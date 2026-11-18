@@ -62,7 +62,7 @@ export async function updateJobStatus(form:FormData){
  requireOffice(role)
  const jobId=read(form,'job_id',50)
  const status=read(form,'status',30)
- if(!isUuid(jobId)||!['pending','in_progress','completed','cancelled'].includes(status)){
+ if(!isUuid(jobId)||!['pending','assigned','in_progress','completed','cancelled'].includes(status)){
   throw new Error('Invalid job or status')
  }
  const {data,error}=await supabase.from('jobs').update({status}).eq('id',jobId).select('id').maybeSingle()

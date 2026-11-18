@@ -2,8 +2,9 @@ import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails} from '../actions/jobs'
 import NewJobForm from './NewJobForm'
+import TeamWhatsAppShare from './TeamWhatsAppShare'
 import {redirect} from 'next/navigation'
-import {serviceShareText,whatsappShareLink} from '../../lib/whatsapp'
+import {serviceShareText} from '../../lib/whatsapp'
 
 export const dynamic='force-dynamic'
 
@@ -24,11 +25,20 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  if(!p?.active)return <main className="wrap"><h1>Account approval pending</h1><form action={signOut}><button>Sign out</button></form></main>
  const staff=p.role==='admin'||p.role==='office'
  const [jobsRes,customersRes]=await Promise.all([
-  s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
+  s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,created_at,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
   staff?s.from('customers').select('id,name,phone,address').order('name',{ascending:true}).limit(1000):Promise.resolve({data:[]})
  ])
  const jobs=jobsRes.data||[]
  const customers=customersRes.data||[]
+ // Read recent progress notes for team messages. No changes to any saved data.
+ const recentUpdates=jobs.length
+  ?await s.from('job_updates').select('job_id,note,created_at')
+    .in('job_id',jobs.map(j=>j.id)).order('created_at',{ascending:false}).limit(1000)
+  :null
+ const latestNotes=new Map<string,{note:string;created_at:string}>()
+ for(const u of recentUpdates?.data||[]){
+  if(!latestNotes.has(u.job_id))latestNotes.set(u.job_id,{note:u.note,created_at:u.created_at})
+ }
  const ordered=[...jobs].sort((a,b)=>{
   const aImported=a.job_number.startsWith('CCTV-IMPORT-20261118-')
   const bImported=b.job_number.startsWith('CCTV-IMPORT-20261118-')
@@ -46,14 +56,23 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  })
  const jobCard=(j:typeof jobs[number])=>{
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
+  const lastUpdate=latestNotes.get(j.id)
   const message=serviceShareText({
    customerName:customer?.name||'Not Provided',
    customerPhone:customer?.phone,
    jobNumber:j.job_number,
+   jobId:j.id,
    place:j.site_address||customer?.address||'Not Provided',
    reason:j.title==='(No reason provided)'?'Not Specified':j.title,
    status:j.status,
-   previousNote:j.source_status_note
+   kind:j.kind,
+   priority:j.priority,
+   section:j.request_section,
+   description:j.description,
+   createdAt:j.created_at,
+   previousNote:j.source_status_note,
+   latestNote:lastUpdate?.note,
+   latestNoteAt:lastUpdate?.created_at
   })
   return <div key={j.id} className="job">
    <div className="job-details">
@@ -65,9 +84,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
     <div className="job-shortcuts">
      <a className="action-link" href={'/jobs/'+j.id}>View full service history</a>
-     <a className="action-link" href={whatsappShareLink(message)} target="_blank" rel="noopener noreferrer">Share to Team via WhatsApp</a>
     </div>
-    <p className="muted team-share-note">Choose your staff/team WhatsApp chat or group to send the prepared service request. Nothing is sent automatically.</p>
+    <TeamWhatsAppShare initialMessage={message}/>
     {staff&&<div className="job-edit-controls">
      <form action={updateJobStatus} className="status-form">
       <input type="hidden" name="job_id" value={j.id}/>

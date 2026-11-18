@@ -57,6 +57,31 @@ export async function addJob(form:FormData){
  revalidatePath('/dashboard')
 }
 
+export async function updateJobDetails(form:FormData){
+ const {supabase,role}=await actor()
+ requireOffice(role)
+ const jobId=read(form,'job_id',50)
+ const title=read(form,'title',180)
+ const kind=read(form,'kind',30)
+ const priority=read(form,'priority',20)
+ const request_section=read(form,'request_section',80)
+ const description=read(form,'description',2000)
+ const site_address=read(form,'site_address',500)
+ if(!isUuid(jobId)||!title||
+    !['breakdown','site_visit','installation'].includes(kind)||
+    !['low','normal','high','urgent'].includes(priority)||
+    !['CCTV NEW INSTALLATION REQUEST','REPAIR & WARRANTY SERVICE','OTHER'].includes(request_section)){
+  throw new Error('Invalid job details')
+ }
+ const {data,error}=await supabase.from('jobs')
+  .update({title,kind,priority,request_section,description:description||null,site_address:site_address||null})
+  .eq('id',jobId).select('id').maybeSingle()
+ ensureSaved(error)
+ if(!data)throw new Error('Job not found or insufficient permissions')
+ revalidatePath('/dashboard')
+ revalidatePath('/jobs/'+jobId)
+}
+
 export async function updateJobStatus(form:FormData){
  const {supabase,role}=await actor()
  requireOffice(role)
@@ -69,6 +94,7 @@ export async function updateJobStatus(form:FormData){
  ensureSaved(error)
  if(!data)throw new Error('Job not found or insufficient permissions')
  revalidatePath('/dashboard')
+ revalidatePath('/jobs/'+jobId)
 }
 
 export async function updateCustomer(form:FormData){

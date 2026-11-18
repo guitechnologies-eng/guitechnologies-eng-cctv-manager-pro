@@ -72,3 +72,17 @@
 /* The New Job form now contains the full customer entry workflow. */
 .forms.single-job-form{grid-template-columns:minmax(0,1fr)}
 .forms.single-job-form .new-job-panel{width:100%}
+
+/* Internal advanced WhatsApp service message editor */
+.team-whatsapp-panel{border:1px solid #296179;border-radius:12px;background:#0b2637;margin:10px 0 16px;overflow:hidden}
+.team-whatsapp-panel>summary{cursor:pointer;font-weight:700;color:#e8fbff;padding:14px 16px;list-style-position:inside;background:#10384e}
+.team-whatsapp-panel[open]>summary{border-bottom:1px solid #296179}
+.team-whatsapp-content{padding:14px}
+.team-whatsapp-content>.muted{font-size:12px;line-height:1.55;margin:0 0 12px}
+.team-whatsapp-content label{margin:8px 0 14px;font-size:13px;font-weight:700}
+.team-whatsapp-text{white-space:pre-wrap;line-height:1.5;min-height:280px;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;resize:vertical;background:#061b29;color:#ecfdff}
+.team-whatsapp-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.team-whatsapp-actions .secondary-button{margin:0}
+.team-whatsapp-actions .whatsapp-team-action{background:#13754b;border-color:#259b67;color:#f2fff8;min-height:41px}
+.team-copy-status{color:#8ef2bb;font-size:12px}
+@media(max-width:600px){.team-whatsapp-actions{flex-direction:column;align-items:stretch}.team-whatsapp-actions>a,.team-whatsapp-actions>button{width:100%!important;margin:0}}

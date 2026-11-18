@@ -86,3 +86,32 @@
 .team-whatsapp-actions .whatsapp-team-action{background:#13754b;border-color:#259b67;color:#f2fff8;min-height:41px}
 .team-copy-status{color:#8ef2bb;font-size:12px}
 @media(max-width:600px){.team-whatsapp-actions{flex-direction:column;align-items:stretch}.team-whatsapp-actions>a,.team-whatsapp-actions>button{width:100%!important;margin:0}}
+
+/* Internal team reminders: dashboard-only alerts, no outbound messaging */
+.internal-reminders{margin:24px 0}
+.internal-reminders-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.internal-reminders-heading h2{margin:0 0 6px}
+.internal-reminders-heading .muted{margin:0 0 10px;font-size:12px}
+.reminder-total{font-size:13px;color:#beebf8;font-weight:700}
+.reminder-counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 22px}
+.reminder-counts a{display:flex;flex-direction:column;gap:5px;min-width:0;padding:13px;border-radius:10px;background:#0b2033;border:1px solid #315269;text-decoration:none;color:#e4f6fd}
+.reminder-counts strong{font-size:27px;line-height:1.2;color:#f6fbff}
+.reminder-counts span{font-size:12px;line-height:1.4}
+.reminder-group{margin:20px 0 0;scroll-margin-top:14px}
+.reminder-group h3{font-size:16px;color:#9de2f1;margin:0 0 8px}
+.reminder-group-count{display:inline-block;background:#234a61;font-size:12px;border-radius:18px;padding:3px 9px}
+.reminder-entry{border:1px solid #2b5067;background:#091f30;border-left:4px solid #21bed2;border-radius:10px;margin:8px 0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px}
+.reminder-entry strong{color:#fff}
+.reminder-entry p{margin:6px 0;line-height:1.45;overflow-wrap:anywhere}
+.reminder-entry small{color:#bce8f3}
+.reminder-entry .action-link{flex-shrink:0}
+.reminder-overdue{border-left-color:#f18572}
+.reminder-today{border-left-color:#f1b464}
+.reminder-upcoming{border-left-color:#66d6b3}
+.reminder-unscheduled{border-left-color:#64b5e2}
+.reminder-editor label{font-size:14px}
+.reminder-editor .muted{font-size:12px;line-height:1.5}
+.job-reminder-note{padding:9px;background:#16354b;border-radius:8px;overflow-wrap:anywhere}
+.job-reminder-dates{display:flex;flex-direction:column;gap:5px}
+.job:target{outline:2px solid #29c7e5;outline-offset:4px;border-radius:6px;scroll-margin-top:15px}
+@media(max-width:750px){.reminder-counts{grid-template-columns:repeat(2,minmax(0,1fr))}.reminder-entry{flex-direction:column;align-items:stretch}.reminder-entry .action-link{width:100%}}

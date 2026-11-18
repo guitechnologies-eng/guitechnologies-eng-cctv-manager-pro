@@ -1,5 +1,5 @@
-// Internal staff-only message. Preparation and sharing are always user-initiated.
-// The site does NOT send any WhatsApp message or select a recipient automatically.
+// Internal staff-only WhatsApp message. ASCII template avoids unsupported emoji glyphs.
+// Staff selects the recipient in WhatsApp; no messages are sent automatically.
 export type ServiceShareData={
  customerName:string
  customerPhone?:string|null
@@ -19,17 +19,17 @@ export type ServiceShareData={
 }
 
 const statusLabels:Record<string,string>={
- pending:'🟡 Pending',
- assigned:'🔵 Assigned',
- in_progress:'🟠 In Progress',
- completed:'🟢 Completed',
- cancelled:'⚫ Cancelled'
+ pending:'Pending',
+ assigned:'Assigned',
+ in_progress:'In Progress',
+ completed:'Completed',
+ cancelled:'Cancelled'
 }
 const priorityLabels:Record<string,string>={
- low:'🟢 Low',
- normal:'🔵 Normal',
- high:'🟠 High',
- urgent:'🔴 URGENT'
+ low:'Low',
+ normal:'Normal',
+ high:'HIGH',
+ urgent:'URGENT'
 }
 const kindLabels:Record<string,string>={
  breakdown:'Repair / Breakdown',
@@ -54,41 +54,41 @@ const safe=(value:string|null|undefined)=>value?.trim()||'Not Provided'
 
 export function serviceShareText(data:ServiceShareData):string{
  const lines=[
-  '📢 *GUI TECHNOLOGIES*',
-  '*CCTV SERVICE JOB • INTERNAL TEAM*',
-  '━━━━━━━━━━━━━━━━━━━━',
-  '🆔 *Job Reference:* '+safe(data.jobNumber),
-  '📂 *Category:* '+(sectionLabels[data.section||'']||safe(data.section)),
-  '🚦 *Priority:* '+(priorityLabels[data.priority||'']||safe(data.priority)),
-  '📌 *Current Status:* '+(statusLabels[data.status]||safe(data.status)),
+  '*GUI TECHNOLOGIES*',
+  '*CCTV SERVICE JOB - INTERNAL TEAM*',
+  '--------------------------------',
+  '*Job Reference:* '+safe(data.jobNumber),
+  '*Category:* '+(sectionLabels[data.section||'']||safe(data.section)),
+  '*Priority:* '+(priorityLabels[data.priority||'']||safe(data.priority)),
+  '*Current Status:* '+(statusLabels[data.status]||safe(data.status)),
   '',
-  '👤 *CUSTOMER DETAILS*',
-  '• Name: '+safe(data.customerName),
-  '• Phone: '+safe(data.customerPhone),
-  '• Place: '+safe(data.place),
+  '*CUSTOMER DETAILS*',
+  'Name: '+safe(data.customerName),
+  'Phone: '+safe(data.customerPhone),
+  'Place: '+safe(data.place),
   '',
-  '🛠️ *SERVICE DETAILS*',
-  '• Service Type: '+(kindLabels[data.kind||'']||safe(data.kind)),
-  '• Issue / Request: '+safe(data.reason)
+  '*SERVICE DETAILS*',
+  'Service Type: '+(kindLabels[data.kind||'']||safe(data.kind)),
+  'Issue / Request: '+safe(data.reason)
  ]
- if(data.description?.trim())lines.push('• Job Description: '+data.description.trim())
+ if(data.description?.trim())lines.push('Job Description: '+data.description.trim())
  const loggedAt=formatColomboDate(data.createdAt)
- if(loggedAt)lines.push('• Recorded: '+loggedAt)
- if(data.previousNote?.trim())lines.push('• Original Note: '+data.previousNote.trim())
+ if(loggedAt)lines.push('Recorded: '+loggedAt)
+ if(data.previousNote?.trim())lines.push('Original Note: '+data.previousNote.trim())
  if(data.latestNote?.trim()){
-  lines.push('','📝 *LATEST PROGRESS UPDATE*','• '+data.latestNote.trim())
+  lines.push('','*LATEST PROGRESS UPDATE*',data.latestNote.trim())
   const updateAt=formatColomboDate(data.latestNoteAt)
-  if(updateAt)lines.push('• Updated: '+updateAt)
+  if(updateAt)lines.push('Updated: '+updateAt)
  }
  lines.push(
   '',
-  '✅ *TEAM FOLLOW-UP*',
+  '*TEAM FOLLOW-UP*',
   'Please review this request and update its progress in CCTV Manager Pro.'
  )
- if(data.jobId&&/^[0-9a-f-]{36}$/i.test(data.jobId)){
-  lines.push('🔗 *Open Job:* https://cctv-manager-pro.vercel.app/jobs/'+data.jobId)
+ if(data.jobId&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.jobId)){
+  lines.push('Open Job: https://cctv-manager-pro.vercel.app/jobs/'+data.jobId)
  }
- lines.push('','🔒 *Internal staff communication only — not for customers.*')
+ lines.push('','*INTERNAL STAFF ONLY - NOT FOR CUSTOMERS*')
  return lines.join('\n')
 }
 

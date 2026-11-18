@@ -1,7 +1,8 @@
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
-import {addCustomer,addJob,addUpdate,updateCustomer,updateJobStatus} from '../actions/jobs'
+import {addCustomer,addJob,addUpdate,updateCustomer,updateJobStatus,updateJobDetails} from '../actions/jobs'
 import {redirect} from 'next/navigation'
+import {serviceShareText,whatsappShareLink,sriLankaWhatsAppNumber} from '../../lib/whatsapp'
 
 export const dynamic='force-dynamic'
 
@@ -22,7 +23,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  if(!p?.active)return <main className="wrap"><h1>Account approval pending</h1><form action={signOut}><button>Sign out</button></form></main>
  const staff=p.role==='admin'||p.role==='office'
  const [jobsRes,customersRes]=await Promise.all([
-  s.from('jobs').select('id,job_number,title,kind,status,priority,request_section,source_status_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
+  s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
   staff?s.from('customers').select('id,name').order('created_at',{ascending:false}).limit(300):Promise.resolve({data:[]})
  ])
  const jobs=jobsRes.data||[]
@@ -36,7 +37,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  })
  const filtered=ordered.filter(j=>{
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
-  const searchable=[customer?.name,customer?.phone,customer?.address,j.title,j.job_number,j.source_status_note].filter(Boolean).join(' ').toLowerCase()
+  const searchable=[customer?.name,customer?.phone,customer?.address,j.site_address,j.title,j.job_number,j.source_status_note].filter(Boolean).join(' ').toLowerCase()
   const matchesSearch=!query||searchable.includes(query)
   const matchesStatus=!statusFilter||j.status===statusFilter
   const matchesSection=!sectionFilter||(sectionFilter==='OTHER'?!sections.some(s=>s.key===j.request_section):j.request_section===sectionFilter)
@@ -44,14 +45,28 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  })
  const jobCard=(j:typeof jobs[number])=>{
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
+  const message=serviceShareText({
+   customerName:customer?.name||'Not Provided',
+   jobNumber:j.job_number,
+   place:j.site_address||customer?.address||'Not Provided',
+   reason:j.title==='(No reason provided)'?'Not Specified':j.title,
+   status:j.status,
+   previousNote:j.source_status_note
+  })
+  const hasCustomerWhatsApp=Boolean(sriLankaWhatsAppNumber(customer?.phone))
   return <div key={j.id} className="job">
    <div className="job-details">
     <div className="job-heading"><strong>{customer?.name||'Customer name unavailable'}</strong><span className="job-number">{j.job_number}</span></div>
-    <p><b>📍 Place:</b> {customer?.address||'Not Provided'}</p>
+    <p><b>📍 Place:</b> {j.site_address||customer?.address||'Not Provided'}</p>
     <p><b>📞 Phone:</b> {customer?.phone?<a href={'tel:'+customer.phone}>{customer.phone}</a>:'Not Provided'}</p>
     <p><b>🔧 Reason:</b> {j.title==='(No reason provided)'?'—':j.title}</p>
     {j.source_status_note&&<p className="source-status">📝 {j.source_status_note}</p>}
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
+    <div className="job-shortcuts">
+     <a className="action-link" href={'/jobs/'+j.id}>View full service history</a>
+     <a className="action-link" href={whatsappShareLink(message)} target="_blank" rel="noopener noreferrer">Share via WhatsApp</a>
+     {hasCustomerWhatsApp&&<a className="action-link whatsapp-customer" href={whatsappShareLink(message,customer?.phone)} target="_blank" rel="noopener noreferrer">WhatsApp Customer</a>}
+    </div>
     {staff&&<div className="job-edit-controls">
      <form action={updateJobStatus} className="status-form">
       <input type="hidden" name="job_id" value={j.id}/>
@@ -65,6 +80,27 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
        </select>
       </label><button type="submit">Save Status</button>
      </form>
+     <details className="edit-customer edit-job">
+      <summary>Edit job details</summary>
+      <form action={updateJobDetails}>
+       <input type="hidden" name="job_id" value={j.id}/>
+       <label>Reason / Job title<input name="title" defaultValue={j.title} maxLength={180} required/></label>
+       <label>Service type<select name="kind" defaultValue={j.kind}>
+        <option value="breakdown">Repair / Breakdown</option><option value="site_visit">Site Visit</option><option value="installation">Installation</option>
+       </select></label>
+       <label>Request section<select name="request_section" defaultValue={j.request_section||'OTHER'}>
+        {sections.map(sec=><option key={sec.key} value={sec.key}>{sec.key}</option>)}
+        <option value="OTHER">Other</option>
+       </select></label>
+       <label>Priority<select name="priority" defaultValue={j.priority}>
+        <option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="urgent">Urgent</option>
+       </select></label>
+       <label>Service place (optional override)<input name="site_address" maxLength={500} defaultValue={j.site_address||''} placeholder={customer?.address||'Enter service location'}/></label>
+       <p className="muted">Leave the place blank to use the customer's address. This won't alter other jobs.</p>
+       <label>Description<textarea name="description" maxLength={2000} defaultValue={j.description||''}/></label>
+       <button type="submit">Save Job Details</button>
+      </form>
+     </details>
      {customer&&<details className="edit-customer">
       <summary>Edit customer details</summary>
       <form action={updateCustomer}>

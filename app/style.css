@@ -22,7 +22,6 @@
 .job-shortcuts{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
 .action-link{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 12px;border-radius:9px;background:#16475d;border:1px solid #31748a;color:#c4f6ff;text-decoration:none;font-weight:700;font-size:13px}
 .action-link:hover,.action-link:focus-visible{background:#1e647d}
-.whatsapp-customer{background:#125741;border-color:#218e68;color:#dbfff1}
 .job-shortcuts .action-link{max-width:100%}
 .edit-job form label{margin:12px 0}
 .edit-job .muted{font-size:12px;line-height:1.5;margin:5px 0}
@@ -45,3 +44,5 @@
  .history-page header .action-link{width:100%}
  .history-page .timeline-entry{padding:10px}
 }
+
+.team-share-note{font-size:12px;line-height:1.5;margin:4px 0 14px}

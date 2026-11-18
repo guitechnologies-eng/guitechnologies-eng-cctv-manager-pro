@@ -46,3 +46,25 @@
 }
 
 .team-share-note{font-size:12px;line-height:1.5;margin:4px 0 14px}
+
+/* One-step New Job + Customer */
+.new-job-panel{min-width:0}
+.new-job-panel h2{margin-bottom:8px}
+.new-job-form{margin-top:18px}
+.customer-mode{display:flex;gap:8px;padding:4px;border:1px solid #24445a;border-radius:12px;background:#091e2e}
+.customer-mode button{flex:1;width:auto;padding:11px 9px;background:#10263b;border:1px solid transparent;color:#b9cedb;cursor:pointer}
+.customer-mode button.selected{background:#087b9e;border-color:#39cbea;color:#fff;font-weight:700}
+.customer-entry{padding:14px 0;border-bottom:1px solid #24445a}
+.customer-entry label,.job-inputs label{font-size:14px;font-weight:600}
+.customer-entry label input,.customer-entry label select{font-weight:400}
+.customer-preview{padding:12px 14px;margin-top:12px;background:#0a2d40;border:1px solid #205b70;border-radius:10px}
+.customer-preview p{margin:7px 0}
+.secondary-button{width:auto!important;background:#1a5169;border:1px solid #367f99;color:#e0faff;padding:9px 12px;margin:4px 5px 4px 0}
+.duplicate-hints{margin-top:12px;padding:13px;border:1px solid #a4752d;background:#332719;border-radius:10px}
+.duplicate-hints p{font-size:13px;line-height:1.5}
+.duplicate-hints button{text-align:left;max-width:100%;white-space:normal}
+.job-inputs{padding:10px 0}
+.job-form-result{margin:14px 0 0;padding:12px 14px;border-radius:9px;overflow-wrap:anywhere}
+.job-form-result.success{background:#103e31;border:1px solid #267c5b;color:#c4ffe5}
+.job-form-result.error{background:#472c29;border:1px solid #945048;color:#ffded6}
+@media(max-width:600px){.customer-mode{flex-direction:column}.new-job-panel{width:100%}.customer-mode button{width:100%}}

@@ -68,3 +68,7 @@
 .job-form-result.success{background:#103e31;border:1px solid #267c5b;color:#c4ffe5}
 .job-form-result.error{background:#472c29;border:1px solid #945048;color:#ffded6}
 @media(max-width:600px){.customer-mode{flex-direction:column}.new-job-panel{width:100%}.customer-mode button{width:100%}}
+
+/* The New Job form now contains the full customer entry workflow. */
+.forms.single-job-form{grid-template-columns:minmax(0,1fr)}
+.forms.single-job-form .new-job-panel{width:100%}

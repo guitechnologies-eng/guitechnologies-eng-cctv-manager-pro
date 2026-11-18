@@ -25,6 +25,8 @@ create table public.jobs (
  customer_id uuid not null references public.customers(id),
  title text not null check(length(trim(title))>0),
  description text,
+ request_section text,
+ source_status_note text,
  kind public.job_kind not null,
  status public.job_status not null default 'pending',
  priority text not null default 'normal' check(priority in ('low','normal','high','urgent')),

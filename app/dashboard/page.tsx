@@ -77,9 +77,12 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    latestNote:lastUpdate?.note,
    latestNoteAt:lastUpdate?.created_at
   })
-  return <div key={j.id} id={"job-"+j.id} className="job">
+  return <div key={j.id} id={"job-"+j.id} className={"job job-card job-status-"+j.status}>
    <div className="job-details">
-    <div className="job-heading"><strong>{customer?.name||'Customer name unavailable'}</strong><span className="job-number">{j.job_number}</span></div>
+    <div className="job-heading">
+     <div className="job-identity"><strong>{customer?.name||'Customer name unavailable'}</strong><span className="job-number">{j.job_number}</span></div>
+     <div className="job-labels"><span className={'status-pill status-'+j.status}>{j.status.replaceAll('_',' ')}</span><span className={'priority-pill priority-'+j.priority}>{j.priority} priority</span></div>
+    </div>
     <p><b>📍 Place:</b> {j.site_address||customer?.address||'Not Provided'}</p>
     <p><b>📞 Phone:</b> {customer?.phone?<a href={'tel:'+customer.phone}>{customer.phone}</a>:'Not Provided'}</p>
     <p><b>🔧 Reason:</b> {j.title==='(No reason provided)'?'—':j.title}</p>
@@ -94,7 +97,9 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
      {j.scheduled_at&&<span>📅 Visit: {colomboDateLabel(j.scheduled_at)}</span>}
      {j.follow_up_at&&<span>🔔 Follow-up: {colomboDateLabel(j.follow_up_at)}</span>}
     </p>}
-    {staff&&<div className="job-edit-controls">
+    {staff&&<details className="job-management">
+     <summary>Manage job · Status, Reminders &amp; Details</summary>
+     <div className="job-edit-controls">
      <details className="edit-customer reminder-editor">
       <summary>🔔 Set / Edit Internal Reminders</summary>
       <form action={updateInternalReminder}>
@@ -155,16 +160,63 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
        <button type="submit">Save Customer</button>
       </form>
      </details>}
-    </div>}
+     </div>
+    </details>}
    </div>
-   <form action={addUpdate}><input type="hidden" name="job_id" value={j.id}/><label>Progress note<input name="note" placeholder="Service visit / work completed" required maxLength={1500}/></label><button>Add note</button></form>
+   <form className="job-progress-form" action={addUpdate}><input type="hidden" name="job_id" value={j.id}/><label>Progress note<input name="note" placeholder="Service visit / work completed" required maxLength={1500}/></label><button>Add note</button></form>
   </div>
  }
  const otherJobs=filtered.filter(j=>!sections.some(s=>s.key===j.request_section))
- return <main className="wrap">
-  <header><div><p className="brand">GUI TECHNOLOGIES</p><h1>CCTV Manager Pro</h1><p>{p.full_name} · {p.role}</p></div><form action={signOut}><button>Sign out</button></form></header>
-  <section className="cards">{[['Visible jobs',jobs.length],['Pending',jobs.filter(j=>j.status==='pending').length],['In progress',jobs.filter(j=>j.status==='in_progress').length],['Completed',jobs.filter(j=>j.status==='completed').length]].map(([label,count])=><article key={label}><strong>{count}</strong><span>{label}</span></article>)}</section>
-  {staff&&<section className="panel internal-reminders" id="reminder-list">
+ return <div className="app-frame">
+  <aside className="app-sidebar" aria-label="Workspace navigation">
+   <div className="sidebar-brand">
+    <span className="sidebar-symbol" aria-hidden="true">▦</span>
+    <div><span className="sidebar-company">GUI TECHNOLOGIES</span><strong>CCTV Manager Pro</strong></div>
+   </div>
+   <div className="sidebar-section-label">WORKSPACE</div>
+   <nav className="sidebar-nav">
+    <a className="sidebar-link active" href="#overview"><span aria-hidden="true">◫</span> Overview</a>
+    {staff&&<a className="sidebar-link" href="#reminder-list"><span aria-hidden="true">◉</span> Team Reminders {reminderItems.length>0&&<small>{reminderItems.length}</small>}</a>}
+    {staff&&<a className="sidebar-link" href="#new-job"><span aria-hidden="true">＋</span> Create Job</a>}
+    <a className="sidebar-link" href="#service-requests"><span aria-hidden="true">▤</span> Service Requests</a>
+   </nav>
+   <div className="sidebar-footer">
+    <span className="workspace-status"><span className="online-indicator" aria-hidden="true"/> Internal workspace</span>
+    <p>Staff-only access · Sri Lanka</p>
+   </div>
+  </aside>
+  <main className="wrap dashboard-main" id="overview">
+   <header className="dashboard-topbar">
+    <p className="topbar-breadcrumb"><span className="online-indicator" aria-hidden="true"/> Workspace <span className="breadcrumb-separator">/</span> Dashboard</p>
+    <div className="topbar-user"><div className="user-avatar" aria-hidden="true">{p.full_name?.charAt(0)?.toUpperCase()||'G'}</div>
+     <div><strong>{p.full_name}</strong><span>{p.role}</span></div>
+     <form action={signOut}><button type="submit" className="signout-button">Sign out</button></form>
+    </div>
+   </header>
+   <section className="dashboard-hero" aria-labelledby="dashboard-heading">
+    <div className="hero-content">
+     <span className="hero-overline">SERVICE OPERATIONS CENTER</span>
+     <h1 id="dashboard-heading">CCTV Service Dashboard<span className="hero-dot">.</span></h1>
+     <p>Manage customer requests, track service progress and stay on top of every follow-up in one place.</p>
+     <div className="hero-quick-actions">
+      {staff&&<a className="hero-primary-action" href="#new-job"><span aria-hidden="true">＋</span> Create New Job</a>}
+      <a className="hero-secondary-action" href="#service-requests">View Service Jobs <span aria-hidden="true">↗</span></a>
+     </div>
+    </div>
+    <div className="hero-orbit" aria-hidden="true"><div className="orbit-ring orbit-ring-one"/><div className="orbit-ring orbit-ring-two"/><div className="orbit-core">◉</div><span className="orbit-spark orbit-spark-one"/><span className="orbit-spark orbit-spark-two"/></div>
+   </section>
+   <section className="cards stat-grid" aria-label="Job overview statistics">
+    {[
+      {label:'Total Jobs',count:jobs.length,icon:'▤',tone:'cyan',hint:'All visible service requests'},
+      {label:'Pending Jobs',count:jobs.filter(j=>j.status==='pending').length,icon:'◷',tone:'amber',hint:'Awaiting service action'},
+      {label:'In Progress',count:jobs.filter(j=>j.status==='in_progress').length,icon:'◉',tone:'blue',hint:'Currently being worked on'},
+      {label:'Completed Jobs',count:jobs.filter(j=>j.status==='completed').length,icon:'✓',tone:'green',hint:'Service work finished'}
+    ].map(stat=><article key={stat.label} className={'stat-card stat-'+stat.tone}>
+      <div className="stat-card-header"><span>{stat.label}</span><span className="stat-icon" aria-hidden="true">{stat.icon}</span></div>
+      <strong>{stat.count}</strong><small>{stat.hint}</small>
+    </article>)}
+   </section>
+  {staff&&<section className="panel internal-reminders ui-section" id="reminder-list">
    <div className="internal-reminders-heading"><div><h2>🔔 Internal Team Reminders</h2><p className="muted">Dashboard alerts only · Sri Lanka time · Updates when you load or refresh the dashboard.</p></div><span className="reminder-total">{reminderItems.length} active alerts</span></div>
    <div className="reminder-counts">
     <a href="#reminder-overdue"><strong>{reminderGroups.overdue.length}</strong><span>Overdue</span></a>
@@ -191,17 +243,17 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     }):<p className="muted">No jobs in this category.</p>}
    </div>)}
   </section>}
-  {staff&&<div className="forms single-job-form">
+  {staff&&<div className="forms single-job-form" id="new-job">
    <NewJobForm customers={customers}/>
   </div>}
-  <section className="panel"><h2>{staff?'All service requests':'My service requests'}</h2>
+  <section className="panel service-requests ui-section" id="service-requests"><div className="section-heading"><div><span className="section-eyebrow">SERVICE QUEUE</span><h2>{staff?'All Service Requests':'My Service Requests'}</h2><p>Search, manage and update your service jobs.</p></div><span className="section-count-total">{jobs.length} total jobs</span></div>
    <form method="GET" action="/dashboard" className="job-filters">
     <label>Search customer, phone, place or reason<input name="q" type="search" defaultValue={params.q||''} maxLength={120} placeholder="Name / phone / address / job"/></label>
     <label>Status<select name="status" defaultValue={statusFilter}><option value="">All statuses</option><option value="pending">Pending</option><option value="assigned">Assigned</option><option value="in_progress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>
     <label>Section<select name="section" defaultValue={sectionFilter}><option value="">All sections</option>{sections.map(s=><option key={s.key} value={s.key}>{s.key}</option>)}<option value="OTHER">Other</option></select></label>
     <div className="filter-buttons"><button type="submit">Search / Filter</button><a href="/dashboard">Clear</a></div>
    </form>
-   <p className="muted">Showing {filtered.length} of {jobs.length} service requests</p>
+   <p className="muted filter-results">Showing <strong>{filtered.length}</strong> of {jobs.length} service requests</p>
    {jobsRes.error?<p>Unable to load service requests.</p>:!filtered.length?<p>No matching service requests.</p>:<div>
     {sections.map(sec=>{
      const group=filtered.filter(j=>j.request_section===sec.key)
@@ -210,6 +262,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     {otherJobs.length>0&&<div className="job-section"><h3>Other requests <span className="section-count">{otherJobs.length}</span></h3>{otherJobs.map(jobCard)}</div>}
    </div>}
   </section>
-  <p className="muted">Service records are stored in the dedicated CCTV Manager Pro database. Previous status notes are separate from current workflow status.</p>
- </main>
+  <footer className="dashboard-footer"><span>© GUI Technologies · CCTV Manager Pro</span><span>Internal service management · Sri Lanka</span></footer>
+  </main>
+ </div>
 }

@@ -1,11 +1,24 @@
-# Dedicated database setup (not yet deployed)
+# CCTV Manager Pro - dedicated database setup
 
-1. Create a **new** Supabase project. Never run this SQL on the existing My Solution Colombo or attendance databases.
-2. Review and run `database/schema.sql` in the new project's SQL editor.
-3. Add only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to your private deployment environment.
-4. Create staff accounts using the Supabase Auth dashboard. A trusted database administrator must provision `public.profiles` rows with the corresponding auth user IDs and explicitly set `active=true` and the intended `role`. Never allow users to self-assign roles.
-5. Check RLS with three distinct test users (admin, office, technician), including a technician attempting to read a job assigned to another technician.
-6. Do not enable production until permissions, build, session handling and full workflows are tested.
+## Live project
+- Supabase account: Guit2004; project: `cctv-manager-pro` (`mxurrjcrdgsikrtmpipy`)
+- Live site: https://cctv-manager-pro.vercel.app
+- This is NOT `my-solution-colombo` or `attendance-salary-management`; do not modify those systems.
 
-## Current limitations
-The UI is a starter dashboard. Job creation forms, file uploads, job completion workflows, and reporting remain to be implemented. No real database or live login has been tested.
+## Fresh project setup (not for an existing live database)
+1. Create a separate Supabase project.
+2. Apply `database/schema.sql` once.
+3. Apply `database/migrations/20261118_service_manager_v2.sql` once.
+4. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` on Vercel. Never expose secret/service-role keys.
+5. Provision profiles for registered users via a trusted administrator; never let users self-assign roles.
+6. Test admin/office/technician RLS, authentication, status edits, service history and WhatsApp share links.
+
+## V2 features / security
+- Job reason, type, priority, section, description and optional per-job site-address editing.
+- `public.job_history` has RLS and is read-only to clients. Restricted internal triggers audit future changes.
+- `public.service_history` is a `security_invoker` view merging progress notes with job/customer change history.
+- History is paginated, including author/time. Activity that was never recorded cannot be reconstructed.
+- WhatsApp opens only when the staff member clicks the share link. No automatic messages are sent.
+- The Assign Technician form is intentionally removed.
+- Do not delete or reseed existing 16 customer and 16 job records.
+- Real password-based end-to-end login still requires an authorized user to test privately.

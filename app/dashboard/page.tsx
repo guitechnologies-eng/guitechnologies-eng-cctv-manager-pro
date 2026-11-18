@@ -1,10 +1,11 @@
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
-import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails} from '../actions/jobs'
+import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder} from '../actions/jobs'
 import NewJobForm from './NewJobForm'
 import TeamWhatsAppShare from './TeamWhatsAppShare'
 import {redirect} from 'next/navigation'
 import {serviceShareText} from '../../lib/whatsapp'
+import {getReminderGroups,colomboInputValue,colomboDateLabel} from '../../lib/reminders'
 
 export const dynamic='force-dynamic'
 
@@ -25,11 +26,13 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  if(!p?.active)return <main className="wrap"><h1>Account approval pending</h1><form action={signOut}><button>Sign out</button></form></main>
  const staff=p.role==='admin'||p.role==='office'
  const [jobsRes,customersRes]=await Promise.all([
-  s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,created_at,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
+  s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,created_at,scheduled_at,follow_up_at,reminder_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
   staff?s.from('customers').select('id,name,phone,address').order('name',{ascending:true}).limit(1000):Promise.resolve({data:[]})
  ])
  const jobs=jobsRes.data||[]
  const customers=customersRes.data||[]
+ const reminderGroups=getReminderGroups(jobs)
+ const reminderItems=[...reminderGroups.overdue,...reminderGroups.today,...reminderGroups.upcoming,...reminderGroups.unscheduled]
  // Read recent progress notes for team messages. No changes to any saved data.
  const recentUpdates=jobs.length
   ?await s.from('job_updates').select('job_id,note,created_at')
@@ -74,7 +77,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    latestNote:lastUpdate?.note,
    latestNoteAt:lastUpdate?.created_at
   })
-  return <div key={j.id} className="job">
+  return <div key={j.id} id={"job-"+j.id} className="job">
    <div className="job-details">
     <div className="job-heading"><strong>{customer?.name||'Customer name unavailable'}</strong><span className="job-number">{j.job_number}</span></div>
     <p><b>📍 Place:</b> {j.site_address||customer?.address||'Not Provided'}</p>
@@ -86,7 +89,29 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
      <a className="action-link" href={'/jobs/'+j.id}>View full service history</a>
     </div>
     <TeamWhatsAppShare initialMessage={message}/>
+    {j.reminder_note&&<p className="job-reminder-note"><strong>📌 Internal Note:</strong> {j.reminder_note}</p>}
+    {(j.scheduled_at||j.follow_up_at)&&<p className="job-reminder-dates">
+     {j.scheduled_at&&<span>📅 Visit: {colomboDateLabel(j.scheduled_at)}</span>}
+     {j.follow_up_at&&<span>🔔 Follow-up: {colomboDateLabel(j.follow_up_at)}</span>}
+    </p>}
     {staff&&<div className="job-edit-controls">
+     <details className="edit-customer reminder-editor">
+      <summary>🔔 Set / Edit Internal Reminders</summary>
+      <form action={updateInternalReminder}>
+       <input type="hidden" name="job_id" value={j.id}/>
+       <label>Visit Date &amp; Time (Sri Lanka)
+        <input type="datetime-local" name="scheduled_at" defaultValue={colomboInputValue(j.scheduled_at)}/>
+       </label>
+       <label>Next Follow-up Date &amp; Time (Sri Lanka)
+        <input type="datetime-local" name="follow_up_at" defaultValue={colomboInputValue(j.follow_up_at)}/>
+       </label>
+       <label>Internal Reminder Note
+        <textarea name="reminder_note" maxLength={500} defaultValue={j.reminder_note||''} placeholder="Follow up on repair / call before site visit"/>
+       </label>
+       <p className="muted">Dashboard alerts only. No customer WhatsApp, automatic messages or technician assignment.</p>
+       <button type="submit">Save Internal Reminder</button>
+      </form>
+     </details>
      <form action={updateJobStatus} className="status-form">
       <input type="hidden" name="job_id" value={j.id}/>
       <label>Update job status
@@ -139,6 +164,33 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  return <main className="wrap">
   <header><div><p className="brand">GUI TECHNOLOGIES</p><h1>CCTV Manager Pro</h1><p>{p.full_name} · {p.role}</p></div><form action={signOut}><button>Sign out</button></form></header>
   <section className="cards">{[['Visible jobs',jobs.length],['Pending',jobs.filter(j=>j.status==='pending').length],['In progress',jobs.filter(j=>j.status==='in_progress').length],['Completed',jobs.filter(j=>j.status==='completed').length]].map(([label,count])=><article key={label}><strong>{count}</strong><span>{label}</span></article>)}</section>
+  {staff&&<section className="panel internal-reminders" id="reminder-list">
+   <div className="internal-reminders-heading"><div><h2>🔔 Internal Team Reminders</h2><p className="muted">Dashboard alerts only · Sri Lanka time · Updates when you load or refresh the dashboard.</p></div><span className="reminder-total">{reminderItems.length} active alerts</span></div>
+   <div className="reminder-counts">
+    <a href="#reminder-overdue"><strong>{reminderGroups.overdue.length}</strong><span>Overdue</span></a>
+    <a href="#reminder-today"><strong>{reminderGroups.today.length}</strong><span>Due Today</span></a>
+    <a href="#reminder-upcoming"><strong>{reminderGroups.upcoming.length}</strong><span>Next 7 Days</span></a>
+    <a href="#reminder-unscheduled"><strong>{reminderGroups.unscheduled.length}</strong><span>Pending – Schedule Needed</span></a>
+   </div>
+   {([
+    ['overdue','Overdue – Action Required'],
+    ['today','Due Today'],
+    ['upcoming','Next 7 Days'],
+    ['unscheduled','Pending – Schedule Needed']
+   ] as const).map(([key,label])=><div key={key} className="reminder-group" id={'reminder-'+key}>
+    <h3>{label} <span className="reminder-group-count">{reminderGroups[key].length}</span></h3>
+    {reminderGroups[key].length?reminderGroups[key].map(item=>{
+     const cust=Array.isArray(item.job.customer)?item.job.customer[0]:item.job.customer
+     return <div className={'reminder-entry reminder-'+key} key={item.job.id}>
+      <div><strong>{cust?.name||'Customer'}</strong><span className="muted"> · {item.job.job_number}</span>
+       <p>{item.job.title} · {item.kind==='visit'?'Site visit':item.kind==='follow_up'?'Follow-up':'No date set'}</p>
+       {item.dueAt&&<small>{colomboDateLabel(item.dueAt)}</small>}
+       {item.job.reminder_note&&<p className="muted">{item.job.reminder_note}</p>}
+      </div><a className="action-link" href={'#job-'+item.job.id}>Open Job</a>
+     </div>
+    }):<p className="muted">No jobs in this category.</p>}
+   </div>)}
+  </section>}
   {staff&&<div className="forms single-job-form">
    <NewJobForm customers={customers}/>
   </div>}

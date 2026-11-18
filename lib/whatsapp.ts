@@ -1,14 +1,8 @@
-// Explicit, user-initiated WhatsApp links. Never send data automatically.
-export function sriLankaWhatsAppNumber(phone:string|null|undefined):string|null{
- const digits=String(phone||'').replace(/\D/g,'')
- if(/^94(7\d{8})$/.test(digits))return digits
- if(/^0(7\d{8})$/.test(digits))return '94'+digits.slice(1)
- if(/^7\d{8}$/.test(digits))return '94'+digits
- return null
-}
-
+// User-initiated sharing: only prepares a WhatsApp message.
+// No recipient is selected automatically; staff must choose the internal team chat.
 export function serviceShareText(data:{
  customerName:string
+ customerPhone?:string|null
  jobNumber:string
  place:string
  reason:string
@@ -16,9 +10,10 @@ export function serviceShareText(data:{
  previousNote?:string|null
 }):string{
  const lines=[
-  'GUI TECHNOLOGIES - CCTV SERVICE REQUEST',
+  'GUI TECHNOLOGIES - INTERNAL CCTV SERVICE REQUEST',
   'Reference: '+data.jobNumber,
   'Customer: '+data.customerName,
+  'Customer phone: '+(data.customerPhone||'Not Provided'),
   'Place: '+data.place,
   'Reason: '+data.reason,
   'Current status: '+data.status.replaceAll('_',' ')
@@ -27,7 +22,7 @@ export function serviceShareText(data:{
  return lines.join('\n')
 }
 
-export function whatsappShareLink(text:string,phone?:string|null):string{
- const number=phone?sriLankaWhatsAppNumber(phone):null
- return 'https://wa.me/'+(number||'')+'?text='+encodeURIComponent(text)
+export function whatsappShareLink(text:string):string{
+ // No customer number or team contact is hardcoded; choose the team/group in WhatsApp.
+ return 'https://wa.me/?text='+encodeURIComponent(text)
 }

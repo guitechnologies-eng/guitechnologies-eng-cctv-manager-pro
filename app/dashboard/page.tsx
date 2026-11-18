@@ -1,6 +1,6 @@
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
-import {addCustomer,addUpdate,updateCustomer,updateJobStatus,updateJobDetails} from '../actions/jobs'
+import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails} from '../actions/jobs'
 import NewJobForm from './NewJobForm'
 import {redirect} from 'next/navigation'
 import {serviceShareText,whatsappShareLink} from '../../lib/whatsapp'
@@ -121,8 +121,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  return <main className="wrap">
   <header><div><p className="brand">GUI TECHNOLOGIES</p><h1>CCTV Manager Pro</h1><p>{p.full_name} · {p.role}</p></div><form action={signOut}><button>Sign out</button></form></header>
   <section className="cards">{[['Visible jobs',jobs.length],['Pending',jobs.filter(j=>j.status==='pending').length],['In progress',jobs.filter(j=>j.status==='in_progress').length],['Completed',jobs.filter(j=>j.status==='completed').length]].map(([label,count])=><article key={label}><strong>{count}</strong><span>{label}</span></article>)}</section>
-  {staff&&<div className="forms">
-   <section className="panel"><h2>New customer</h2><form action={addCustomer}><label>Customer name<input name="name" maxLength={120} required/></label><label>Phone<input name="phone" maxLength={40}/></label><label>Site address<input name="address" maxLength={500}/></label><button>Add customer</button></form></section>
+  {staff&&<div className="forms single-job-form">
    <NewJobForm customers={customers}/>
   </div>}
   <section className="panel"><h2>{staff?'All service requests':'My service requests'}</h2>

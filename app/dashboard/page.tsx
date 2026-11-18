@@ -60,7 +60,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  const jobCard=(j:typeof jobs[number])=>{
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
   const lastUpdate=latestNotes.get(j.id)
-  const message=serviceShareText({
+  const shareData={
    customerName:customer?.name||'Not Provided',
    customerPhone:customer?.phone,
    jobNumber:j.job_number,
@@ -76,7 +76,9 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    previousNote:j.source_status_note,
    latestNote:lastUpdate?.note,
    latestNoteAt:lastUpdate?.created_at
-  })
+  }
+  const emojiMessage=serviceShareText(shareData,'emoji')
+  const plainMessage=serviceShareText(shareData,'plain')
   return <div key={j.id} id={"job-"+j.id} className={"job job-card job-status-"+j.status}>
    <div className="job-details">
     <div className="job-heading">
@@ -91,7 +93,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <div className="job-shortcuts">
      <a className="action-link" href={'/jobs/'+j.id}>View full service history</a>
     </div>
-    <TeamWhatsAppShare initialMessage={message}/>
+    <TeamWhatsAppShare emojiMessage={emojiMessage} plainMessage={plainMessage}/>
     {j.reminder_note&&<p className="job-reminder-note"><strong>📌 Internal Note:</strong> {j.reminder_note}</p>}
     {(j.scheduled_at||j.follow_up_at)&&<p className="job-reminder-dates">
      {j.scheduled_at&&<span>📅 Visit: {colomboDateLabel(j.scheduled_at)}</span>}

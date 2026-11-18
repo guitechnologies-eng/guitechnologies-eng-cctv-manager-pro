@@ -2,21 +2,72 @@ import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {addCustomer,addJob,addUpdate} from '../actions/jobs'
 import {redirect} from 'next/navigation'
+
 export const dynamic='force-dynamic'
+
+const sections=[
+ {key:'CCTV NEW INSTALLATION REQUEST',label:'1. CCTV NEW INSTALLATION REQUEST'},
+ {key:'REPAIR & WARRANTY SERVICE',label:'2. REPAIR & WARRANTY SERVICE'}
+] as const
+
 export default async function Dashboard(){
- const s=await db();const {data:{user}}=await s.auth.getUser();if(!user)redirect('/login');
- const {data:p}=await s.from('profiles').select('full_name,role,active').eq('id',user.id).single();
- if(!p?.active)return <main className="wrap"><h1>Account approval pending</h1><form action={signOut}><button>Sign out</button></form></main>;
- const staff=p.role==='admin'||p.role==='office';
+ const s=await db()
+ const {data:{user}}=await s.auth.getUser()
+ if(!user)redirect('/login')
+ const {data:p}=await s.from('profiles').select('full_name,role,active').eq('id',user.id).single()
+ if(!p?.active)return <main className="wrap"><h1>Account approval pending</h1><form action={signOut}><button>Sign out</button></form></main>
+ const staff=p.role==='admin'||p.role==='office'
  const [jobsRes,customersRes]=await Promise.all([
- s.from('jobs').select('id,job_number,title,kind,status,priority').order('created_at',{ascending:false}).limit(100),
- staff?s.from('customers').select('id,name').order('created_at',{ascending:false}).limit(200):Promise.resolve({data:[]})
- ]);
- const jobs=jobsRes.data||[],customers=customersRes.data||[];
- return <main className="wrap"><header><div><p className="brand">GUI TECHNOLOGIES</p><h1>CCTV Manager Pro</h1><p>{p.full_name} · {p.role}</p></div><form action={signOut}><button>Sign out</button></form></header>
- <section className="cards">{[['Visible jobs',jobs.length],['Pending',jobs.filter(j=>j.status==='pending').length],['In progress',jobs.filter(j=>j.status==='in_progress').length],['Completed',jobs.filter(j=>j.status==='completed').length]].map(([label,count])=><article key={label}><strong>{count}</strong><span>{label}</span></article>)}</section>
- {staff&&<div className="forms"><section className="panel"><h2>New customer</h2><form action={addCustomer}><label>Customer name<input name="name" maxLength={120} required/></label><label>Phone<input name="phone" maxLength={40}/></label><label>Site address<input name="address" maxLength={500}/></label><button>Add customer</button></form></section>
- <section className="panel"><h2>New job</h2><form action={addJob}><label>Customer<select name="customer_id" required defaultValue=""><option value="" disabled>Select customer</option>{customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label><label>Job title<input name="title" required maxLength={180}/></label><label>Type<select name="kind"><option value="breakdown">Breakdown</option><option value="site_visit">Site visit</option><option value="installation">Installation</option></select></label><label>Priority<select name="priority"><option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="urgent">Urgent</option></select></label><label>Description<textarea name="description" maxLength={2000}/></label><button>Create job</button></form></section></div>}
- <section className="panel"><h2>{staff?'All jobs':'My assigned jobs'}</h2>{jobsRes.error?<p>Unable to load jobs.</p>:!jobs.length?<p>No jobs available.</p>:<div className="joblist">{jobs.map(j=><div key={j.id} className="job"><div><strong>{j.job_number}</strong> — {j.title}<p>{j.kind} · {j.status} · {j.priority}</p></div><form action={addUpdate}><input type="hidden" name="job_id" value={j.id}/><label>Progress note<input name="note" placeholder="Site visit notes / work completed" required maxLength={1500}/></label><button>Add note</button></form></div>)}</div>}</section>
- <p className="muted">Staff access is enforced by database row-level security. Job status changes, attachments and reports are planned for the next release.</p></main>
+  s.from('jobs').select('id,job_number,title,kind,status,priority,request_section,source_status_note,customer:customers(name,phone,address)').order('created_at',{ascending:false}).limit(200),
+  staff?s.from('customers').select('id,name').order('created_at',{ascending:false}).limit(300):Promise.resolve({data:[]})
+ ])
+ const jobs=jobsRes.data||[]
+ const customers=customersRes.data||[]
+ const ordered=[...jobs].sort((a,b)=>{
+  const aImported=a.job_number.startsWith('CCTV-IMPORT-20261118-')
+  const bImported=b.job_number.startsWith('CCTV-IMPORT-20261118-')
+  if(aImported&&bImported)return a.job_number.localeCompare(b.job_number)
+  if(aImported!==bImported)return aImported?1:-1
+  return 0
+ })
+ const jobCard=(j:typeof jobs[number])=>{
+  const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
+  return <div key={j.id} className="job">
+   <div className="job-details">
+    <div className="job-heading"><strong>{customer?.name||'Customer name unavailable'}</strong><span className="job-number">{j.job_number}</span></div>
+    <p><b>📍 Place:</b> {customer?.address||'Not Provided'}</p>
+    <p><b>📞 Phone:</b> {customer?.phone?<a href={'tel:'+customer.phone}>{customer.phone}</a>:'Not Provided'}</p>
+    <p><b>🔧 Reason:</b> {j.title==='(No reason provided)'?'—':j.title}</p>
+    {j.source_status_note&&<p className="source-status">📝 {j.source_status_note}</p>}
+    <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
+   </div>
+   <form action={addUpdate}><input type="hidden" name="job_id" value={j.id}/><label>Progress note<input name="note" placeholder="Service visit / work completed" required maxLength={1500}/></label><button>Add note</button></form>
+  </div>
+ }
+ const otherJobs=ordered.filter(j=>!sections.some(s=>s.key===j.request_section))
+ return <main className="wrap">
+  <header><div><p className="brand">GUI TECHNOLOGIES</p><h1>CCTV Manager Pro</h1><p>{p.full_name} · {p.role}</p></div><form action={signOut}><button>Sign out</button></form></header>
+  <section className="cards">{[['Visible jobs',jobs.length],['Pending',jobs.filter(j=>j.status==='pending').length],['In progress',jobs.filter(j=>j.status==='in_progress').length],['Completed',jobs.filter(j=>j.status==='completed').length]].map(([label,count])=><article key={label}><strong>{count}</strong><span>{label}</span></article>)}</section>
+  {staff&&<div className="forms">
+   <section className="panel"><h2>New customer</h2><form action={addCustomer}><label>Customer name<input name="name" maxLength={120} required/></label><label>Phone<input name="phone" maxLength={40}/></label><label>Site address<input name="address" maxLength={500}/></label><button>Add customer</button></form></section>
+   <section className="panel"><h2>New job</h2><form action={addJob}>
+    <label>Customer<select name="customer_id" required defaultValue=""><option value="" disabled>Select customer</option>{customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+    <label>Request section<select name="request_section" required defaultValue=""><option value="" disabled>Select section</option>{sections.map(x=><option key={x.key} value={x.key}>{x.key}</option>)}<option value="OTHER">Other</option></select></label>
+    <label>Reason / Job title<input name="title" required maxLength={180}/></label>
+    <label>Type<select name="kind"><option value="breakdown">Breakdown</option><option value="site_visit">Site visit</option><option value="installation">Installation</option></select></label>
+    <label>Priority<select name="priority"><option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="urgent">Urgent</option></select></label>
+    <label>Description<textarea name="description" maxLength={2000}/></label><button>Create job</button>
+   </form></section>
+  </div>}
+  <section className="panel"><h2>{staff?'All service requests':'My service requests'}</h2>
+   {jobsRes.error?<p>Unable to load service requests.</p>:!ordered.length?<p>No service requests available.</p>:<div>
+    {sections.map(sec=>{
+     const group=ordered.filter(j=>j.request_section===sec.key)
+     return <div className="job-section" key={sec.key}><h3>{sec.label} <span className="section-count">{group.length}</span></h3>{group.length?group.map(jobCard):<p className="muted">No requests in this section.</p>}</div>
+    })}
+    {otherJobs.length>0&&<div className="job-section"><h3>Other requests <span className="section-count">{otherJobs.length}</span></h3>{otherJobs.map(jobCard)}</div>}
+   </div>}
+  </section>
+  <p className="muted">Service records are stored in the dedicated CCTV Manager Pro database. Previous status notes are separate from current workflow status.</p>
+ </main>
 }

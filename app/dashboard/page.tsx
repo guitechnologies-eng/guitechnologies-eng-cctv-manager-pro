@@ -2,7 +2,7 @@ import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {addCustomer,addJob,addUpdate,updateCustomer,updateJobStatus,updateJobDetails} from '../actions/jobs'
 import {redirect} from 'next/navigation'
-import {serviceShareText,whatsappShareLink,sriLankaWhatsAppNumber} from '../../lib/whatsapp'
+import {serviceShareText,whatsappShareLink} from '../../lib/whatsapp'
 
 export const dynamic='force-dynamic'
 
@@ -47,13 +47,13 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
   const message=serviceShareText({
    customerName:customer?.name||'Not Provided',
+   customerPhone:customer?.phone,
    jobNumber:j.job_number,
    place:j.site_address||customer?.address||'Not Provided',
    reason:j.title==='(No reason provided)'?'Not Specified':j.title,
    status:j.status,
    previousNote:j.source_status_note
   })
-  const hasCustomerWhatsApp=Boolean(sriLankaWhatsAppNumber(customer?.phone))
   return <div key={j.id} className="job">
    <div className="job-details">
     <div className="job-heading"><strong>{customer?.name||'Customer name unavailable'}</strong><span className="job-number">{j.job_number}</span></div>
@@ -64,9 +64,9 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
     <div className="job-shortcuts">
      <a className="action-link" href={'/jobs/'+j.id}>View full service history</a>
-     <a className="action-link" href={whatsappShareLink(message)} target="_blank" rel="noopener noreferrer">Share via WhatsApp</a>
-     {hasCustomerWhatsApp&&<a className="action-link whatsapp-customer" href={whatsappShareLink(message,customer?.phone)} target="_blank" rel="noopener noreferrer">WhatsApp Customer</a>}
+     <a className="action-link" href={whatsappShareLink(message)} target="_blank" rel="noopener noreferrer">Share to Team via WhatsApp</a>
     </div>
+    <p className="muted team-share-note">Choose your staff/team WhatsApp chat or group to send the prepared service request. Nothing is sent automatically.</p>
     {staff&&<div className="job-edit-controls">
      <form action={updateJobStatus} className="status-form">
       <input type="hidden" name="job_id" value={j.id}/>

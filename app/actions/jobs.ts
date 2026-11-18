@@ -57,6 +57,74 @@ export async function addJob(form:FormData){
  revalidatePath('/dashboard')
 }
 
+
+export type JobCreateState = {
+ success:boolean
+ message:string
+ jobNumber?:string
+ customerCreated?:boolean
+}
+
+export async function createJobWithCustomer(_state:JobCreateState,form:FormData):Promise<JobCreateState>{
+ const {supabase,role}=await actor()
+ requireOffice(role)
+ const mode=read(form,'customer_mode',20)
+ const customer_id=read(form,'customer_id',50)
+ const customer_name=read(form,'customer_name',120)
+ const customer_phone=read(form,'customer_phone',40)
+ const customer_address=read(form,'customer_address',500)
+ const title=read(form,'title',180)
+ const kind=read(form,'kind',30)
+ const priority=read(form,'priority',20)
+ const request_section=read(form,'request_section',80)
+ const description=read(form,'description',2000)
+ const site_address=read(form,'site_address',500)
+
+ if(!['existing','new'].includes(mode)) return {success:false,message:'Select an existing or new customer.'}
+ if(mode==='existing'&&!isUuid(customer_id)) return {success:false,message:'Please select a saved customer.'}
+ if(mode==='new'&&!customer_name) return {success:false,message:'Enter the new customer name.'}
+ if(!title||!['breakdown','site_visit','installation'].includes(kind)||
+  !['normal','low','high','urgent'].includes(priority)||
+  !['CCTV NEW INSTALLATION REQUEST','REPAIR & WARRANTY SERVICE','OTHER'].includes(request_section)){
+  return {success:false,message:'Please complete valid job details.'}
+ }
+
+ const {data,error}=await supabase.rpc('create_job_with_customer',{
+  p_customer_id:mode==='existing'?customer_id:null,
+  p_customer_name:mode==='new'?customer_name:null,
+  p_customer_phone:mode==='new'?customer_phone:null,
+  p_customer_address:mode==='new'?customer_address:null,
+  p_title:title,
+  p_kind:kind,
+  p_priority:priority,
+  p_request_section:request_section,
+  p_description:description||null,
+  p_site_address:site_address||null
+ })
+ if(error){
+  const isDuplicate=error.message.includes('Customer with this phone already exists')
+  const isAmbiguous=error.message.includes('Several customers match')
+  const isMissing=error.message.includes('Selected customer not found')
+  const message=isDuplicate
+   ?'This phone belongs to a saved customer. Search and select that customer instead.'
+   :isAmbiguous
+   ?'More than one saved customer matches. Please select the correct customer.'
+   :isMissing
+   ?'Saved customer could not be found. Refresh the list and try again.'
+   :'Job was not saved. Please check the details and try again.'
+  return {success:false,message}
+ }
+ revalidatePath('/dashboard')
+ return {
+  success:true,
+  message:data?.customer_created
+   ?'New customer and job saved successfully.'
+   :'Job saved successfully using an existing customer.',
+  jobNumber:data?.job_number||undefined,
+  customerCreated:Boolean(data?.customer_created)
+ }
+}
+
 export async function updateJobDetails(form:FormData){
  const {supabase,role}=await actor()
  requireOffice(role)

@@ -7,3 +7,4 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
   ?'Sign in could not be completed. Please try again.'
   :null
  return <main className="login"><section className="panel"><p className="brand">GUI TECHNOLOGIES</p><h1>CCTV Manager Pro</h1><p>Authorized staff access only</p>{message&&<p role="alert">{message}</p>}<form action={signIn}><label>Email<input name="email" type="email" required autoComplete="username" autoCapitalize="none"/></label><label>Password<input name="password" type="password" required autoComplete="current-password"/></label><button type="submit">Sign in</button></form><p className="muted">If your saved password does not work, type the password manually or reset it through your account administrator.</p></section></main>
+}

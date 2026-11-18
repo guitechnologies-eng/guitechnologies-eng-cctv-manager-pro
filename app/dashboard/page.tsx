@@ -1,6 +1,6 @@
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
-import {addCustomer,addJob,addUpdate} from '../actions/jobs'
+import {addCustomer,addJob,addUpdate,updateCustomer,updateJobStatus} from '../actions/jobs'
 import {redirect} from 'next/navigation'
 
 export const dynamic='force-dynamic'
@@ -10,7 +10,11 @@ const sections=[
  {key:'REPAIR & WARRANTY SERVICE',label:'2. REPAIR & WARRANTY SERVICE'}
 ] as const
 
-export default async function Dashboard(){
+export default async function Dashboard({searchParams}:{searchParams:Promise<{q?:string;status?:string;section?:string}>}){
+ const params=await searchParams
+ const query=typeof params.q==='string'?params.q.trim().slice(0,120).toLowerCase():''
+ const statusFilter=typeof params.status==='string'&&['pending','assigned','in_progress','completed','cancelled'].includes(params.status)?params.status:''
+ const sectionFilter=typeof params.section==='string'&&['CCTV NEW INSTALLATION REQUEST','REPAIR & WARRANTY SERVICE','OTHER'].includes(params.section)?params.section:''
  const s=await db()
  const {data:{user}}=await s.auth.getUser()
  if(!user)redirect('/login')
@@ -18,7 +22,7 @@ export default async function Dashboard(){
  if(!p?.active)return <main className="wrap"><h1>Account approval pending</h1><form action={signOut}><button>Sign out</button></form></main>
  const staff=p.role==='admin'||p.role==='office'
  const [jobsRes,customersRes]=await Promise.all([
-  s.from('jobs').select('id,job_number,title,kind,status,priority,request_section,source_status_note,customer:customers(name,phone,address)').order('created_at',{ascending:false}).limit(200),
+  s.from('jobs').select('id,job_number,title,kind,status,priority,request_section,source_status_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
   staff?s.from('customers').select('id,name').order('created_at',{ascending:false}).limit(300):Promise.resolve({data:[]})
  ])
  const jobs=jobsRes.data||[]
@@ -30,6 +34,14 @@ export default async function Dashboard(){
   if(aImported!==bImported)return aImported?1:-1
   return 0
  })
+ const filtered=ordered.filter(j=>{
+  const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
+  const searchable=[customer?.name,customer?.phone,customer?.address,j.title,j.job_number,j.source_status_note].filter(Boolean).join(' ').toLowerCase()
+  const matchesSearch=!query||searchable.includes(query)
+  const matchesStatus=!statusFilter||j.status===statusFilter
+  const matchesSection=!sectionFilter||(sectionFilter==='OTHER'?!sections.some(s=>s.key===j.request_section):j.request_section===sectionFilter)
+  return matchesSearch&&matchesStatus&&matchesSection
+ })
  const jobCard=(j:typeof jobs[number])=>{
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
   return <div key={j.id} className="job">
@@ -40,11 +52,35 @@ export default async function Dashboard(){
     <p><b>🔧 Reason:</b> {j.title==='(No reason provided)'?'—':j.title}</p>
     {j.source_status_note&&<p className="source-status">📝 {j.source_status_note}</p>}
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
+    {staff&&<div className="job-edit-controls">
+     <form action={updateJobStatus} className="status-form">
+      <input type="hidden" name="job_id" value={j.id}/>
+      <label>Update job status
+       <select name="status" defaultValue={j.status} required>
+        <option value="pending">Pending</option>
+        <option value="assigned">Assigned</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+       </select>
+      </label><button type="submit">Save Status</button>
+     </form>
+     {customer&&<details className="edit-customer">
+      <summary>Edit customer details</summary>
+      <form action={updateCustomer}>
+       <input type="hidden" name="customer_id" value={customer.id}/>
+       <label>Customer name<input name="name" required maxLength={120} defaultValue={customer.name}/></label>
+       <label>Phone<input name="phone" maxLength={40} defaultValue={customer.phone||''}/></label>
+       <label>Place / Address<input name="address" maxLength={500} defaultValue={customer.address||''}/></label>
+       <button type="submit">Save Customer</button>
+      </form>
+     </details>}
+    </div>}
    </div>
    <form action={addUpdate}><input type="hidden" name="job_id" value={j.id}/><label>Progress note<input name="note" placeholder="Service visit / work completed" required maxLength={1500}/></label><button>Add note</button></form>
   </div>
  }
- const otherJobs=ordered.filter(j=>!sections.some(s=>s.key===j.request_section))
+ const otherJobs=filtered.filter(j=>!sections.some(s=>s.key===j.request_section))
  return <main className="wrap">
   <header><div><p className="brand">GUI TECHNOLOGIES</p><h1>CCTV Manager Pro</h1><p>{p.full_name} · {p.role}</p></div><form action={signOut}><button>Sign out</button></form></header>
   <section className="cards">{[['Visible jobs',jobs.length],['Pending',jobs.filter(j=>j.status==='pending').length],['In progress',jobs.filter(j=>j.status==='in_progress').length],['Completed',jobs.filter(j=>j.status==='completed').length]].map(([label,count])=><article key={label}><strong>{count}</strong><span>{label}</span></article>)}</section>
@@ -60,9 +96,16 @@ export default async function Dashboard(){
    </form></section>
   </div>}
   <section className="panel"><h2>{staff?'All service requests':'My service requests'}</h2>
-   {jobsRes.error?<p>Unable to load service requests.</p>:!ordered.length?<p>No service requests available.</p>:<div>
+   <form method="GET" action="/dashboard" className="job-filters">
+    <label>Search customer, phone, place or reason<input name="q" type="search" defaultValue={params.q||''} maxLength={120} placeholder="Name / phone / address / job"/></label>
+    <label>Status<select name="status" defaultValue={statusFilter}><option value="">All statuses</option><option value="pending">Pending</option><option value="assigned">Assigned</option><option value="in_progress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>
+    <label>Section<select name="section" defaultValue={sectionFilter}><option value="">All sections</option>{sections.map(s=><option key={s.key} value={s.key}>{s.key}</option>)}<option value="OTHER">Other</option></select></label>
+    <div className="filter-buttons"><button type="submit">Search / Filter</button><a href="/dashboard">Clear</a></div>
+   </form>
+   <p className="muted">Showing {filtered.length} of {jobs.length} service requests</p>
+   {jobsRes.error?<p>Unable to load service requests.</p>:!filtered.length?<p>No matching service requests.</p>:<div>
     {sections.map(sec=>{
-     const group=ordered.filter(j=>j.request_section===sec.key)
+     const group=filtered.filter(j=>j.request_section===sec.key)
      return <div className="job-section" key={sec.key}><h3>{sec.label} <span className="section-count">{group.length}</span></h3>{group.length?group.map(jobCard):<p className="muted">No requests in this section.</p>}</div>
     })}
     {otherJobs.length>0&&<div className="job-section"><h3>Other requests <span className="section-count">{otherJobs.length}</span></h3>{otherJobs.map(jobCard)}</div>}

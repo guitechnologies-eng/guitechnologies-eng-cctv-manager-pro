@@ -3,6 +3,7 @@
 import {db} from '../../lib/supabase'
 import {revalidatePath} from 'next/cache'
 import {redirect} from 'next/navigation'
+import {fromColomboInput} from '../../lib/reminders'
 
 const read=(form:FormData,key:string,max=500)=>String(form.get(key)||'').trim().slice(0,max)
 const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
@@ -179,6 +180,32 @@ export async function updateCustomer(form:FormData){
  ensureSaved(error)
  if(!data)throw new Error('Customer not found or insufficient permissions')
  revalidatePath('/dashboard')
+}
+
+export async function updateInternalReminder(form:FormData){
+ const {supabase,role}=await actor()
+ requireOffice(role)
+ const jobId=read(form,'job_id',50)
+ if(!isUuid(jobId))throw new Error('Invalid job reference')
+ const scheduledInput=read(form,'scheduled_at',16)
+ const followUpInput=read(form,'follow_up_at',16)
+ const reminderNote=read(form,'reminder_note',501)
+ if(reminderNote.length>500)throw new Error('Reminder note is too long')
+ let scheduledAt:string|null
+ let followUpAt:string|null
+ try{
+  scheduledAt=fromColomboInput(scheduledInput)
+  followUpAt=fromColomboInput(followUpInput)
+ }catch{
+  throw new Error('Please enter a valid Sri Lanka date and time')
+ }
+ const {data,error}=await supabase.from('jobs')
+  .update({scheduled_at:scheduledAt,follow_up_at:followUpAt,reminder_note:reminderNote||null})
+  .eq('id',jobId).select('id').maybeSingle()
+ ensureSaved(error)
+ if(!data)throw new Error('Job not found or insufficient permissions')
+ revalidatePath('/dashboard')
+ revalidatePath('/jobs/'+jobId)
 }
 
 export async function addUpdate(form:FormData){

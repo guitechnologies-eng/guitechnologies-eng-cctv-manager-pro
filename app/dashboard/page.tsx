@@ -1,6 +1,7 @@
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
-import {addCustomer,addJob,addUpdate,updateCustomer,updateJobStatus,updateJobDetails} from '../actions/jobs'
+import {addCustomer,addUpdate,updateCustomer,updateJobStatus,updateJobDetails} from '../actions/jobs'
+import NewJobForm from './NewJobForm'
 import {redirect} from 'next/navigation'
 import {serviceShareText,whatsappShareLink} from '../../lib/whatsapp'
 
@@ -24,7 +25,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  const staff=p.role==='admin'||p.role==='office'
  const [jobsRes,customersRes]=await Promise.all([
   s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
-  staff?s.from('customers').select('id,name').order('created_at',{ascending:false}).limit(300):Promise.resolve({data:[]})
+  staff?s.from('customers').select('id,name,phone,address').order('name',{ascending:true}).limit(1000):Promise.resolve({data:[]})
  ])
  const jobs=jobsRes.data||[]
  const customers=customersRes.data||[]
@@ -122,14 +123,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   <section className="cards">{[['Visible jobs',jobs.length],['Pending',jobs.filter(j=>j.status==='pending').length],['In progress',jobs.filter(j=>j.status==='in_progress').length],['Completed',jobs.filter(j=>j.status==='completed').length]].map(([label,count])=><article key={label}><strong>{count}</strong><span>{label}</span></article>)}</section>
   {staff&&<div className="forms">
    <section className="panel"><h2>New customer</h2><form action={addCustomer}><label>Customer name<input name="name" maxLength={120} required/></label><label>Phone<input name="phone" maxLength={40}/></label><label>Site address<input name="address" maxLength={500}/></label><button>Add customer</button></form></section>
-   <section className="panel"><h2>New job</h2><form action={addJob}>
-    <label>Customer<select name="customer_id" required defaultValue=""><option value="" disabled>Select customer</option>{customers.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
-    <label>Request section<select name="request_section" required defaultValue=""><option value="" disabled>Select section</option>{sections.map(x=><option key={x.key} value={x.key}>{x.key}</option>)}<option value="OTHER">Other</option></select></label>
-    <label>Reason / Job title<input name="title" required maxLength={180}/></label>
-    <label>Type<select name="kind"><option value="breakdown">Breakdown</option><option value="site_visit">Site visit</option><option value="installation">Installation</option></select></label>
-    <label>Priority<select name="priority"><option value="normal">Normal</option><option value="low">Low</option><option value="high">High</option><option value="urgent">Urgent</option></select></label>
-    <label>Description<textarea name="description" maxLength={2000}/></label><button>Create job</button>
-   </form></section>
+   <NewJobForm customers={customers}/>
   </div>}
   <section className="panel"><h2>{staff?'All service requests':'My service requests'}</h2>
    <form method="GET" action="/dashboard" className="job-filters">

@@ -1,5 +1,5 @@
 // Internal team-only WhatsApp messages. Nothing is sent automatically.
-// Common Unicode emoji (code-point escapes) are encoded using encodeURIComponent.
+// Use plain-text labels to avoid unsupported emoji placeholders.
 export type ServiceShareData={
  customerName:string
  customerPhone?:string|null
@@ -16,25 +16,6 @@ export type ServiceShareData={
  latestNote?:string|null
  latestNoteAt?:string|null
  jobId?:string|null
-}
-export type WhatsAppMessageStyle='emoji'|'plain'
-
-// Simple, widely supported emoji. Unicode escapes keep the source portable.
-const emoji={
- heading:'\u{1F4F9}', // video camera
- reference:'\u{1F4CB}',
- category:'\u{1F4C1}',
- priority:'\u{1F6A8}',
- status:'\u{1F4CC}',
- customer:'\u{1F464}',
- phone:'\u{1F4DE}',
- place:'\u{1F4CD}',
- service:'\u{1F527}',
- note:'\u{1F4DD}',
- time:'\u{1F4C5}',
- action:'\u{2705}',
- link:'\u{1F517}',
- private:'\u{1F512}'
 }
 const statusLabels:Record<string,string>={
  pending:'Pending',assigned:'Assigned',in_progress:'In Progress',
@@ -61,48 +42,47 @@ function formatColomboDate(iso?:string|null):string|null{
 }
 const safe=(v:string|null|undefined)=>v?.trim()||'Not Provided'
 
-export function serviceShareText(data:ServiceShareData,style:WhatsAppMessageStyle='emoji'):string{
- const icon=(key:keyof typeof emoji)=>style==='emoji'?emoji[key]+' ':''
+export function serviceShareText(data:ServiceShareData):string{
  const lines=[
-  icon('heading')+'*GUI TECHNOLOGIES*',
+  '*GUI TECHNOLOGIES*',
   '*CCTV SERVICE JOB - INTERNAL TEAM*',
   '--------------------------------',
-  icon('reference')+'*Job Reference:* '+safe(data.jobNumber),
-  icon('category')+'*Category:* '+(sectionLabels[data.section||'']||safe(data.section)),
-  icon('priority')+'*Priority:* '+(priorityLabels[data.priority||'']||safe(data.priority)),
-  icon('status')+'*Current Status:* '+(statusLabels[data.status]||safe(data.status)),
+  '*Job Reference:* '+safe(data.jobNumber),
+  '*Category:* '+(sectionLabels[data.section||'']||safe(data.section)),
+  '*Priority:* '+(priorityLabels[data.priority||'']||safe(data.priority)),
+  '*Current Status:* '+(statusLabels[data.status]||safe(data.status)),
   '',
-  icon('customer')+'*CUSTOMER DETAILS*',
+  '*CUSTOMER DETAILS*',
   'Name: '+safe(data.customerName),
-  icon('phone')+'Phone: '+safe(data.customerPhone),
-  icon('place')+'Place: '+safe(data.place),
+  'Phone: '+safe(data.customerPhone),
+  'Place: '+safe(data.place),
   '',
-  icon('service')+'*SERVICE DETAILS*',
+  '*SERVICE DETAILS*',
   'Service Type: '+(kindLabels[data.kind||'']||safe(data.kind)),
   'Issue / Request: '+safe(data.reason)
  ]
  if(data.description?.trim())lines.push('Job Description: '+data.description.trim())
  const loggedAt=formatColomboDate(data.createdAt)
- if(loggedAt)lines.push(icon('time')+'Recorded: '+loggedAt)
- if(data.previousNote?.trim())lines.push(icon('note')+'Original Note: '+data.previousNote.trim())
+ if(loggedAt)lines.push('Recorded: '+loggedAt)
+ if(data.previousNote?.trim())lines.push('Original Note: '+data.previousNote.trim())
  if(data.latestNote?.trim()){
-  lines.push('',icon('note')+'*LATEST PROGRESS UPDATE*',data.latestNote.trim())
+  lines.push('','*LATEST PROGRESS UPDATE*',data.latestNote.trim())
   const updateAt=formatColomboDate(data.latestNoteAt)
   if(updateAt)lines.push('Updated: '+updateAt)
  }
  lines.push('',
-  icon('action')+'*TEAM FOLLOW-UP*',
+  '*TEAM FOLLOW-UP*',
   'Please review this request and update its progress in CCTV Manager Pro.'
  )
  if(data.jobId&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.jobId)){
-  lines.push(icon('link')+'Open Job: https://cctv-manager-pro.vercel.app/jobs/'+data.jobId)
+  lines.push('Open Job: https://cctv-manager-pro.vercel.app/jobs/'+data.jobId)
  }
- lines.push('',icon('private')+'*INTERNAL STAFF ONLY - NOT FOR CUSTOMERS*')
+ lines.push('','*INTERNAL STAFF ONLY - NOT FOR CUSTOMERS*')
  return lines.join('\n')
 }
 
 export function whatsappShareLink(text:string):string{
- // Emoji + Sinhala text round-trip safely as UTF-8 URL encoding.
+ // Sinhala and other Unicode user data round-trip safely via URL encoding.
  // The team recipient must be selected by the human in WhatsApp.
  return 'https://wa.me/?text='+encodeURIComponent(text)
 }

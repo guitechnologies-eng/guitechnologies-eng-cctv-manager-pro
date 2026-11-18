@@ -1,28 +1,98 @@
-// User-initiated sharing: only prepares a WhatsApp message.
-// No recipient is selected automatically; staff must choose the internal team chat.
-export function serviceShareText(data:{
+// Internal staff-only message. Preparation and sharing are always user-initiated.
+// The site does NOT send any WhatsApp message or select a recipient automatically.
+export type ServiceShareData={
  customerName:string
  customerPhone?:string|null
  jobNumber:string
  place:string
  reason:string
  status:string
+ kind?:string|null
+ priority?:string|null
+ section?:string|null
+ description?:string|null
  previousNote?:string|null
-}):string{
+ createdAt?:string|null
+ latestNote?:string|null
+ latestNoteAt?:string|null
+ jobId?:string|null
+}
+
+const statusLabels:Record<string,string>={
+ pending:'🟡 Pending',
+ assigned:'🔵 Assigned',
+ in_progress:'🟠 In Progress',
+ completed:'🟢 Completed',
+ cancelled:'⚫ Cancelled'
+}
+const priorityLabels:Record<string,string>={
+ low:'🟢 Low',
+ normal:'🔵 Normal',
+ high:'🟠 High',
+ urgent:'🔴 URGENT'
+}
+const kindLabels:Record<string,string>={
+ breakdown:'Repair / Breakdown',
+ site_visit:'Site Visit',
+ installation:'New Installation'
+}
+const sectionLabels:Record<string,string>={
+ 'CCTV NEW INSTALLATION REQUEST':'New Installation Request',
+ 'REPAIR & WARRANTY SERVICE':'Repair & Warranty Service',
+ 'OTHER':'Other'
+}
+function formatColomboDate(iso?:string|null):string|null{
+ if(!iso)return null
+ const date=new Date(iso)
+ if(Number.isNaN(date.getTime()))return null
+ return new Intl.DateTimeFormat('en-GB',{
+  timeZone:'Asia/Colombo',day:'2-digit',month:'short',year:'numeric',
+  hour:'2-digit',minute:'2-digit',hour12:true
+ }).format(date)+' (SL)'
+}
+const safe=(value:string|null|undefined)=>value?.trim()||'Not Provided'
+
+export function serviceShareText(data:ServiceShareData):string{
  const lines=[
-  'GUI TECHNOLOGIES - INTERNAL CCTV SERVICE REQUEST',
-  'Reference: '+data.jobNumber,
-  'Customer: '+data.customerName,
-  'Customer phone: '+(data.customerPhone||'Not Provided'),
-  'Place: '+data.place,
-  'Reason: '+data.reason,
-  'Current status: '+data.status.replaceAll('_',' ')
+  '📢 *GUI TECHNOLOGIES*',
+  '*CCTV SERVICE JOB • INTERNAL TEAM*',
+  '━━━━━━━━━━━━━━━━━━━━',
+  '🆔 *Job Reference:* '+safe(data.jobNumber),
+  '📂 *Category:* '+(sectionLabels[data.section||'']||safe(data.section)),
+  '🚦 *Priority:* '+(priorityLabels[data.priority||'']||safe(data.priority)),
+  '📌 *Current Status:* '+(statusLabels[data.status]||safe(data.status)),
+  '',
+  '👤 *CUSTOMER DETAILS*',
+  '• Name: '+safe(data.customerName),
+  '• Phone: '+safe(data.customerPhone),
+  '• Place: '+safe(data.place),
+  '',
+  '🛠️ *SERVICE DETAILS*',
+  '• Service Type: '+(kindLabels[data.kind||'']||safe(data.kind)),
+  '• Issue / Request: '+safe(data.reason)
  ]
- if(data.previousNote)lines.push('Previous note: '+data.previousNote)
+ if(data.description?.trim())lines.push('• Job Description: '+data.description.trim())
+ const loggedAt=formatColomboDate(data.createdAt)
+ if(loggedAt)lines.push('• Recorded: '+loggedAt)
+ if(data.previousNote?.trim())lines.push('• Original Note: '+data.previousNote.trim())
+ if(data.latestNote?.trim()){
+  lines.push('','📝 *LATEST PROGRESS UPDATE*','• '+data.latestNote.trim())
+  const updateAt=formatColomboDate(data.latestNoteAt)
+  if(updateAt)lines.push('• Updated: '+updateAt)
+ }
+ lines.push(
+  '',
+  '✅ *TEAM FOLLOW-UP*',
+  'Please review this request and update its progress in CCTV Manager Pro.'
+ )
+ if(data.jobId&&/^[0-9a-f-]{36}$/i.test(data.jobId)){
+  lines.push('🔗 *Open Job:* https://cctv-manager-pro.vercel.app/jobs/'+data.jobId)
+ }
+ lines.push('','🔒 *Internal staff communication only — not for customers.*')
  return lines.join('\n')
 }
 
 export function whatsappShareLink(text:string):string{
- // No customer number or team contact is hardcoded; choose the team/group in WhatsApp.
+ // Recipient/chat is chosen by staff in WhatsApp, not by this app.
  return 'https://wa.me/?text='+encodeURIComponent(text)
 }

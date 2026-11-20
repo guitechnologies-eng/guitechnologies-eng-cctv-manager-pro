@@ -1,12 +1,12 @@
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
-import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder} from '../actions/jobs'
+import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder,assignTechnician} from '../actions/jobs'
 import NewJobForm from './NewJobForm'
 import PendingSubmit from './PendingSubmit'
 import TeamWhatsAppShare from './TeamWhatsAppShare'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
-import {paginateJobs,dashboardPageHref,reminderJobHref} from '../../lib/dashboard-pagination'
+import {paginateJobs,dashboardPageHref,reminderJobHref,filterJobByTechnician} from '../../lib/dashboard-pagination'
 import {serviceShareText} from '../../lib/whatsapp'
 import {getReminderGroups,colomboInputValue,colomboDateLabel} from '../../lib/reminders'
 
@@ -17,7 +17,7 @@ const sections=[
  {key:'REPAIR & WARRANTY SERVICE',label:'2. REPAIR & WARRANTY SERVICE'}
 ] as const
 
-export default async function Dashboard({searchParams}:{searchParams:Promise<{q?:string;status?:string;section?:string;page?:string}>}){
+export default async function Dashboard({searchParams}:{searchParams:Promise<{q?:string;status?:string;section?:string;page?:string;tech?:string}>}){
  const params=await searchParams
  const query=typeof params.q==='string'?params.q.trim().slice(0,120).toLowerCase():''
  const statusFilter=typeof params.status==='string'&&['pending','assigned','in_progress','completed','cancelled'].includes(params.status)?params.status:''
@@ -28,12 +28,24 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  const {data:p}=await s.from('profiles').select('full_name,role,active').eq('id',user.id).single()
  if(!p?.active)return <main className="wrap"><h1>Account approval pending</h1><form action={signOut}><button>Sign out</button></form></main>
  const staff=p.role==='admin'||p.role==='office'
- const [jobsRes,customersRes]=await Promise.all([
+ const [jobsRes,customersRes,assignmentsRes,techniciansRes]=await Promise.all([
   s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,created_at,scheduled_at,follow_up_at,reminder_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
-  staff?s.from('customers').select('id,name,phone,address').order('name',{ascending:true}).limit(1000):Promise.resolve({data:[]})
+  staff?s.from('customers').select('id,name,phone,address').order('name',{ascending:true}).limit(1000):Promise.resolve({data:[]}),
+  s.from('job_assignments').select('job_id,technician_id').limit(1000),
+  staff?s.from('profiles').select('id,full_name').eq('role','technician').eq('active',true).order('full_name',{ascending:true}):Promise.resolve({data:[]})
  ])
  const jobs=jobsRes.data||[]
  const customers=customersRes.data||[]
+ const technicians=techniciansRes.data||[]
+ const assignmentByJob=new Map<string,string>(
+  (assignmentsRes.data||[]).map(a=>[a.job_id,a.technician_id])
+ )
+ const technicianNames=new Map<string,string>(technicians.map(t=>[t.id,t.full_name]))
+ const techFilter=p.role==='technician'
+  ?(params.tech==='all'?'all':'mine')
+  :params.tech==='unassigned'?'unassigned'
+  :technicians.some(t=>t.id===params.tech)?String(params.tech):'all'
+ const assignedToMe=jobs.filter(j=>assignmentByJob.get(j.id)===user.id).length
  const reminderGroups=getReminderGroups(jobs)
  const reminderItems=[...reminderGroups.overdue,...reminderGroups.today,...reminderGroups.upcoming,...reminderGroups.unscheduled]
  const ordered=[...jobs].sort((a,b)=>{
@@ -49,7 +61,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   const matchesSearch=!query||searchable.includes(query)
   const matchesStatus=!statusFilter||j.status===statusFilter
   const matchesSection=!sectionFilter||(sectionFilter==='OTHER'?!sections.some(s=>s.key===j.request_section):j.request_section===sectionFilter)
-  return matchesSearch&&matchesStatus&&matchesSection
+  const matchesTech=filterJobByTechnician(j.id,assignmentByJob.get(j.id),techFilter,user.id,p.role==='technician')
+  return matchesSearch&&matchesStatus&&matchesSection&&matchesTech
  })
  const visiblePage=paginateJobs(filtered,params.page)
  const visibleJobs=visiblePage.items
@@ -63,10 +76,14 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  for(const u of latestNoteRes?.data||[]){
   latestNotes.set(u.job_id,{note:u.note,created_at:u.created_at})
  }
- const pageFilters={q:query,status:statusFilter,section:sectionFilter}
+ const pageFilters={q:query,status:statusFilter,section:sectionFilter,tech:techFilter}
  const jobCard=(j:typeof jobs[number])=>{
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
   const lastUpdate=latestNotes.get(j.id)
+  const assignedId=assignmentByJob.get(j.id)
+  const assignedName=assignedId
+   ?(technicianNames.get(assignedId)||(assignedId===user.id?'You':'Technician (inactive or other)'))
+   :null
   const shareData={
    customerName:customer?.name||'Not Provided',
    customerPhone:customer?.phone,
@@ -96,6 +113,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <p><b>🔧 Reason:</b> {j.title==='(No reason provided)'?'—':j.title}</p>
     {j.source_status_note&&<p className="source-status">📝 {j.source_status_note}</p>}
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
+    <p className="job-assignment-line"><b>Assigned Technician:</b> <span className={assignedId?'assignment-assigned':'assignment-unassigned'}>{assignedName||'Not assigned'}</span></p>
     <div className="job-shortcuts">
      <Link prefetch={false} className="action-link" href={'/jobs/'+j.id}>View full service history</Link>
     </div>
@@ -108,6 +126,19 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     {staff&&<details className="job-management">
      <summary>Manage job · Status, Reminders &amp; Details</summary>
      <div className="job-edit-controls">
+     <form action={assignTechnician} className="assign-technician-form">
+      <input type="hidden" name="job_id" value={j.id}/>
+      <label>Assign Technician
+       <select name="technician_id" defaultValue={assignedId||''} aria-label={'Assigned Technician for '+j.job_number}>
+        <option value="">Unassigned (remove Technician)</option>
+        {technicians.map(t=><option key={t.id} value={t.id}>{t.full_name}</option>)}
+        {assignedId&&!technicians.some(t=>t.id===assignedId)&&
+         <option value={assignedId} disabled>Previously assigned (inactive)</option>}
+       </select>
+      </label>
+      <p className="muted">Assign or reassign an active Technician. Changes appear in Service History.</p>
+      <PendingSubmit label="Save Technician Assignment" pendingLabel="Saving Assignment..."/>
+     </form>
      <details className="edit-customer reminder-editor">
       <summary>🔔 Set / Edit Internal Reminders</summary>
       <form action={updateInternalReminder}>
@@ -121,7 +152,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
        <label>Internal Reminder Note
         <textarea name="reminder_note" maxLength={500} defaultValue={j.reminder_note||''} placeholder="Follow up on repair / call before site visit"/>
        </label>
-       <p className="muted">Dashboard alerts only. No customer WhatsApp, automatic messages or technician assignment.</p>
+       <p className="muted">Dashboard alerts only. No customer WhatsApp or automatic messages.</p>
        <PendingSubmit label="Save Internal Reminder" pendingLabel="Saving Reminder..."/>
       </form>
      </details>
@@ -186,6 +217,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <a className="sidebar-link active" href="#overview"><span aria-hidden="true">◫</span> Overview</a>
     {staff&&<a className="sidebar-link" href="#reminder-list"><span aria-hidden="true">◉</span> Team Reminders {reminderItems.length>0&&<small>{reminderItems.length}</small>}</a>}
     {staff&&<a className="sidebar-link" href="#new-job"><span aria-hidden="true">＋</span> Create Job</a>}
+    {p.role==='technician'&&<Link className="sidebar-link" href="/dashboard?tech=mine#service-requests"><span aria-hidden="true">◉</span> My Assigned Jobs ({assignedToMe})</Link>}
     <a className="sidebar-link" href="#service-requests"><span aria-hidden="true">▤</span> Service Requests</a>
     {p.role==='admin'&&<Link className="sidebar-link" href="/staff"><span aria-hidden="true">▦</span> Staff Management</Link>}
    </nav>
@@ -209,7 +241,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
      <p>Manage customer requests, track service progress and stay on top of every follow-up in one place.</p>
      <div className="hero-quick-actions">
       {staff&&<a className="hero-primary-action" href="#new-job"><span aria-hidden="true">＋</span> Create New Job</a>}
-      <a className="hero-secondary-action" href="#service-requests">View Service Jobs <span aria-hidden="true">↗</span></a>
+      <a className="hero-secondary-action" href={p.role==='technician'?'/dashboard?tech=mine#service-requests':'#service-requests'}>{p.role==='technician'?'My Assigned Jobs':'View Service Jobs'} <span aria-hidden="true">↗</span></a>
      </div>
     </div>
     <div className="hero-orbit" aria-hidden="true"><div className="orbit-ring orbit-ring-one"/><div className="orbit-ring orbit-ring-two"/><div className="orbit-core">◉</div><span className="orbit-spark orbit-spark-one"/><span className="orbit-spark orbit-spark-two"/></div>
@@ -255,11 +287,18 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   {staff&&<div className="forms single-job-form" id="new-job">
    <NewJobForm customers={customers}/>
   </div>}
-  <section className="panel service-requests ui-section" id="service-requests"><div className="section-heading"><div><span className="section-eyebrow">SERVICE QUEUE</span><h2>{staff?'All Service Requests':'My Service Requests'}</h2><p>Search, manage and update your service jobs.</p></div><span className="section-count-total">{jobs.length} total jobs</span></div>
+  <section className="panel service-requests ui-section" id="service-requests"><div className="section-heading"><div><span className="section-eyebrow">SERVICE QUEUE</span><h2>{staff?'All Service Requests':techFilter==='mine'?'My Assigned Jobs':'All Service Jobs'}</h2><p>{p.role==='technician'?('Jobs assigned to you: '+assignedToMe+'. Switch to All Jobs for the shared queue.'):'Search, assign and manage service jobs.'}</p></div><span className="section-count-total">{jobs.length} total jobs</span></div>
    <form method="GET" action="/dashboard" className="job-filters">
     <label>Search customer, phone, place or reason<input name="q" type="search" defaultValue={params.q||''} maxLength={120} placeholder="Name / phone / address / job"/></label>
     <label>Status<select name="status" defaultValue={statusFilter}><option value="">All statuses</option><option value="pending">Pending</option><option value="assigned">Assigned</option><option value="in_progress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>
     <label>Section<select name="section" defaultValue={sectionFilter}><option value="">All sections</option>{sections.map(s=><option key={s.key} value={s.key}>{s.key}</option>)}<option value="OTHER">Other</option></select></label>
+    <label>Technician<select name="tech" defaultValue={techFilter}>
+     {p.role==='technician'
+      ?<><option value="mine">My Assigned Jobs</option><option value="all">All Service Jobs</option></>
+      :<><option value="all">All Jobs</option><option value="unassigned">Unassigned Jobs</option>
+        {technicians.map(t=><option key={t.id} value={t.id}>{t.full_name}</option>)}
+       </>}
+    </select></label>
     <div className="filter-buttons"><button type="submit">Search / Filter</button><a href="/dashboard">Clear</a></div>
    </form>
    <p className="muted filter-results">Showing <strong>{visiblePage.from}–{visiblePage.to}</strong> of {filtered.length} matching service requests (from {jobs.length} loaded jobs)</p>

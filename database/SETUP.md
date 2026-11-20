@@ -58,3 +58,17 @@
 - Existing passwords remain valid. The underlying email account remains necessary for administrative account recovery.
 - If the environment variable is missing, sign-in fails closed with a service message rather than exposing any identity mapping.
 - Ensure Vercel secrets are visible only to authorized project administrators, and do not expose usernames/emails through client bundles or debug output.
+
+## Admin-created user logins (20 Nov 2026)
+
+- **Staff Management** is available at `/staff` to active Administrators only.
+- Admins enter a full name, unique 3-32 character username, initial strong password and a role (`Office Staff` or `Admin`). Office Staff can manage service jobs; Admin can additionally create staff users.
+- `public.staff_accounts` stores a unique username, Supabase Auth user UUID and creator reference. It does **not** store passwords. Its RLS allows SELECT to active Admin only; direct INSERT/UPDATE/DELETE grants are revoked from normal web users.
+- An authenticated Admin Server Action uses the Supabase Edge Function `admin-create-staff`. The function validates the caller's JWT and active Admin role **again**, then creates a Supabase Auth account using the secret key provided by the Supabase Edge environment. The secret key is never shipped to browsers or Vercel.
+- The new Auth identity uses the server-internal deterministic address `<username>@staff.cctv-manager-pro.invalid`; staff type **only their username** into the browser. It is not a real mailbox, so email-based password recovery is unavailable for these accounts. Password management is administrator-managed until a secure password reset feature is built.
+- Existing `guiadmin` keeps the original Supabase Auth email/password identity; the encrypted Vercel `CCTV_LOGIN_ALIASES_JSON` value continues to resolve it. Adding new usernames does **not** require Vercel environment edits.
+- New staff account provisioning is limited to Admin/Office roles. Technician assignment UI is still intentionally excluded. No customer WhatsApp messages are sent.
+- Apply `database/migrations/20261120_admin_staff_accounts.sql` on the dedicated CCTV database only. Deploy `supabase/functions/admin-create-staff/index.ts` to the **same** Supabase project with the function's own JWT verification enabled in code. Verify it is active before exposing the `/staff` UI.
+- The Edge Function may use `verify_jwt=false` at the gateway because it verifies the supplied user's Bearer token with Supabase Auth `getUser` and checks the active Admin role before any privileged operation.
+- Admin should privately share each new staff member's initial password. Do not paste passwords into chat or store them in a customer/job note.
+- Real end-to-end staff creation requires an authorized Admin to sign in and submit a test user, confirm username login, then manage that test user according to policy. Automated tests verify username mapping, RLS and application builds, but do not impersonate the Administrator or use their password.

@@ -429,3 +429,27 @@ main.wrap.dashboard-main{max-width:1500px;width:100%;margin:0;padding:22px clamp
  .staff-create-form>button[type=submit]{width:100%;max-width:none}
  .staff-hero{min-height:unset}
 }
+
+/* Admin-only staff edit controls */
+.staff-list-table{min-width:730px}
+.staff-list-table th:last-child,.staff-list-table td:last-child{min-width:205px}
+.staff-edit-details{border:1px solid #35546a;border-radius:10px;background:#0b2539;max-width:335px}
+.staff-edit-details>summary{padding:10px 13px;cursor:pointer;font-size:12px;font-weight:800;color:#8ce4f4;white-space:nowrap}
+.staff-edit-details[open]{min-width:255px}
+.staff-edit-details[open]>summary{border-bottom:1px solid #35546a}
+.staff-edit-body{padding:13px;display:grid;gap:15px}
+.staff-edit-form,.staff-pin-reset-form{display:grid;gap:7px}
+.staff-edit-form label,.staff-pin-reset-form label{font-size:12px;margin:0}
+.staff-edit-form input,.staff-edit-form select,.staff-pin-reset-form input{margin:5px 0 3px;width:100%;padding:9px;min-width:0;font-size:12px}
+.staff-edit-form input:disabled{opacity:.72}
+.staff-edit-form button,.staff-pin-reset-form button{width:100%;margin-top:6px;padding:10px;font-size:12px}
+.staff-pin-reset-form{padding-top:15px;border-top:1px solid #315066}
+.staff-pin-reset-form>strong{font-size:13px;color:#e1f9ff}
+.staff-pin-reset-form>.muted,.staff-edit-form>.muted{font-size:11px;line-height:1.5;margin:5px 0}
+.staff-edit-ok,.staff-edit-err{margin:6px 0 0;font-size:12px;border-radius:7px;padding:9px 10px;line-height:1.5}
+.staff-edit-ok{background:#194637;color:#b9f9db;border:1px solid #3c9271}
+.staff-edit-err{background:#462a34;color:#ffd6e0;border:1px solid #9f5266}
+@media(max-width:800px){
+ .staff-list-table{min-width:630px}
+ .staff-edit-details[open]{min-width:240px}
+}

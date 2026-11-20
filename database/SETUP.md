@@ -99,3 +99,15 @@
 - Apply database/migrations/20261120_shop_staff_technician_roles.sql on the dedicated CCTV database only.
 - The migration changes only SELECT/INSERT RLS policies, not existing customer/job/profile rows. Auth and Edge functions independently enforce Admin-only creation.
 - Test in transaction by temporarily changing a known Admin role to technician, confirming reads/notes allowed and edits denied, then ROLLBACK.
+
+## Admin can edit existing staff (20 Nov 2026)
+
+- Admin-only `/staff` directory now includes an **Edit User** panel for previously added staff.
+- Admin may edit **Full Name, Role (Shop Staff/Technician/Admin), Active/Inactive**, and **reset PIN** for PIN-based staff.
+- Username is intentionally **not editable** in this release: it is linked to the staff's Supabase Auth identity and PIN-derived credential.
+- Profile fields are saved atomically using `public.cctv_admin_edit_staff` after the Edge function validates an active Admin JWT; the database function additionally verifies the Admin role, locks edits, protects the last active Admin, and prevents self-demotion or self-deactivation.
+- `admin-manage-staff` Edge Function resets a PIN using the existing Supabase Vault pepper and Supabase Auth `admin.updateUserById` API. It never returns PINs to the browser.
+- The original `guiadmin` password-based login cannot be reset through the new PIN control. Existing sessions may continue until expiry, but account deactivation blocks business-data access through current RLS.
+- Apply `database/migrations/20261120_admin_edit_staff.sql` only on the dedicated CCTV Manager Pro project. Deploy `admin-manage-staff` with `_shared/pin-auth.ts` and `_shared/staff-edit-rules.ts`.
+- Existing customer/job records, current usernames, technician assignment UI (removed), and customer WhatsApp messaging remain untouched.
+- Automated tests verify input validation and production builds; secure SQL tests verify role restrictions with `ROLLBACK`. Actual PIN reset must be verified privately by an authorized Admin.

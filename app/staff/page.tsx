@@ -2,6 +2,7 @@ import {db} from '../../lib/supabase'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
 import StaffManager from './StaffManager'
+import StaffEditor from './StaffEditor'
 
 export const dynamic='force-dynamic'
 
@@ -47,7 +48,7 @@ export default async function StaffPage(){
     <div className="hero-content">
      <span className="hero-overline">ADMIN ACCESS ONLY</span>
      <h1>Staff Management</h1>
-     <p>Add secure username-based accounts for your internal team. Only active Administrators can create new staff users.</p>
+     <p>Add secure username-based accounts for your internal team. Only active Administrators can create users, edit existing staff and reset staff PINs.</p>
     </div>
    </section>
    <StaffManager/>
@@ -61,7 +62,7 @@ export default async function StaffPage(){
      :!accounts?.length
        ?<p className="muted">No staff accounts found.</p>
        :<div className="staff-list-scroll"><table className="staff-list-table">
-        <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th></tr></thead>
+        <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th>Manage</th></tr></thead>
         <tbody>{accounts.map(a=>{
          const p=byId.get(a.user_id)
          return <tr key={a.user_id}>
@@ -71,10 +72,11 @@ export default async function StaffPage(){
           <td><span className={'staff-account-state '+(p?.active?'staff-active':'staff-inactive')}>
            {p?.active?'Active':'Inactive'}
           </span></td>
+          <td><StaffEditor userId={a.user_id} username={a.username} fullName={p?.full_name||''} role={p?.role||'technician'} active={Boolean(p?.active)} isSelf={a.user_id===user.id}/></td>
          </tr>
         })}</tbody>
        </table></div>}
-    <p className="muted">Staff PINs are never displayed in this directory.</p>
+    <p className="muted">Only active Admins can edit these accounts. Existing usernames are kept unchanged. Staff PINs are never displayed.</p>
    </section>
   </main>
  </div>

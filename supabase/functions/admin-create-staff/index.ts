@@ -4,6 +4,7 @@
 // JWT verification is performed inside the handler, including active Admin role.
 // The Supabase secret/service-role key never leaves the Edge environment.
 import {createClient} from 'npm:@supabase/supabase-js@2.57.0'
+import {derivePinAuthPassword,normalizeStaffPin} from '../_shared/pin-auth.ts'
 
 const STAFF_DOMAIN='staff.cctv-manager-pro.invalid'
 const USERNAME=/^[a-z][a-z0-9._-]{2,31}$/
@@ -17,11 +18,10 @@ function parseStaffInput(input:unknown){
  const username=typeof data.username==='string'?data.username.trim().toLowerCase():''
  const name=typeof data.full_name==='string'?data.full_name.trim():''
  const role=typeof data.role==='string'?data.role:''
- const password=typeof data.password==='string'?data.password:''
+ const pin=normalizeStaffPin(data.pin)
  if(!USERNAME.test(username)||name.length<2||name.length>120||
-    !['office','admin'].includes(role)||password.length<12||password.length>128||
-    !/[A-Z]/.test(password)||!/[a-z]/.test(password)||!/[0-9]/.test(password))return null
- return {username,full_name:name,role,password}
+    !['office','admin'].includes(role)||!pin)return null
+ return {username,full_name:name,role,pin:pin!}
 }
 
 Deno.serve(async(req:Request)=>{
@@ -52,16 +52,22 @@ Deno.serve(async(req:Request)=>{
   return reply(400,'Invalid staff details')
  }
  const input=parseStaffInput(parsed)
- if(!input)return reply(400,'Enter a valid username, name, role, and strong password (12+ characters, upper/lower case and a number).')
+ if(!input)return reply(400,'Enter a valid username, name, role and numeric PIN (4-8 digits).')
 
  const {data:existing,error:lookupError}=await adminClient.from('staff_accounts')
   .select('user_id').eq('username',input.username).maybeSingle()
  if(lookupError)return reply(503,'Could not check staff username')
  if(existing)return reply(409,'This username is already in use')
 
+ // Pepper is stored encrypted in Supabase Vault; only the Edge service key may read it.
+ const {data:pepper,error:pepperError}=await adminClient.rpc('cctv_staff_pin_pepper')
+ if(pepperError||typeof pepper!=='string')return reply(503,'PIN setup is temporarily unavailable')
+ let password:string
+ try{password=await derivePinAuthPassword(input.username,input.pin,pepper)}
+ catch{return reply(503,'PIN setup is temporarily unavailable')}
  const email=input.username+'@'+STAFF_DOMAIN
  const {data:created,error:creationError}=await adminClient.auth.admin.createUser({
-  email,password:input.password,email_confirm:true
+  email,password,email_confirm:true
  })
  if(creationError||!created.user){
   const duplicate=/already|registered|duplicate/i.test(creationError?.message||'')

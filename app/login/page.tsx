@@ -3,7 +3,7 @@ import {signIn} from '../actions/auth'
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
  const p=await searchParams
  const message=p.error==='credentials'
-  ?'Incorrect username or password. Enter the password for your CCTV Manager Pro account.'
+  ?'Incorrect username, password or PIN. Please try again.'
   :p.error==='service'
   ?'Sign in is temporarily unavailable. Please contact your administrator.'
   :null
@@ -21,13 +21,13 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
       spellCheck={false} pattern="[A-Za-z][A-Za-z0-9._-]{2,31}"
       placeholder="Enter your username"/>
     </label>
-    <label>Password
+    <label>Password / Staff PIN
      <input name="password" type="password" required autoComplete="current-password"
-      placeholder="Enter your password"/>
+      placeholder="Admin password or staff PIN"/>
     </label>
     <button type="submit">Sign in</button>
    </form>
-   <p className="muted">Use your staff username and the same CCTV Manager Pro password. No Gmail address is needed on this screen.</p>
+   <p className="muted">Admin uses the existing password. Newly created staff use their 4–8 digit PIN. No Gmail address is required.</p>
   </section>
  </main>
 }

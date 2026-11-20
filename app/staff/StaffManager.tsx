@@ -16,7 +16,7 @@ export default function StaffManager(){
   <div className="staff-section-heading">
    <span className="section-eyebrow">ADMINISTRATION</span>
    <h2>Create Staff Login</h2>
-   <p className="muted">Create a username and initial password. Staff can sign in to CCTV Manager Pro without entering a Gmail address.</p>
+   <p className="muted">Create a username and a numeric PIN. Staff can sign in without entering a Gmail address.</p>
   </div>
   <form ref={form} action={submit} autoComplete="off" className="staff-create-form">
    <div className="staff-form-grid">
@@ -39,16 +39,18 @@ export default function StaffManager(){
      <strong>Access permissions</strong>
      <p>Office Staff can manage service requests. Admin can also create staff accounts. No technician assignment feature is enabled.</p>
     </div>
-    <label>Initial Password
-     <input name="password" type="password" required minLength={12}
-      maxLength={128} autoComplete="new-password" placeholder="Strong password (12+ characters)"/>
+    <label>Login PIN (4–8 digits)
+     <input name="pin" type="password" inputMode="numeric" pattern="[0-9]{4,8}"
+      required minLength={4} maxLength={8} autoComplete="new-password"
+      placeholder="Enter numeric PIN" aria-describedby="staff-pin-help"/>
     </label>
-    <label>Confirm Password
-     <input name="confirm_password" type="password" required minLength={12}
-      maxLength={128} autoComplete="new-password" placeholder="Type password again"/>
+    <label>Confirm PIN
+     <input name="confirm_pin" type="password" inputMode="numeric" pattern="[0-9]{4,8}"
+      required minLength={4} maxLength={8} autoComplete="new-password"
+      placeholder="Re-enter PIN"/>
     </label>
    </div>
-   <p className="muted staff-password-note">Include uppercase, lowercase and a number. Share the password privately. Passwords are handled by Supabase Auth, not stored in the staff directory.</p>
+   <p id="staff-pin-help" className="muted staff-password-note">Numeric PIN only (4–8 digits). Avoid easy PINs such as 1234, 0000 or birthdays. A 6–8 digit random PIN is safer. Never share PINs in job notes or WhatsApp groups.</p>
    <button type="submit" disabled={pending}>{pending?'Creating Staff Account...':'Create Staff Account'}</button>
    {result.message&&<div className={'staff-result '+(result.success?'staff-result-success':'staff-result-error')} role="status">
     <strong>{result.success?'Account created':'Could not create account'}</strong>

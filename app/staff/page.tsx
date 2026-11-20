@@ -74,7 +74,7 @@ export default async function StaffPage(){
          </tr>
         })}</tbody>
        </table></div>}
-    <p className="muted">User passwords are never displayed in this directory.</p>
+    <p className="muted">Staff PINs are never displayed in this directory.</p>
    </section>
   </main>
  </div>

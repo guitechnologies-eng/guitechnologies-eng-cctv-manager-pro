@@ -10,9 +10,9 @@ test('4 to 8 digit staff PINs accepted including leading zeros',()=>{
 test('PIN rejects weak format, letters and out of range length',()=>{
  for(const pin of ['', '123','123456789','12 34','123a','१२३४',null])assert.equal(normalizeStaffPin(pin),null)
 })
-test('PIN credentials are keyed, deterministic, 64-char Supabase-compatible hashes',async()=>{
+test('PIN credentials are keyed, deterministic, strong Supabase-compatible hashes',async()=>{
  const first=await derivePinAuthPassword('kasun','1234',pepper)
- assert.match(first,/^[a-f0-9]{64}$/)
+ assert.match(first,/^Cctv1![a-f0-9]{64}$/)
  assert.equal(first,await derivePinAuthPassword('kasun','1234',pepper))
  assert.notEqual(first,await derivePinAuthPassword('kasun','4321',pepper))
  assert.notEqual(first,await derivePinAuthPassword('nimal','1234',pepper))

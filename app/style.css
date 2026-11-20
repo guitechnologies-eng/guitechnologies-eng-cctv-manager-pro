@@ -382,3 +382,15 @@ main.wrap.dashboard-main{max-width:1500px;width:100%;margin:0;padding:22px clamp
 .whatsapp-format-help{font-size:12px;margin:8px 0 14px!important;line-height:1.5}
 .team-whatsapp-text{font-family:ui-sans-serif,system-ui,"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;white-space:pre-wrap;line-height:1.6}
 @media(max-width:540px){.whatsapp-style-switch{max-width:none}.whatsapp-style-switch button{padding:11px 7px}}
+
+/* Username + password login notices */
+.login-error{
+ padding:12px 14px;
+ border:1px solid #a54d60;
+ background:#3d2331;
+ border-radius:10px;
+ color:#ffe4e9;
+ line-height:1.5;
+ font-size:13px;
+}
+.login input[name="username"]{letter-spacing:.03em}

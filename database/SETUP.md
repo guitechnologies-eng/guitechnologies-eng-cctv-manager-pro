@@ -47,3 +47,14 @@
 - On the **dedicated** Supabase project, use a rolled-back transaction to test status, reminder edits, history, customer auto-add/deduplication and progress notes without leaving sample data.
 - Verify anonymous / unknown-user RLS and the production login redirect.
 - A real human must still verify password-based login, form saves, mobile interaction, sign out, and WhatsApp chat selection in a browser.
+
+## Username + password sign-in
+
+- The login form accepts a **username**, not a Gmail/email address. The existing Supabase Auth email identity and password remain unchanged.
+- Set `CCTV_LOGIN_ALIASES_JSON` as an **encrypted, server-only** Vercel project environment variable for the dedicated CCTV app (never use the `NEXT_PUBLIC_` prefix). Example: `{"guiadmin":"admin@your-business.example"}`; replace the sample email with the user's existing, confirmed Supabase Auth account.
+- Usernames are lowercase/case-insensitive (3-32 ASCII letters, digits, periods, underscores and hyphens; first character must be a letter).
+- The server action resolves the username to an account email privately, then uses Supabase `signInWithPassword`. The browser sees only Username + Password and generic errors. No Supabase Auth account, password, or business data is migrated.
+- To enable another staff member, add a distinct username/email mapping in the encrypted variable, confirm they have an active authorized Supabase staff profile, and redeploy.
+- Existing passwords remain valid. The underlying email account remains necessary for administrative account recovery.
+- If the environment variable is missing, sign-in fails closed with a service message rather than exposing any identity mapping.
+- Ensure Vercel secrets are visible only to authorized project administrators, and do not expose usernames/emails through client bundles or debug output.

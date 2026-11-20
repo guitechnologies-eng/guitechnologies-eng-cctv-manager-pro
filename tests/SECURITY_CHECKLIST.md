@@ -37,3 +37,14 @@
 - `npm test` – automated unit tests.
 - `npm run build` – unit tests and full Next.js production build.
 - Always use a dedicated project and wrap data mutation tests in `BEGIN` / `ROLLBACK`.
+
+## Username login verification (20 Nov 2026)
+
+- [x] Existing confirmed, active Admin Supabase Auth account found. Password not changed.
+- [x] Login UI uses `name="username"` and `name="password"`, no browser email field.
+- [x] Server-side mapping stored in encrypted Vercel `CCTV_LOGIN_ALIASES_JSON` (no `NEXT_PUBLIC_` prefix).
+- [x] No user-facing disclosure of the mapped email; unknown username and wrong password show the same generic credentials message.
+- [x] Username resolver rejects invalid, missing, malformed and unlisted aliases.
+- [x] Unit tests on preview deployment pass; Next.js build/typecheck pass.
+- [ ] Authorized staff must still perform an actual username/password login on desktop and mobile; do not share passwords in chat.
+- [ ] Test staff account provisioning before using additional username aliases in production.

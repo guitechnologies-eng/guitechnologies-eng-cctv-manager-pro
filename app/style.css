@@ -394,3 +394,38 @@ main.wrap.dashboard-main{max-width:1500px;width:100%;margin:0;padding:22px clamp
  font-size:13px;
 }
 .login input[name="username"]{letter-spacing:.03em}
+
+/* Restricted staff management */
+.staff-hero{min-height:190px;margin:0 0 22px}
+.staff-hero h1{margin-bottom:8px}
+.staff-create-panel,.staff-list-panel{margin:20px 0;padding:clamp(18px,2.4vw,30px)}
+.staff-section-heading h2,.staff-list-head h2{margin:5px 0 6px;font-size:21px;color:#f1f8ff}
+.staff-section-heading p{max-width:760px;font-size:13px}
+.staff-create-form{max-width:960px}
+.staff-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 20px}
+.staff-form-grid label{margin:11px 0}
+.staff-role-tip{padding:12px 15px;margin:10px 0;border:1px solid #33556c;border-radius:11px;background:#112b41}
+.staff-role-tip strong{font-size:12px;color:#9fe6f3}
+.staff-role-tip p{font-size:12px;line-height:1.55;color:#bacddd;margin:6px 0 0}
+.staff-password-note{font-size:12px;line-height:1.6;margin:15px 0}
+.staff-create-form>button[type=submit]{width:auto;min-width:220px;max-width:100%}
+.staff-result{border-radius:11px;border:1px solid #4f6577;padding:15px 17px;margin-top:15px;font-size:13px}
+.staff-result p{margin:6px 0}
+.staff-result-success{background:#163c33;border-color:#2c8b64;color:#c6f6de}
+.staff-result-error{background:#3f2730;border-color:#a65f73;color:#ffdae4}
+.staff-list-head{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.staff-list-scroll{max-width:100%;overflow-x:auto}
+.staff-list-table{border-collapse:collapse;width:100%;min-width:460px;font-size:13px;text-align:left}
+.staff-list-table th,.staff-list-table td{padding:12px 10px;border-bottom:1px solid #2b4056}
+.staff-list-table th{color:#91b8cd;font-size:11px;letter-spacing:.5px;font-weight:800}
+.staff-list-table td{color:#dceaf3}
+.staff-role-label{text-transform:capitalize}
+.staff-account-state{display:inline-flex;border:1px solid #4e6c7d;border-radius:25px;padding:4px 9px;font-size:11px;font-weight:700}
+.staff-active{color:#aaf3d0;border-color:#307d60;background:#143d32}
+.staff-inactive{color:#ffcca3;border-color:#a17353;background:#4a3029}
+.staff-list-panel>.muted{margin-top:15px;font-size:11px}
+@media(max-width:690px){
+ .staff-form-grid{grid-template-columns:1fr}
+ .staff-create-form>button[type=submit]{width:100%;max-width:none}
+ .staff-hero{min-height:unset}
+}

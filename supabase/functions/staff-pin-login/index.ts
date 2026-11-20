@@ -36,7 +36,7 @@ Deno.serve(async(req:Request)=>{
  // All attempted usernames require a server-only database throttle.
  const {data:permitted,error:limitError}=await adminClient.rpc('cctv_staff_pin_attempt',{p_username:username})
  if(limitError)return reply(503,'Authentication unavailable')
- if(permitted!==true)return reply(401,'Incorrect username or PIN or temporarily locked. Try later.')
+ if(permitted!==true)return reply(401,'Incorrect username or PIN')
 
  const {data:pepper,error:pepperError}=await adminClient.rpc('cctv_staff_pin_pepper')
  if(pepperError||typeof pepper!=='string')return reply(503,'Authentication unavailable')

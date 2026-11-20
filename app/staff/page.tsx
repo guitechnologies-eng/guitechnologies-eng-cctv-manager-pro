@@ -67,7 +67,7 @@ export default async function StaffPage(){
          return <tr key={a.user_id}>
           <td><strong>{a.username}</strong></td>
           <td>{p?.full_name||'Unknown'}</td>
-          <td className="staff-role-label">{p?.role==='admin'?'Admin':p?.role==='office'?'Office Staff':'Other'}</td>
+          <td className="staff-role-label">{p?.role==='admin'?'Admin':p?.role==='office'?'Shop Staff':p?.role==='technician'?'Technician':'Other'}</td>
           <td><span className={'staff-account-state '+(p?.active?'staff-active':'staff-inactive')}>
            {p?.active?'Active':'Inactive'}
           </span></td>

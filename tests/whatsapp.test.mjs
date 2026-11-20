@@ -44,3 +44,10 @@ test('unavailable optional values remain readable and invalid job IDs are exclud
  assert.match(message,/Place: Not Provided/)
  assert.doesNotMatch(message,/Open Job:/)
 })
+
+test('internal team share includes the selected technician without customer WhatsApp automation',()=>{
+ const text=serviceShareText({...sample,assignedTechnician:'Kasun Perera'})
+ assert.match(text,/\*Assigned Technician:\* Kasun Perera/)
+ assert.match(text,/\*INTERNAL STAFF ONLY - NOT FOR CUSTOMERS\*/)
+ assert.equal(new URL(whatsappShareLink(text)).pathname,'/')
+})

@@ -48,3 +48,17 @@
 - [x] Unit tests on preview deployment pass; Next.js build/typecheck pass.
 - [ ] Authorized staff must still perform an actual username/password login on desktop and mobile; do not share passwords in chat.
 - [ ] Test staff account provisioning before using additional username aliases in production.
+
+## Admin-managed staff account creation (20 Nov 2026)
+
+- [x] Admin username `guiadmin` registered in RLS-protected directory without changing original Supabase Auth identity.
+- [x] Only verified active Admin may access `/staff`; logged-out clients are redirected to `/login`.
+- [x] `public.staff_accounts`: RLS enabled; authenticated users cannot INSERT or UPDATE directly; anonymous clients cannot SELECT.
+- [x] Privileged user creation runs inside Supabase Edge Function, not browser or Vercel; service role key comes from Supabase's Edge environment.
+- [x] Edge Function verifies bearer JWT with Supabase Auth and active Admin profile before privileged operations.
+- [x] Staff creation action validates username, 12+ char password and roles; Office/Admin roles only.
+- [x] Login fallback computes username-derived internal Supabase Auth identity; existing `guiadmin` alias still uses its original email/password.
+- [x] Preview Next.js build and TypeScript checks pass; automated username resolver tests pass.
+- [x] Existing customers/jobs remain untouched; no Assign Technician or Customer WhatsApp options introduced.
+- [ ] An authenticated Admin must actually create a test staff account in the live UI and verify the new user can sign in. Real Admin credentials were not available to automated tools.
+- [ ] Verify user password recovery/rotation through a future secure admin workflow; synthetic internal email identities cannot receive password-reset emails.

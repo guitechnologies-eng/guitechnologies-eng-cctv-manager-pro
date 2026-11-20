@@ -133,7 +133,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
         <option value="">Unassigned (remove Technician)</option>
         {technicians.map(t=><option key={t.id} value={t.id}>{t.full_name}</option>)}
         {assignedId&&!technicians.some(t=>t.id===assignedId)&&
-         <option value={assignedId} disabled>Previously assigned (inactive)</option>}
+         <option value={assignedId}>Previously assigned (inactive; choose another)</option>}
        </select>
       </label>
       <p className="muted">Assign or reassign an active Technician. Changes appear in Service History.</p>

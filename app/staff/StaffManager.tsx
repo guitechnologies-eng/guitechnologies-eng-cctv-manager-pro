@@ -31,13 +31,14 @@ export default function StaffManager(){
     </label>
     <label>Access Role
      <select name="role" defaultValue="office" required>
-      <option value="office">Office Staff - Manage service jobs</option>
+      <option value="office">Shop Staff - Manage customers and jobs</option>
+      <option value="technician">Technician - View jobs and add service notes</option>
       <option value="admin">Admin - Manage jobs and staff users</option>
      </select>
     </label>
     <div className="staff-role-tip">
      <strong>Access permissions</strong>
-     <p>Office Staff can manage service requests. Admin can also create staff accounts. No technician assignment feature is enabled.</p>
+     <p>Shop Staff can create and edit customers/jobs. Technicians can view all service jobs and add progress notes, without editing customer details. Admin can also create users. No technician assignment feature is enabled.</p>
     </div>
     <label>Login PIN (4–8 digits)
      <input name="pin" type="password" inputMode="numeric" pattern="[0-9]{4,8}"

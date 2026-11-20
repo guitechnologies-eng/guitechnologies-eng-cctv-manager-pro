@@ -86,3 +86,16 @@
 - Existing Admin Auth account/password and all customer/job data remain untouched. Existing old-style password staff accounts, if any, are not automatically migrated.
 - Even with lockouts, short PINs are less safe than long passwords. Prefer 6-8 digits, keep them private, and use MFA for sensitive Admin access.
 - PIN reset and staff account disabling are separate features not included in this update.
+
+## Shop Staff and Technician roles (20 Nov 2026)
+
+- The actual team consists of **Shop Staff** and **Technicians**, with an additional **Admin** role for managing staff.
+- Role `office` is displayed as **Shop Staff** to retain database compatibility and all existing permissions.
+- Shop Staff may create/edit customers, new jobs, job status, follow-up schedule and progress notes.
+- Technicians may **view all service jobs and customer contact details**, read service history and add progress notes.
+- Technicians cannot create/edit customers or jobs, change workflow status, schedule visits, or add staff accounts. Staff PIN login permits technician role.
+- No Assign Technician UI or job assignment is required; technicians see the shared job queue.
+- The Admin-only Staff Management form accepts Shop Staff, Technician and Admin roles. Admins should only grant Admin to fully trusted staff.
+- Apply database/migrations/20261120_shop_staff_technician_roles.sql on the dedicated CCTV database only.
+- The migration changes only SELECT/INSERT RLS policies, not existing customer/job/profile rows. Auth and Edge functions independently enforce Admin-only creation.
+- Test in transaction by temporarily changing a known Admin role to technician, confirming reads/notes allowed and edits denied, then ROLLBACK.

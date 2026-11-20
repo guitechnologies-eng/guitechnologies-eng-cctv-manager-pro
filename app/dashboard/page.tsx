@@ -191,7 +191,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    <header className="dashboard-topbar">
     <p className="topbar-breadcrumb"><span className="online-indicator" aria-hidden="true"/> Workspace <span className="breadcrumb-separator">/</span> Dashboard</p>
     <div className="topbar-user"><div className="user-avatar" aria-hidden="true">{p.full_name?.charAt(0)?.toUpperCase()||'G'}</div>
-     <div><strong>{p.full_name}</strong><span>{p.role}</span></div>
+     <div><strong>{p.full_name}</strong><span>{p.role==='office'?'Shop Staff':p.role==='technician'?'Technician':p.role}</span></div>
      <form action={signOut}><button type="submit" className="signout-button">Sign out</button></form>
     </div>
    </header>

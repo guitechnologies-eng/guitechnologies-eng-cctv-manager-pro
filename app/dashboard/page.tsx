@@ -99,7 +99,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    createdAt:j.created_at,
    previousNote:j.source_status_note,
    latestNote:lastUpdate?.note,
-   latestNoteAt:lastUpdate?.created_at
+   latestNoteAt:lastUpdate?.created_at,
+   assignedTechnician:assignedName||'Unassigned'
   }
   const message=serviceShareText(shareData)
   return <div key={j.id} id={"job-"+j.id} className={"job job-card job-status-"+j.status}>

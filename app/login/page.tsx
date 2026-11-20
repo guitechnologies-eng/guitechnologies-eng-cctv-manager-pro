@@ -1,4 +1,5 @@
 import {signIn} from '../actions/auth'
+import InstallApp from '../components/InstallApp'
 
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
  const p=await searchParams
@@ -27,6 +28,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
     </label>
     <button type="submit">Sign in</button>
    </form>
+   <InstallApp/>
    <p className="muted">Admin uses the existing password. Newly created staff use their 4–8 digit PIN. No Gmail address is required.</p>
   </section>
  </main>

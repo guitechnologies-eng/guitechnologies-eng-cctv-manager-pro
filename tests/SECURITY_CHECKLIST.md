@@ -84,3 +84,14 @@
 - [x] Transaction verifies technician cannot update jobs or insert customers; test data/role changes rolled back.
 - [x] Existing Admin, Shop Staff edit privileges unchanged.
 - [ ] Manual Admin create-user flow and Technician login must be validated by authorized users with private credentials.
+
+## Editing previously created staff
+
+- [x] Staff profile changes allowed only to authenticated, active Admins at both Next.js Server Action and Supabase Edge function.
+- [x] SQL RPC executable only by service_role; anon/authenticated have no direct EXECUTE access.
+- [x] SQL transaction checks and locks prevent the last active Admin from being deactivated or demoted.
+- [x] Admins cannot deactivate or demote themselves through Staff Management.
+- [x] Name, role and status edit tests completed in rolled-back SQL transaction; existing records preserved.
+- [x] PIN reset is restricted to Auth accounts using the synthetic PIN-based identity and never changes the original guiadmin password.
+- [x] New PIN is pepper-derived in Supabase Edge and updated using Auth Admin API; staff usernames remain immutable.
+- [ ] Authorized Admin must test Edit User and PIN reset in a real signed-in browser; no PIN or password should be supplied in chat.

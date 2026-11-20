@@ -1,3 +1,28 @@
+import type {Metadata,Viewport} from 'next'
 import './style.css'
-export const metadata={title:'CCTV Manager Pro | GUI Technologies',description:'Internal CCTV service management'}
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><body>{children}</body></html>}
+
+export const metadata:Metadata={
+ title:'CCTV Manager Pro | GUI Technologies',
+ description:'Internal CCTV service management for GUI Technologies',
+ applicationName:'CCTV Manager Pro',
+ manifest:'/manifest.webmanifest',
+ icons:{
+  icon:[
+   {url:'/icons/192.png',sizes:'192x192',type:'image/png'},
+   {url:'/icons/512.png',sizes:'512x512',type:'image/png'}
+  ],
+  apple:[{url:'/icons/180.png',sizes:'180x180',type:'image/png'}]
+ },
+ appleWebApp:{capable:true,title:'CCTV Manager Pro',statusBarStyle:'black-translucent'},
+ formatDetection:{telephone:false}
+}
+export const viewport:Viewport={
+ width:'device-width',
+ initialScale:1,
+ viewportFit:'cover',
+ themeColor:'#071625'
+}
+
+export default function RootLayout({children}:{children:React.ReactNode}){
+ return <html lang="en"><body>{children}</body></html>
+}

@@ -136,3 +136,13 @@
 - Apply `database/migrations/20261120_assign_technician.sql` **only to dedicated CCTV project**. It adds a unique job assignment index, the audited RPC, and expands the allowed job history event type without changing customer/job rows.
 - Tests cover assign, repeat assign (no double audit), reject non-technician, unassign, technician visibility and denial of mutation, and My Assigned Jobs filter/pagination. SQL tests are wrapped in ROLLBACK.
 - Authorized Admin/Shop Staff should still verify assignment changes in a real browser using existing accounts; no credentials are requested or stored by tests.
+
+## Install on Android / iPhone (PWA)
+
+- This is an **installable website / Progressive Web App**, not a Google Play Store APK. App data stays on the existing online CCTV Manager Pro server.
+- Android: open https://cctv-manager-pro.vercel.app/login in Chrome; choose **Install app** when offered or open Chrome menu (three dots) > **Install app** / **Add to Home screen**. Tap the installed CCTV Manager Pro home-screen icon to use the normal Username + PIN login.
+- iPhone: open the URL in Safari, tap Share > **Add to Home Screen**. iOS launch uses standalone view and mobile icon.
+- `/manifest.webmanifest` declares standalone display, 192x192 and 512x512 PNG icons, scope and a `/dashboard` entry point; after launch unauthenticated users are redirected to login.
+- App icons are neutral CCTV Manager graphics, **not an AI-generated or modified GUI Technologies official company logo**. Replace the icon with the exact original asset only if made available and approved.
+- Online connection is required. No service worker caches customer details, service history, passwords/PINs, sessions or dashboards for offline use. Existing Supabase RLS and session checks remain in place.
+- Test installation in current Android Chrome/Samsung Internet and iOS Safari; actual device installation and user credential login still need a person on their device.

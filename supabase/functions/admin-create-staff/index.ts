@@ -20,7 +20,7 @@ function parseStaffInput(input:unknown){
  const role=typeof data.role==='string'?data.role:''
  const pin=normalizeStaffPin(data.pin)
  if(!USERNAME.test(username)||name.length<2||name.length>120||
-    !['office','admin'].includes(role)||!pin)return null
+    !['office','technician','admin'].includes(role)||!pin)return null
  return {username,full_name:name,role,pin:pin!}
 }
 

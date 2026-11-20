@@ -22,3 +22,14 @@ export function resolveLoginEmail(input:unknown,config:string|undefined):string|
  const email=value.trim().toLowerCase()
  return email.length<=254&&emailPattern.test(email)?email:null
 }
+
+/**
+ * Supabase Auth uses an internal email identity for admin-created staff.
+ * The email is never requested from staff or exposed by the login form.
+ * This namespace must match the admin-create-staff Edge Function.
+ */
+export function staffUsernameEmail(input:unknown):string|null{
+ const username=normalizeLoginUsername(input)
+ if(!username)return null
+ return username+'@staff.cctv-manager-pro.invalid'
+}

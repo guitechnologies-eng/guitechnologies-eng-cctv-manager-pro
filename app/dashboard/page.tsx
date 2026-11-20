@@ -2,6 +2,7 @@ import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder} from '../actions/jobs'
 import NewJobForm from './NewJobForm'
+import PendingSubmit from './PendingSubmit'
 import TeamWhatsAppShare from './TeamWhatsAppShare'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
@@ -121,7 +122,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
         <textarea name="reminder_note" maxLength={500} defaultValue={j.reminder_note||''} placeholder="Follow up on repair / call before site visit"/>
        </label>
        <p className="muted">Dashboard alerts only. No customer WhatsApp, automatic messages or technician assignment.</p>
-       <button type="submit">Save Internal Reminder</button>
+       <PendingSubmit label="Save Internal Reminder" pendingLabel="Saving Reminder..."/>
       </form>
      </details>
      <form action={updateJobStatus} className="status-form">
@@ -134,7 +135,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
         <option value="completed">Completed</option>
         <option value="cancelled">Cancelled</option>
        </select>
-      </label><button type="submit">Save Status</button>
+      </label><PendingSubmit label="Save Status" pendingLabel="Saving Status..."/>
      </form>
      <details className="edit-customer edit-job">
       <summary>Edit job details</summary>
@@ -154,7 +155,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
        <label>Service place (optional override)<input name="site_address" maxLength={500} defaultValue={j.site_address||''} placeholder={customer?.address||'Enter service location'}/></label>
        <p className="muted">Leave the place blank to use the customer's address. This won't alter other jobs.</p>
        <label>Description<textarea name="description" maxLength={2000} defaultValue={j.description||''}/></label>
-       <button type="submit">Save Job Details</button>
+       <PendingSubmit label="Save Job Details" pendingLabel="Saving Details..."/>
       </form>
      </details>
      {customer&&<details className="edit-customer">
@@ -164,13 +165,13 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
        <label>Customer name<input name="name" required maxLength={120} defaultValue={customer.name}/></label>
        <label>Phone<input name="phone" maxLength={40} defaultValue={customer.phone||''}/></label>
        <label>Place / Address<input name="address" maxLength={500} defaultValue={customer.address||''}/></label>
-       <button type="submit">Save Customer</button>
+       <PendingSubmit label="Save Customer" pendingLabel="Saving Customer..."/>
       </form>
      </details>}
      </div>
     </details>}
    </div>
-   <form className="job-progress-form" action={addUpdate}><input type="hidden" name="job_id" value={j.id}/><label>Progress note<input name="note" placeholder="Service visit / work completed" required maxLength={1500}/></label><button>Add note</button></form>
+   <form className="job-progress-form" action={addUpdate}><input type="hidden" name="job_id" value={j.id}/><label>Progress note<input name="note" placeholder="Service visit / work completed" required maxLength={1500}/></label><PendingSubmit label="Add Note" pendingLabel="Saving Note..."/></form>
   </div>
  }
  const otherJobs=visibleJobs.filter(j=>!sections.some(s=>s.key===j.request_section))

@@ -4,6 +4,8 @@ import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternal
 import NewJobForm from './NewJobForm'
 import TeamWhatsAppShare from './TeamWhatsAppShare'
 import {redirect} from 'next/navigation'
+import Link from 'next/link'
+import {paginateJobs,dashboardPageHref,reminderJobHref} from '../../lib/dashboard-pagination'
 import {serviceShareText} from '../../lib/whatsapp'
 import {getReminderGroups,colomboInputValue,colomboDateLabel} from '../../lib/reminders'
 
@@ -14,7 +16,7 @@ const sections=[
  {key:'REPAIR & WARRANTY SERVICE',label:'2. REPAIR & WARRANTY SERVICE'}
 ] as const
 
-export default async function Dashboard({searchParams}:{searchParams:Promise<{q?:string;status?:string;section?:string}>}){
+export default async function Dashboard({searchParams}:{searchParams:Promise<{q?:string;status?:string;section?:string;page?:string}>}){
  const params=await searchParams
  const query=typeof params.q==='string'?params.q.trim().slice(0,120).toLowerCase():''
  const statusFilter=typeof params.status==='string'&&['pending','assigned','in_progress','completed','cancelled'].includes(params.status)?params.status:''
@@ -33,15 +35,6 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  const customers=customersRes.data||[]
  const reminderGroups=getReminderGroups(jobs)
  const reminderItems=[...reminderGroups.overdue,...reminderGroups.today,...reminderGroups.upcoming,...reminderGroups.unscheduled]
- // Read recent progress notes for team messages. No changes to any saved data.
- const recentUpdates=jobs.length
-  ?await s.from('job_updates').select('job_id,note,created_at')
-    .in('job_id',jobs.map(j=>j.id)).order('created_at',{ascending:false}).limit(1000)
-  :null
- const latestNotes=new Map<string,{note:string;created_at:string}>()
- for(const u of recentUpdates?.data||[]){
-  if(!latestNotes.has(u.job_id))latestNotes.set(u.job_id,{note:u.note,created_at:u.created_at})
- }
  const ordered=[...jobs].sort((a,b)=>{
   const aImported=a.job_number.startsWith('CCTV-IMPORT-20261118-')
   const bImported=b.job_number.startsWith('CCTV-IMPORT-20261118-')
@@ -57,6 +50,19 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   const matchesSection=!sectionFilter||(sectionFilter==='OTHER'?!sections.some(s=>s.key===j.request_section):j.request_section===sectionFilter)
   return matchesSearch&&matchesStatus&&matchesSection
  })
+ const visiblePage=paginateJobs(filtered,params.page)
+ const visibleJobs=visiblePage.items
+ // Query only the most recent progress note for each card actually shown.
+ // RLS-respecting view prevents transferring full service histories on dashboard load.
+ const latestNoteRes=visibleJobs.length
+  ?await s.from('latest_job_updates').select('job_id,note,created_at')
+    .in('job_id',visibleJobs.map(j=>j.id))
+  :null
+ const latestNotes=new Map<string,{note:string;created_at:string}>()
+ for(const u of latestNoteRes?.data||[]){
+  latestNotes.set(u.job_id,{note:u.note,created_at:u.created_at})
+ }
+ const pageFilters={q:query,status:statusFilter,section:sectionFilter}
  const jobCard=(j:typeof jobs[number])=>{
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
   const lastUpdate=latestNotes.get(j.id)
@@ -90,7 +96,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     {j.source_status_note&&<p className="source-status">📝 {j.source_status_note}</p>}
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
     <div className="job-shortcuts">
-     <a className="action-link" href={'/jobs/'+j.id}>View full service history</a>
+     <Link prefetch={false} className="action-link" href={'/jobs/'+j.id}>View full service history</Link>
     </div>
     <TeamWhatsAppShare initialMessage={message}/>
     {j.reminder_note&&<p className="job-reminder-note"><strong>📌 Internal Note:</strong> {j.reminder_note}</p>}
@@ -167,7 +173,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    <form className="job-progress-form" action={addUpdate}><input type="hidden" name="job_id" value={j.id}/><label>Progress note<input name="note" placeholder="Service visit / work completed" required maxLength={1500}/></label><button>Add note</button></form>
   </div>
  }
- const otherJobs=filtered.filter(j=>!sections.some(s=>s.key===j.request_section))
+ const otherJobs=visibleJobs.filter(j=>!sections.some(s=>s.key===j.request_section))
  return <div className="app-frame">
   <aside className="app-sidebar" aria-label="Workspace navigation">
    <div className="sidebar-brand">
@@ -180,7 +186,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     {staff&&<a className="sidebar-link" href="#reminder-list"><span aria-hidden="true">◉</span> Team Reminders {reminderItems.length>0&&<small>{reminderItems.length}</small>}</a>}
     {staff&&<a className="sidebar-link" href="#new-job"><span aria-hidden="true">＋</span> Create Job</a>}
     <a className="sidebar-link" href="#service-requests"><span aria-hidden="true">▤</span> Service Requests</a>
-    {p.role==='admin'&&<a className="sidebar-link" href="/staff"><span aria-hidden="true">▦</span> Staff Management</a>}
+    {p.role==='admin'&&<Link className="sidebar-link" href="/staff"><span aria-hidden="true">▦</span> Staff Management</Link>}
    </nav>
    <div className="sidebar-footer">
     <span className="workspace-status"><span className="online-indicator" aria-hidden="true"/> Internal workspace</span>
@@ -240,7 +246,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
        <p>{item.job.title} · {item.kind==='visit'?'Site visit':item.kind==='follow_up'?'Follow-up':'No date set'}</p>
        {item.dueAt&&<small>{colomboDateLabel(item.dueAt)}</small>}
        {item.job.reminder_note&&<p className="muted">{item.job.reminder_note}</p>}
-      </div><a className="action-link" href={'#job-'+item.job.id}>Open Job</a>
+      </div><a className="action-link" href={reminderJobHref(item.job.job_number)}>Open Job</a>
      </div>
     }):<p className="muted">No jobs in this category.</p>}
    </div>)}
@@ -255,14 +261,23 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <label>Section<select name="section" defaultValue={sectionFilter}><option value="">All sections</option>{sections.map(s=><option key={s.key} value={s.key}>{s.key}</option>)}<option value="OTHER">Other</option></select></label>
     <div className="filter-buttons"><button type="submit">Search / Filter</button><a href="/dashboard">Clear</a></div>
    </form>
-   <p className="muted filter-results">Showing <strong>{filtered.length}</strong> of {jobs.length} service requests</p>
+   <p className="muted filter-results">Showing <strong>{visiblePage.from}–{visiblePage.to}</strong> of {filtered.length} matching service requests (from {jobs.length} loaded jobs)</p>
    {jobsRes.error?<p>Unable to load service requests.</p>:!filtered.length?<p>No matching service requests.</p>:<div>
     {sections.map(sec=>{
-     const group=filtered.filter(j=>j.request_section===sec.key)
+     const group=visibleJobs.filter(j=>j.request_section===sec.key)
      return <div className="job-section" key={sec.key}><h3>{sec.label} <span className="section-count">{group.length}</span></h3>{group.length?group.map(jobCard):<p className="muted">No requests in this section.</p>}</div>
     })}
     {otherJobs.length>0&&<div className="job-section"><h3>Other requests <span className="section-count">{otherJobs.length}</span></h3>{otherJobs.map(jobCard)}</div>}
    </div>}
+   {visiblePage.totalPages>1&&<nav className="dashboard-pagination" aria-label="Service jobs pages">
+    {visiblePage.page>1
+     ?<Link prefetch={false} className="action-link" href={dashboardPageHref(visiblePage.page-1,pageFilters)}>Previous</Link>
+     :<span className="page-link-disabled">Previous</span>}
+    <span>Page {visiblePage.page} of {visiblePage.totalPages}</span>
+    {visiblePage.page<visiblePage.totalPages
+     ?<Link prefetch={false} className="action-link" href={dashboardPageHref(visiblePage.page+1,pageFilters)}>Next</Link>
+     :<span className="page-link-disabled">Next</span>}
+   </nav>}
   </section>
   <footer className="dashboard-footer"><span>© GUI Technologies · CCTV Manager Pro</span><span>Internal service management · Sri Lanka</span></footer>
   </main>

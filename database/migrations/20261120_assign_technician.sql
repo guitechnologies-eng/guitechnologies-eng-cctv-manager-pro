@@ -14,6 +14,12 @@ ALTER TABLE public.job_history ADD CONSTRAINT job_history_event_type_check
 REVOKE INSERT,DELETE,UPDATE ON public.job_assignments FROM authenticated,anon;
 GRANT SELECT ON public.job_assignments TO authenticated;
 
+-- Inactive technicians must not read old assignments through Data API.
+DROP POLICY IF EXISTS assignments_read ON public.job_assignments;
+CREATE POLICY assignments_read ON public.job_assignments FOR SELECT TO authenticated
+ USING ((select private.current_role()) IN ('admin','office')
+  OR ((select private.current_role())='technician' AND technician_id=(select auth.uid())));
+
 CREATE OR REPLACE FUNCTION public.assign_job_technician(p_job_id uuid,p_technician_id uuid)
 RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=''

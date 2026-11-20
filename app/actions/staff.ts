@@ -22,16 +22,14 @@ export async function createStaffAccount(
  const username=normalizeLoginUsername(form.get('username'))
  const full_name=String(form.get('full_name')||'').trim()
  const role=String(form.get('role')||'')
- const password=String(form.get('password')||'')
- const confirm=String(form.get('confirm_password')||'')
+ const pin=String(form.get('pin')||'')
+ const confirm=String(form.get('confirm_pin')||'')
 
  if(!username)return fail('Username must be 3-32 characters, starting with a letter. Use letters, numbers, dots, hyphens or underscores.')
  if(full_name.length<2||full_name.length>120)return fail('Enter a staff name between 2 and 120 characters.')
  if(role!=='office'&&role!=='admin')return fail('Choose Office Staff or Admin role.')
- if(password.length<12||password.length>128||!/[a-z]/.test(password)||!/[A-Z]/.test(password)||!/[0-9]/.test(password)){
-  return fail('Password must be 12-128 characters and contain uppercase, lowercase and a number.')
- }
- if(password!==confirm)return fail('Passwords do not match.')
+ if(!/^[0-9]{4,8}$/.test(pin))return fail('PIN must contain 4 to 8 digits only.')
+ if(pin!==confirm)return fail('PINs do not match.')
 
  const {data:{session}}=await supabase.auth.getSession()
  if(!session||session.user.id!==user.id)return fail('Your session has expired. Sign in again.')
@@ -39,7 +37,7 @@ export async function createStaffAccount(
  try{
   const {data,error}=await supabase.functions.invoke('admin-create-staff',{
    method:'POST',
-   body:{username,full_name,role,password},
+   body:{username,full_name,role,pin},
    headers:{Authorization:'Bearer '+session.access_token}
   })
   if(error){
@@ -53,13 +51,13 @@ export async function createStaffAccount(
     ?String((details as {message:unknown}).message):''
    const allowed=['This username is already in use',
     'Only an active administrator can add staff accounts',
-    'Enter a valid username, name, role, and strong password (12+ characters, upper/lower case and a number).',
+    'Enter a valid username, name, role and numeric PIN (4-8 digits).',
     'Staff account could not be saved. Please contact the administrator.']
    return fail(allowed.includes(serverMessage)?serverMessage:'Could not create staff account. Please try again.')
   }
   if(!data||data.username!==username)return fail('Could not confirm staff creation. Please refresh Staff Management.')
   revalidatePath('/staff')
-  return {success:true,message:'Staff account created. Share the username and temporary password privately.',username}
+  return {success:true,message:'Staff account created. Share the username and PIN privately.',username}
  }catch{
   return fail('Staff creation service unavailable. Please try again.')
  }

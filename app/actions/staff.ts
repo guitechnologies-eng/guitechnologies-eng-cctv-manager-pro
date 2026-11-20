@@ -27,7 +27,7 @@ export async function createStaffAccount(
 
  if(!username)return fail('Username must be 3-32 characters, starting with a letter. Use letters, numbers, dots, hyphens or underscores.')
  if(full_name.length<2||full_name.length>120)return fail('Enter a staff name between 2 and 120 characters.')
- if(role!=='office'&&role!=='admin')return fail('Choose Office Staff or Admin role.')
+ if(!['office','technician','admin'].includes(role))return fail('Choose Shop Staff, Technician or Admin role.')
  if(!/^[0-9]{4,8}$/.test(pin))return fail('PIN must contain 4 to 8 digits only.')
  if(pin!==confirm)return fail('PINs do not match.')
 

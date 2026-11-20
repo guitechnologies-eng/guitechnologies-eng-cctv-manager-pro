@@ -52,7 +52,7 @@ Deno.serve(async(req:Request)=>{
  if(error||!data.session||!data.user)return reply(401,'Incorrect username or PIN')
  const {data:profile,error:profileError}=await adminClient.from('profiles')
   .select('role,active').eq('id',data.user.id).maybeSingle()
- if(profileError||!profile?.active||!['admin','office'].includes(profile.role)){
+ if(profileError||!profile?.active||!['admin','office','technician'].includes(profile.role)){
   return reply(401,'Incorrect username or PIN')
  }
  const {data:alias,error:aliasError}=await adminClient.from('staff_accounts')

@@ -74,3 +74,13 @@
 - [x] New staff PIN login uses dedicated Edge authentication and sets session cookies through the Next.js Server Action.
 - [ ] Authorized Admin must create a real PIN-based staff account and test sign-in; no Admin password has been supplied to the assistant.
 - [ ] Admin-managed PIN change/reset UI is a separate next step; synthetic email aliases cannot receive recovery email.
+
+## Shop Staff & Technician Roles
+
+- [x] Admin can create Shop Staff (`office`) and Technician (`technician`) users with PIN; Edge role checks support both.
+- [x] Technician PIN login accepts the `technician` role while still checking active profile and matching staff account.
+- [x] Technician sees the shared service queue; no per-technician assignment required.
+- [x] Read-only transaction verifies technician access to jobs, customers and service history, plus progress note insertion.
+- [x] Transaction verifies technician cannot update jobs or insert customers; test data/role changes rolled back.
+- [x] Existing Admin, Shop Staff edit privileges unchanged.
+- [ ] Manual Admin create-user flow and Technician login must be validated by authorized users with private credentials.

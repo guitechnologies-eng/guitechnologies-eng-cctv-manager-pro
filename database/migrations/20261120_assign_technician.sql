@@ -5,6 +5,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS job_assignments_one_technician_per_job
 CREATE INDEX IF NOT EXISTS job_assignments_technician_job_idx
  ON public.job_assignments(technician_id,job_id);
 
+-- Extend the allowed audit event types without changing existing history records.
+ALTER TABLE public.job_history DROP CONSTRAINT IF EXISTS job_history_event_type_check;
+ALTER TABLE public.job_history ADD CONSTRAINT job_history_event_type_check
+ CHECK(event_type IN ('status_changed','job_edited','customer_edited','technician_assignment'));
+
 -- Disallow client-side direct mutation that would skip service-history audit.
 REVOKE INSERT,DELETE,UPDATE ON public.job_assignments FROM authenticated,anon;
 GRANT SELECT ON public.job_assignments TO authenticated;

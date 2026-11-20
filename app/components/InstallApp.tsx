@@ -39,6 +39,9 @@ export default function InstallApp({compact=false}:{compact?:boolean}){
    await prompt.prompt()
    const choice=await prompt.userChoice
    if(choice.outcome==='accepted')setPrompt(null)
+  }catch{
+   // Browsers without a working install prompt can still use the menu steps.
+   setPrompt(null)
   }finally{setInstalling(false)}
  }
 

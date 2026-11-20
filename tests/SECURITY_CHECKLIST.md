@@ -95,3 +95,15 @@
 - [x] PIN reset is restricted to Auth accounts using the synthetic PIN-based identity and never changes the original guiadmin password.
 - [x] New PIN is pepper-derived in Supabase Edge and updated using Auth Admin API; staff usernames remain immutable.
 - [ ] Authorized Admin must test Edit User and PIN reset in a real signed-in browser; no PIN or password should be supplied in chat.
+
+## Dashboard performance / RLS checks (20 November 2026)
+
+- [x] New `latest_job_updates` is `security_invoker=true`, index backed, and caller RLS enforced.
+- [x] Unknown authenticated identity cannot read any progress notes from the view (SQL read-only transaction).
+- [x] Latest-note correctness checked under authorized Admin role (SQL read-only transaction).
+- [x] Dashboard paginates **12 job cards per page**, while summary/reminders still use the loaded jobs.
+- [x] URL filters and reminder search targets preserved by pagination tests.
+- [x] Save buttons use a pending state to discourage duplicate clicks.
+- [x] Next.js 15 middleware follows Supabase SSR `getClaims` guidance for session validation; page-level user/profile checks remain in place.
+- [ ] An authorized staff account should verify real PC/mobile speed, search, next/previous, share-to-team previews, reminder links and forms.
+- [ ] Monitor authenticated dashboard latency and Vercel Web Vitals after enough genuine traffic; no speed improvement percentage is claimed without a baseline.

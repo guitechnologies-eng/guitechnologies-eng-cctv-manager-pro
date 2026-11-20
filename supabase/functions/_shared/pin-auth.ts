@@ -19,5 +19,5 @@ export async function derivePinAuthPassword(username:string,pin:string,pepperHex
  const key=await crypto.subtle.importKey('raw',keyBytes,{name:'HMAC',hash:'SHA-256'},false,['sign'])
  const data=new TextEncoder().encode('CCTV-MANAGER-PIN-V1|'+username.toLowerCase()+'|'+pin)
  const hash=await crypto.subtle.sign('HMAC',key,data)
- return Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('')
+ return 'Cctv1!' + Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('')
 }

@@ -2,6 +2,7 @@
 // The Supabase service role is available only in the Edge function environment.
 import {createClient} from 'npm:@supabase/supabase-js@2.57.0'
 import {derivePinAuthPassword,normalizeStaffPin} from '../_shared/pin-auth.ts'
+import {validateStaffProfileUpdate} from '../_shared/staff-edit-rules.ts'
 
 const uuidRe=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const headers={'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
@@ -38,14 +39,11 @@ Deno.serve(async(req:Request)=>{
  const operation=raw.operation
 
  if(operation==='update_profile'){
-  const name=typeof raw.full_name==='string'?raw.full_name.trim():''
-  const role=raw.role
-  const active=raw.active
-  if(name.length<2||name.length>120||!['admin','office','technician'].includes(String(role))||typeof active!=='boolean'){
-   return resp(400,'Invalid staff name, role or status')
-  }
+  const change=validateStaffProfileUpdate(raw.full_name,raw.role,raw.active)
+  if(!change)return resp(400,'Invalid staff name, role or status')
   const {error}=await admin.rpc('cctv_admin_edit_staff',{
-   p_actor:user.id,p_target:targetId,p_full_name:name,p_role:role,p_active:active
+   p_actor:user.id,p_target:targetId,p_full_name:change.full_name,
+   p_role:change.role,p_active:change.active
   })
   if(error){
    if(error.message.includes('own admin access')||error.message.includes('last active administrator')){

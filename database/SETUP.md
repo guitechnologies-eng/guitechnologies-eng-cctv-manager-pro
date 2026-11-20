@@ -111,3 +111,15 @@
 - Apply `database/migrations/20261120_admin_edit_staff.sql` only on the dedicated CCTV Manager Pro project. Deploy `admin-manage-staff` with `_shared/pin-auth.ts` and `_shared/staff-edit-rules.ts`.
 - Existing customer/job records, current usernames, technician assignment UI (removed), and customer WhatsApp messaging remain untouched.
 - Automated tests verify input validation and production builds; secure SQL tests verify role restrictions with `ROLLBACK`. Actual PIN reset must be verified privately by an authorized Admin.
+
+## Dashboard speed and smoothness improvements (20 Nov 2026)
+
+- Display only **12 service Job Cards per dashboard page**, with Next/Previous controls; Search/Status/Section filters carry across pages. This prevents hundreds of editor forms/WhatsApp previews being rendered in a single response.
+- Reminders link to the associated job using its unique Job Reference in a search, so it remains findable after pagination.
+- Latest progress notes use the dedicated `public.latest_job_updates` security-invoker view and only read notes for jobs on the current page. The former 1000-row history query is removed. The view respects per-role RLS.
+- Protected routes use `getClaims()` during session refresh in Next.js 15 middleware, following Supabase SSR guidance; pages still verify current user/profile and role.
+- In-progress Save buttons disable repeated submits and give immediate feedback; a lightweight Dashboard loading skeleton makes navigation more responsive.
+- Existing features, job data, Customer Auto-Add, reminders, staff roles, service history and team-only WhatsApp remain unchanged. **Assign Technician** and **Customer WhatsApp** are not added.
+- This is a performance-focused layout/query optimization, not a data migration or rewrite. The existing dashboard fetch cap of 200 jobs remains until a future full server-side search/pagination enhancement.
+- To reapply, deploy `database/migrations/20261120_latest_updates_perf.sql` to the **dedicated CCTV project only**; verify the view has `security_invoker=true` and unauthorized staff see no notes.
+- Unit tests cover paging, filter links, 17-job two-page navigation, invalid page values and reminder link encoding. Verify actual PC/mobile authenticated responsiveness manually.

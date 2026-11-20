@@ -180,6 +180,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     {staff&&<a className="sidebar-link" href="#reminder-list"><span aria-hidden="true">◉</span> Team Reminders {reminderItems.length>0&&<small>{reminderItems.length}</small>}</a>}
     {staff&&<a className="sidebar-link" href="#new-job"><span aria-hidden="true">＋</span> Create Job</a>}
     <a className="sidebar-link" href="#service-requests"><span aria-hidden="true">▤</span> Service Requests</a>
+    {p.role==='admin'&&<a className="sidebar-link" href="/staff"><span aria-hidden="true">▦</span> Staff Management</a>}
    </nav>
    <div className="sidebar-footer">
     <span className="workspace-status"><span className="online-indicator" aria-hidden="true"/> Internal workspace</span>

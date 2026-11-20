@@ -35,3 +35,18 @@ test('mapped email normalization does not change username uniqueness rules',()=>
  assert.equal(resolveLoginEmail('GUIADMIN','{"guiadmin":"  STAFF@EXAMPLE.COM  "}'),'staff@example.com')
  assert.equal(resolveLoginEmail('guiadmin','{"GuiAdmin":"staff@example.com"}'),null)
 })
+
+test('new staff usernames map to deterministic internal auth identities',async()=>{
+ const {staffUsernameEmail}=await import('../lib/username-login.ts')
+ assert.equal(staffUsernameEmail('Kasun'),'kasun@staff.cctv-manager-pro.invalid')
+ assert.equal(staffUsernameEmail(' staff.user_1 '),'staff.user_1@staff.cctv-manager-pro.invalid')
+ assert.equal(staffUsernameEmail('kasun@example.com'),null)
+ assert.equal(staffUsernameEmail(''),null)
+ assert.equal(staffUsernameEmail('constructor'),'constructor@staff.cctv-manager-pro.invalid')
+})
+test('existing guiadmin alias keeps its original email instead of synthetic identity',async()=>{
+ const {staffUsernameEmail}=await import('../lib/username-login.ts')
+ const config=JSON.stringify({guiadmin:'admin@example.com'})
+ assert.equal(resolveLoginEmail('guiadmin',config),'admin@example.com')
+ assert.equal(staffUsernameEmail('guiadmin'),'guiadmin@staff.cctv-manager-pro.invalid')
+})

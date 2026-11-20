@@ -56,9 +56,21 @@
 - [x] `public.staff_accounts`: RLS enabled; authenticated users cannot INSERT or UPDATE directly; anonymous clients cannot SELECT.
 - [x] Privileged user creation runs inside Supabase Edge Function, not browser or Vercel; service role key comes from Supabase's Edge environment.
 - [x] Edge Function verifies bearer JWT with Supabase Auth and active Admin profile before privileged operations.
-- [x] Staff creation action validates username, 12+ char password and roles; Office/Admin roles only.
+- [x] Staff creation action validates username, 4-8 digit numeric PIN and roles; Office/Admin roles only.
 - [x] Login fallback computes username-derived internal Supabase Auth identity; existing `guiadmin` alias still uses its original email/password.
 - [x] Preview Next.js build and TypeScript checks pass; automated username resolver tests pass.
 - [x] Existing customers/jobs remain untouched; no Assign Technician or Customer WhatsApp options introduced.
 - [ ] An authenticated Admin must actually create a test staff account in the live UI and verify the new user can sign in. Real Admin credentials were not available to automated tools.
 - [ ] Verify user password recovery/rotation through a future secure admin workflow; synthetic internal email identities cannot receive password-reset emails.
+
+## PIN login security checks (20 November 2026)
+
+- [x] PIN input accepts 4-8 numeric characters; leading zeros preserved.
+- [x] PINs are converted to non-reversible 70-character Supabase Auth credentials using HMAC-SHA256 and a 32-byte Vault secret.
+- [x] No plaintext staff PIN stored in public customer/job/staff tables.
+- [x] Vault pepper RPC accessible only to service_role; anon and authenticated have no EXECUTE permission.
+- [x] Server-only per-username limit prevents more than 5 PIN login attempts per 30-minute window; SQL test used ROLLBACK.
+- [x] Existing guiadmin password flow is left unchanged.
+- [x] New staff PIN login uses dedicated Edge authentication and sets session cookies through the Next.js Server Action.
+- [ ] Authorized Admin must create a real PIN-based staff account and test sign-in; no Admin password has been supplied to the assistant.
+- [ ] Admin-managed PIN change/reset UI is a separate next step; synthetic email aliases cannot receive recovery email.

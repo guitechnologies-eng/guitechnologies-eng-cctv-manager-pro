@@ -469,3 +469,16 @@ main.wrap.dashboard-main{max-width:1500px;width:100%;margin:0;padding:22px clamp
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:760px){.loading-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-loading-hero{height:190px}}
 @media(prefers-reduced-motion:reduce){.loading-line{animation:none}}
+
+/* Assign Technician: compact fast job editor and clearly visible ownership */
+.assign-technician-form{padding:16px;border:1px solid #315a71;background:linear-gradient(140deg,#102f46,#0a2537);border-radius:12px;display:grid;gap:11px}
+.assign-technician-form label{margin:0;color:#d8eff6;font-weight:700;font-size:12px}
+.assign-technician-form select{margin:7px 0 0;min-height:42px}
+.assign-technician-form>.muted{margin:0;font-size:11px;line-height:1.5}
+.assign-technician-form button{width:100%;margin:0}
+.job-assignment-line{padding:9px 12px;border:1px solid #264e63;background:#102c3d;border-radius:9px;font-size:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.job-assignment-line b{color:#d8ecf6}
+.assignment-assigned{color:#8df0c1;font-weight:800}
+.assignment-unassigned{color:#fad18b;font-weight:750}
+.job-filters label:has(select[name="tech"]){min-width:140px}
+@media(max-width:670px){.job-assignment-line{display:block}.job-assignment-line span{display:block;margin-top:5px}}

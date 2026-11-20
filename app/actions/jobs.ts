@@ -217,3 +217,29 @@ export async function addUpdate(form:FormData){
  ensureSaved(error)
  revalidatePath('/dashboard')
 }
+
+/** Admin/Shop Staff can assign, reassign or unassign an active Technician. */
+export async function assignTechnician(form:FormData){
+ const {supabase,role}=await actor()
+ requireOffice(role)
+ const jobId=read(form,'job_id',50)
+ const technicianId=read(form,'technician_id',50)
+ if(!isUuid(jobId)||(technicianId&&!isUuid(technicianId))){
+  throw new Error('Invalid job or Technician')
+ }
+ // An atomic, audited Supabase RPC checks active Technician and staff roles again.
+ const {error}=await supabase.rpc('assign_job_technician',{
+  p_job_id:jobId,
+  p_technician_id:technicianId||null
+ })
+ if(error){
+  const message=error.message.includes('Choose an active Technician')
+   ?'Choose an active Technician and try again.'
+   :error.message.includes('Job not found')
+   ?'This service job no longer exists.'
+   :'Technician assignment could not be saved. Check your permissions.'
+  throw new Error(message)
+ }
+ revalidatePath('/dashboard')
+ revalidatePath('/jobs/'+jobId)
+}

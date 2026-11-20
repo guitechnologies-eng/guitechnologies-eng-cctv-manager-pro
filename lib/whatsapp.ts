@@ -15,6 +15,7 @@ export type ServiceShareData={
  createdAt?:string|null
  latestNote?:string|null
  latestNoteAt?:string|null
+ assignedTechnician?:string|null
  jobId?:string|null
 }
 const statusLabels:Record<string,string>={
@@ -51,6 +52,7 @@ export function serviceShareText(data:ServiceShareData):string{
   '*Category:* '+(sectionLabels[data.section||'']||safe(data.section)),
   '*Priority:* '+(priorityLabels[data.priority||'']||safe(data.priority)),
   '*Current Status:* '+(statusLabels[data.status]||safe(data.status)),
+  '*Assigned Technician:* '+(data.assignedTechnician?.trim()||'Unassigned'),
   '',
   '*CUSTOMER DETAILS*',
   'Name: '+safe(data.customerName),

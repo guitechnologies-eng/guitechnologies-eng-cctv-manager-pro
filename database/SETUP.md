@@ -53,16 +53,16 @@
 - The login form accepts a **username**, not a Gmail/email address. The existing Supabase Auth email identity and password remain unchanged.
 - Set `CCTV_LOGIN_ALIASES_JSON` as an **encrypted, server-only** Vercel project environment variable for the dedicated CCTV app (never use the `NEXT_PUBLIC_` prefix). Example: `{"guiadmin":"admin@your-business.example"}`; replace the sample email with the user's existing, confirmed Supabase Auth account.
 - Usernames are lowercase/case-insensitive (3-32 ASCII letters, digits, periods, underscores and hyphens; first character must be a letter).
-- The server action resolves the username to an account email privately, then uses Supabase `signInWithPassword`. The browser sees only Username + Password and generic errors. No Supabase Auth account, password, or business data is migrated.
-- To enable another staff member, add a distinct username/email mapping in the encrypted variable, confirm they have an active authorized Supabase staff profile, and redeploy.
+- The server action uses Supabase password login for the original Admin alias, or a rate-limited Supabase Edge PIN verification for newer staff accounts. The browser sees Username + Password/PIN and generic errors. No Supabase Auth account, password, or business data is migrated.
+- To enable another staff member, use the Admin-only Staff Management form. The encrypted username-to-email mapping remains necessary for the original Admin account only.
 - Existing passwords remain valid. The underlying email account remains necessary for administrative account recovery.
-- If the environment variable is missing, sign-in fails closed with a service message rather than exposing any identity mapping.
+- If the encrypted alias mapping is missing, the original Admin password login fails closed; the separate staff PIN service can still authenticate existing staff usernames.
 - Ensure Vercel secrets are visible only to authorized project administrators, and do not expose usernames/emails through client bundles or debug output.
 
 ## Admin-created user logins (20 Nov 2026)
 
 - **Staff Management** is available at `/staff` to active Administrators only.
-- Admins enter a full name, unique 3-32 character username, initial strong password and a role (`Office Staff` or `Admin`). Office Staff can manage service jobs; Admin can additionally create staff users.
+- Admins enter a full name, unique 3-32 character username, numeric PIN (4-8 digits) and a role (`Office Staff` or `Admin`). Office Staff can manage service jobs; Admin can additionally create staff users.
 - `public.staff_accounts` stores a unique username, Supabase Auth user UUID and creator reference. It does **not** store passwords. Its RLS allows SELECT to active Admin only; direct INSERT/UPDATE/DELETE grants are revoked from normal web users.
 - An authenticated Admin Server Action uses the Supabase Edge Function `admin-create-staff`. The function validates the caller's JWT and active Admin role **again**, then creates a Supabase Auth account using the secret key provided by the Supabase Edge environment. The secret key is never shipped to browsers or Vercel.
 - The new Auth identity uses the server-internal deterministic address `<username>@staff.cctv-manager-pro.invalid`; staff type **only their username** into the browser. It is not a real mailbox, so email-based password recovery is unavailable for these accounts. Password management is administrator-managed until a secure password reset feature is built.
@@ -70,7 +70,7 @@
 - New staff account provisioning is limited to Admin/Office roles. Technician assignment UI is still intentionally excluded. No customer WhatsApp messages are sent.
 - Apply `database/migrations/20261120_admin_staff_accounts.sql` on the dedicated CCTV database only. Deploy `supabase/functions/admin-create-staff/index.ts` to the **same** Supabase project with the function's own JWT verification enabled in code. Verify it is active before exposing the `/staff` UI.
 - The Edge Function may use `verify_jwt=false` at the gateway because it verifies the supplied user's Bearer token with Supabase Auth `getUser` and checks the active Admin role before any privileged operation.
-- Admin should privately share each new staff member's initial password. Do not paste passwords into chat or store them in a customer/job note.
+- Admin should privately share each new staff member's initial PIN. Do not paste passwords into chat or store them in a customer/job note.
 - Real end-to-end staff creation requires an authorized Admin to sign in and submit a test user, confirm username login, then manage that test user according to policy. Automated tests verify username mapping, RLS and application builds, but do not impersonate the Administrator or use their password.
 
 ## Staff numeric PIN login (20 November 2026)

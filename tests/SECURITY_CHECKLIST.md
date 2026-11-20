@@ -107,3 +107,16 @@
 - [x] Next.js 15 middleware follows Supabase SSR `getClaims` guidance for session validation; page-level user/profile checks remain in place.
 - [ ] An authorized staff account should verify real PC/mobile speed, search, next/previous, share-to-team previews, reminder links and forms.
 - [ ] Monitor authenticated dashboard latency and Vercel Web Vitals after enough genuine traffic; no speed improvement percentage is claimed without a baseline.
+
+
+## Assignment permissions and auditing (20 Nov 2026)
+
+- [x] DB supports at most one currently assigned Technician per Job.
+- [x] Admin/Shop Staff assignment RPC checks active role and active Technician and serializes job assignment changes.
+- [x] Reassign/unassign operations use a single transaction and write to `job_history` for Service History.
+- [x] Repeat assignment with same technician is a no-op (no duplicate audit).
+- [x] Invalid target role is rejected with a transaction rollback.
+- [x] Technician may read their own assignment, cannot modify assignments; direct browser INSERT/DELETE privilege revoked.
+- [x] Rolled-back SQL tests confirm assignment, removal and history integration; no real job was changed.
+- [x] UI filter unit tests cover My Assigned, shared All Jobs, Unassigned and filter-preserving pagination.
+- [ ] Real Admin and Technician browser sign-ins should verify role-specific assignment controls, form saves, filters and history display.

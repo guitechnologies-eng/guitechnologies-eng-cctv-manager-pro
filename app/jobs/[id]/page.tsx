@@ -14,7 +14,8 @@ const names:Record<string,string>={
  status_changed:'Job status changed',
  job_edited:'Job details updated',
  customer_edited:'Customer details updated',
- progress_note:'Service progress note'
+ progress_note:'Service progress note',
+ technician_assignment:'Technician assignment changed'
 }
 
 export default async function JobHistoryPage({params,searchParams}:{

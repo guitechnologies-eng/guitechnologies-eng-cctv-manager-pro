@@ -123,3 +123,16 @@
 - This is a performance-focused layout/query optimization, not a data migration or rewrite. The existing dashboard fetch cap of 200 jobs remains until a future full server-side search/pagination enhancement.
 - To reapply, deploy `database/migrations/20261120_latest_updates_perf.sql` to the **dedicated CCTV project only**; verify the view has `security_invoker=true` and unauthorized staff see no notes.
 - Unit tests cover paging, filter links, 17-job two-page navigation, invalid page values and reminder link encoding. Verify actual PC/mobile authenticated responsiveness manually.
+
+
+## Assign Technician (20 Nov 2026)
+
+- On the **Admin/Shop Staff dashboard**, open a service job → **Manage Job → Assign Technician**. Choose an active Technician and click Save. Reassign by choosing another person or select Unassigned to remove the assignment.
+- Each job supports **one currently assigned Technician**; the existing `job_assignments` table is retained (no jobs or customers recreated). Assignment changes are serialized per job and audited once per change in `job_history` (visible in Service History).
+- Technicians default to the **My Assigned Jobs** filter but can switch to **All Service Jobs** (the previous shared queue remains visible). Shop Staff can filter **Unassigned** or by technician. Page navigation preserves these filters.
+- Only active Admin/Shop Staff can assign. The `assign_job_technician` database RPC verifies their role, ensures that selected technician is active, and writes atomically. Direct INSERT/DELETE for browser users is revoked to ensure audit trails.
+- Assigning does **not** automatically change the workflow status. Status remains a separate Admin/Shop Staff action.
+- New Job creation stays unchanged: create the job, then use its Assign Technician editor. Team-only WhatsApp sharing remains manual; no Customer WhatsApp feature is introduced.
+- Apply `database/migrations/20261120_assign_technician.sql` **only to dedicated CCTV project**. It adds a unique job assignment index, the audited RPC, and expands the allowed job history event type without changing customer/job rows.
+- Tests cover assign, repeat assign (no double audit), reject non-technician, unassign, technician visibility and denial of mutation, and My Assigned Jobs filter/pagination. SQL tests are wrapped in ROLLBACK.
+- Authorized Admin/Shop Staff should still verify assignment changes in a real browser using existing accounts; no credentials are requested or stored by tests.

@@ -20,16 +20,32 @@ export function paginateJobs<T>(items:readonly T[],requested:unknown,pageSize=JO
 }
 
 export function dashboardPageHref(
- page:number,filters:{q?:string;status?:string;section?:string}
+ page:number,filters:{q?:string;status?:string;section?:string;tech?:string}
 ):string{
  const params=new URLSearchParams()
  if(filters.q?.trim())params.set('q',filters.q.trim())
  if(filters.status)params.set('status',filters.status)
  if(filters.section)params.set('section',filters.section)
+ if(filters.tech)params.set('tech',filters.tech)
  params.set('page',String(page))
  return '/dashboard?'+params.toString()+'#service-requests'
 }
 
 export function reminderJobHref(jobNumber:string):string{
  return '/dashboard?q='+encodeURIComponent(jobNumber)+'#service-requests'
+}
+
+/** Shared job queue stays visible while staff can filter by technician ownership. */
+export function filterJobByTechnician(
+ jobId:string,
+ assignedTechnicianId:string|undefined,
+ selected:string,
+ currentUserId:string,
+ isTechnician:boolean
+):boolean{
+ const filter=selected||(isTechnician?'mine':'all')
+ if(filter==='all')return true
+ if(filter==='mine')return assignedTechnicianId===currentUserId
+ if(filter==='unassigned')return !assignedTechnicianId
+ return assignedTechnicianId===filter
 }

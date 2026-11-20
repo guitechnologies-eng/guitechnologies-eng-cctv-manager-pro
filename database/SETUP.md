@@ -72,3 +72,17 @@
 - The Edge Function may use `verify_jwt=false` at the gateway because it verifies the supplied user's Bearer token with Supabase Auth `getUser` and checks the active Admin role before any privileged operation.
 - Admin should privately share each new staff member's initial password. Do not paste passwords into chat or store them in a customer/job note.
 - Real end-to-end staff creation requires an authorized Admin to sign in and submit a test user, confirm username login, then manage that test user according to policy. Automated tests verify username mapping, RLS and application builds, but do not impersonate the Administrator or use their password.
+
+## Staff numeric PIN login (20 November 2026)
+
+- Admin /staff creates **4-8 digit numeric PIN** accounts instead of initial text passwords. Recommend a random 6-8 digit PIN; 1234, 0000 and birthdays are easy to guess.
+- Admin-created staff enter username plus PIN at /login. The original guiadmin keeps its existing password.
+- PINs are never stored as plaintext in customer/job tables. The Edge functions derive a strong Supabase Auth password with HMAC-SHA256 and a random pepper encrypted in Supabase Vault. The pepper is accessible only to a service-role RPC. Supabase Auth stores its usual salted password hash.
+- staff-pin-login runs server-to-server from a Next.js Server Action, with 5 attempts per 30 minutes per username. A successful login resets the counter.
+- The Edge function returns Auth session tokens over HTTPS to the Server Action, which sets cookies. The PIN is never put in a URL.
+- Deploy admin-create-staff and staff-pin-login with functions/_shared/pin-auth.ts included beside the entrypoints.
+- Apply database/migrations/20261120_staff_pin_login.sql only to the dedicated CCTV database; it creates a Vault secret once and rate-limit functions.
+- Do not rotate the encrypted Vault pepper until staff PINs are re-enrolled; existing derived Auth credentials would stop matching.
+- Existing Admin Auth account/password and all customer/job data remain untouched. Existing old-style password staff accounts, if any, are not automatically migrated.
+- Even with lockouts, short PINs are less safe than long passwords. Prefer 6-8 digits, keep them private, and use MFA for sensitive Admin access.
+- PIN reset and staff account disabling are separate features not included in this update.

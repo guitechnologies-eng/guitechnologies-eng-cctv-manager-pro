@@ -1,6 +1,6 @@
 'use server'
 import {db} from '../../lib/supabase'
-import {resolveLoginEmail} from '../../lib/username-login'
+import {resolveLoginEmail,staffUsernameEmail} from '../../lib/username-login'
 import {redirect} from 'next/navigation'
 
 export async function signIn(formData:FormData){
@@ -11,7 +11,7 @@ export async function signIn(formData:FormData){
  // Read aliases ONLY on the server. No login email is sent to the browser.
  const aliases=process.env.CCTV_LOGIN_ALIASES_JSON
  if(!aliases)redirect('/login?error=service')
- const email=resolveLoginEmail(username,aliases)
+ const email=resolveLoginEmail(username,aliases)||staffUsernameEmail(username)
  const supabase=await db()
 
  // Use one generic error whether a username is unknown or password is wrong.

@@ -108,7 +108,7 @@
 .technician-app .technician-empty p{color:#afccda;font-size:13px;line-height:1.55;max-width:310px}
 
 .technician-app .technician-bottom-nav{
- display:grid;grid-template-columns:repeat(3,minmax(0,1fr));position:fixed;z-index:40;
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));position:fixed;z-index:40;
  bottom:0;left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:760px;
  gap:6px;padding:9px 13px calc(9px + env(safe-area-inset-bottom));
  border:1px solid #345569;border-bottom:0;border-radius:19px 19px 0 0;

@@ -566,3 +566,48 @@ main.wrap.dashboard-main{max-width:1500px;width:100%;margin:0;padding:22px clamp
 .technician-loading-line{background:linear-gradient(110deg,#122a40,#1d4159,#122a40);background-size:200% 100%;border-radius:13px;animation:dashboard-loading-shimmer 1.8s infinite}
 @media(min-width:810px){.technician-top{padding-left:max(28px,calc((100vw - 1000px)/2));padding-right:max(28px,calc((100vw - 1000px)/2))}.technician-bottom-nav{max-width:760px;left:50%;right:auto;width:100%;transform:translateX(-50%)}}
 @media(max-width:365px){.technician-main{padding:13px 11px 110px}.technician-stats>div{padding:13px 4px}.technician-stats span{font-size:10px}.technician-stats strong{font-size:24px}.technician-bottom-nav{padding-left:7px;padding-right:7px}.technician-bottom-nav a{font-size:11px}}
+
+/* Official GUI Technologies identity: exact user-provided globe-and-figure artwork.
+   Brand palette echoes the logo without changing existing data flows or layouts. */
+:root{
+ --gui-brand-blue:#0e95d0;
+ --gui-brand-green:#78b820;
+ --gui-brand-red:#e12721;
+}
+.gui-brand-logo{display:block;flex-shrink:0;object-fit:contain;aspect-ratio:1/1;border-radius:13px;background:#fff;max-width:100%;height:auto}
+.gui-sidebar-logo{width:48px;height:48px;border-radius:13px;box-shadow:0 0 0 1px #379bc54a,0 7px 18px #0004}
+.sidebar-brand{position:relative;border-bottom:1px solid #294152;margin-bottom:17px;padding-bottom:24px}
+.sidebar-brand::after{content:"";position:absolute;bottom:-2px;left:6px;right:6px;height:3px;border-radius:99px;background:linear-gradient(90deg,var(--gui-brand-blue) 0 57%,var(--gui-brand-green) 57% 82%,var(--gui-brand-red) 82%)}
+.sidebar-brand .sidebar-company{color:#77d8f3}
+.sidebar-link.active{box-shadow:inset 3px 0 var(--gui-brand-green)}
+.gui-login-panel{position:relative;overflow:hidden;text-align:center}
+.gui-login-panel::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--gui-brand-blue) 0 54%,var(--gui-brand-green) 54% 80%,var(--gui-brand-red) 80%)}
+.gui-login-logo{display:flex;justify-content:center;align-items:center;margin:0 auto 13px;padding-top:6px}
+.gui-login-logo .gui-brand-logo{width:112px;height:112px;border-radius:18px;box-shadow:0 10px 30px #0005,0 0 0 1px #d1f1ff35}
+.gui-login-panel>.brand{color:#91def2;letter-spacing:2.2px;font-size:12px;font-weight:900;margin:0}
+.gui-login-panel>h1{margin-top:5px}
+.gui-login-panel form{text-align:left}
+.gui-login-panel form button{min-height:46px}
+.gui-login-panel>.muted{font-size:12px;line-height:1.65;text-align:left}
+.technician-top{flex-direction:row;align-items:center;border-bottom:2px solid #1f7396}
+.technician-top>.technician-identity{display:flex;flex-direction:row;align-items:center;min-width:0;gap:10px}
+.technician-identity-text{display:flex;flex-direction:column;min-width:0;gap:3px}
+.gui-technician-logo{width:54px;height:54px;border-radius:12px;box-shadow:0 0 0 1px #479bc554}
+.technician-identity-text .technician-brand{color:#8cdef5}
+.technician-identity-text .technician-user{max-width:100%;text-overflow:ellipsis}
+.technician-bottom-nav{border-top:2px solid #267e9a}
+.technician-bottom-nav a:focus-visible{outline-color:var(--gui-brand-green)}
+.gui-history-brand{display:flex;align-items:center;gap:14px;min-width:0}
+.gui-history-brand .brand{color:#7bd6ee;margin:0}
+.gui-history-brand h1{margin:2px 0}
+.gui-history-brand .gui-brand-logo{width:62px;height:62px}
+.gui-loading-logo{width:84px;height:84px;justify-self:center;box-shadow:0 7px 22px #0004}
+@media(max-width:600px){
+ .gui-history-brand{align-items:flex-start}
+ .gui-history-brand .gui-brand-logo{width:50px;height:50px}
+ .gui-login-logo .gui-brand-logo{width:100px;height:100px}
+ .technician-top>.technician-identity{gap:8px}
+ .gui-technician-logo{width:47px;height:47px}
+ .technician-identity-text>strong{font-size:13px}
+ .technician-top .technician-signout{padding:9px 10px;font-size:11px;white-space:nowrap}
+}

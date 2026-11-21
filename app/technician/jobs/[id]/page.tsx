@@ -1,7 +1,7 @@
 import {db} from '../../../../lib/supabase'
 import {notFound} from 'next/navigation'
 import Link from 'next/link'
-import TechnicianProgressForm from './TechnicianProgressForm'
+import TechnicianProgressForm from '../TechnicianProgressForm'
 
 export const dynamic='force-dynamic'
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i

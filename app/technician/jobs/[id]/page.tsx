@@ -2,6 +2,7 @@ import {db} from '../../../../lib/supabase'
 import {notFound} from 'next/navigation'
 import Link from 'next/link'
 import TechnicianProgressForm from '../TechnicianProgressForm'
+import TechIcon from '../../TechIcon'
 
 export const dynamic='force-dynamic'
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i
@@ -32,37 +33,40 @@ export default async function TechnicianJobPage({params}:{
   .order('created_at',{ascending:false}).limit(12)
 
  return <>
-  <Link className="technician-back" href="/technician">Back to My Jobs</Link>
+  <Link className="technician-back" href="/technician"><TechIcon name="back" size={18}/> Back to my jobs</Link>
   <section className="technician-job-header">
-   <span className="technician-job-number">{job.job_number}</span>
+   <div className="technician-card-top">
+    <span className="technician-job-number">JOB {job.job_number}</span>
+    <span className={'technician-status technician-status-'+job.status}>
+     {job.status.replaceAll('_',' ')}
+    </span>
+   </div>
    <h1>{customer?.name||'Customer'}</h1>
-   <span className={'technician-status technician-status-'+job.status}>
-    {job.status.replaceAll('_',' ').toUpperCase()}
-   </span>
+   <p>{job.title}</p>
   </section>
   <section className="technician-detail-card">
-   <h2>Service Details</h2>
+   <div className="technician-detail-title"><span className="technician-panel-icon"><TechIcon name="note" size={19}/></span><h2>Job information</h2></div>
    <dl>
-    <div><dt>Reason</dt><dd>{job.title}</dd></div>
-    <div><dt>Work Type</dt><dd>{job.kind.replaceAll('_',' ')}</dd></div>
-    <div><dt>Priority</dt><dd>{job.priority}</dd></div>
-    <div><dt>Location</dt><dd>{job.site_address||customer?.address||'Not provided'}</dd></div>
-    {job.scheduled_at&&<div><dt>Visit</dt><dd>{displayDate(job.scheduled_at)} (Sri Lanka)</dd></div>}
-    {job.description&&<div><dt>Instructions</dt><dd>{job.description}</dd></div>}
+    <div><dt>Service requested</dt><dd>{job.title}</dd></div>
+    <div><dt>Work type</dt><dd>{job.kind.replaceAll('_',' ')}</dd></div>
+    <div><dt>Priority</dt><dd><span className="technician-priority">{job.priority}</span></dd></div>
+    <div><dt>Service address</dt><dd>{job.site_address||customer?.address||'Not provided'}</dd></div>
+    {job.scheduled_at&&<div><dt>Scheduled visit</dt><dd>{displayDate(job.scheduled_at)} (Sri Lanka)</dd></div>}
+    {job.description&&<div><dt>Technician instructions</dt><dd className="technician-instructions">{job.description}</dd></div>}
    </dl>
    {customer?.phone&&<a className="technician-call technician-call-wide" href={'tel:'+customer.phone}>
-    Call {customer.name}
+    <TechIcon name="phone" size={18}/> Call {customer.name||'customer'}
    </a>}
   </section>
   <TechnicianProgressForm jobId={job.id} status={job.status}/>
   <Link className="technician-lodging-link" href={'/technician/lodging?job='+job.id}>
-   Add Lodging Details for This Job
+   <TechIcon name="bed" size={19}/> Add lodging details <TechIcon name="chevron" size={17}/>
   </Link>
   <section className="technician-history">
-   <h2>Service History</h2>
+   <div className="technician-detail-title"><span className="technician-panel-icon"><TechIcon name="history" size={19}/></span><h2>Service activity</h2></div>
    {!history?.length?<p>No activity recorded yet.</p>:
     <ol>{history.map(item=><li key={item.id}>
-     <span>{displayDate(item.created_at)}</span>
+     <time dateTime={item.created_at}>{displayDate(item.created_at)}</time>
      <strong>{item.event_type.replaceAll('_',' ')}</strong>
      <p>{item.details}</p>
     </li>)}</ol>}

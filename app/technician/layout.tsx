@@ -2,7 +2,6 @@ import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
-import InstallApp from '../components/InstallApp'
 
 export const dynamic='force-dynamic'
 
@@ -25,7 +24,6 @@ export default async function TechnicianLayout({children}:{children:React.ReactN
   </header>
   <main className="technician-main" id="technician-main">
    {children}
-   <InstallApp compact/>
   </main>
   <nav className="technician-bottom-nav" aria-label="Technician mobile navigation">
    <Link href="/technician">My Jobs</Link>

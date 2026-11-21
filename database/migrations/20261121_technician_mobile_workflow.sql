@@ -85,3 +85,53 @@ CREATE POLICY technician_lodging_insert ON public.technician_lodging
   ))
  );
 NOTIFY pgrst,'reload schema';
+
+
+-- Extend the EXISTING audit trigger: allow only authorized technician
+-- status transitions, never arbitrary job field edits. The RPC locks/validates
+-- assignment first, and ordinary technician clients still have no UPDATE grant.
+CREATE OR REPLACE FUNCTION private.audit_cctv_job_changes()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
+AS $$
+DECLARE
+ v_actor uuid:=auth.uid();
+ v_details text;
+BEGIN
+ IF v_actor IS NOT NULL AND NOT EXISTS (
+  SELECT 1 FROM public.profiles p
+  WHERE p.id=v_actor AND p.active AND p.role IN ('admin','office')
+ ) THEN
+  IF NOT (
+   EXISTS (
+    SELECT 1 FROM public.profiles p
+    JOIN public.job_assignments a ON a.technician_id=p.id
+    WHERE p.id=v_actor AND p.active AND p.role='technician' AND a.job_id=NEW.id
+   )
+   AND OLD.status IN ('pending','assigned','in_progress')
+   AND NEW.status IN ('in_progress','completed')
+   AND OLD.status IS DISTINCT FROM NEW.status
+   AND (to_jsonb(OLD)-'status')=(to_jsonb(NEW)-'status')
+  ) THEN
+   RAISE EXCEPTION 'Unauthorized job edit' USING ERRCODE='42501';
+  END IF;
+ END IF;
+
+ IF OLD.status IS DISTINCT FROM NEW.status THEN
+  INSERT INTO public.job_history(job_id,actor_id,event_type,details,previous_status,new_status)
+  VALUES(NEW.id,v_actor,'status_changed',
+   'Status: '||OLD.status::text||' → '||NEW.status::text,OLD.status,NEW.status);
+ END IF;
+ v_details:=concat_ws(' | ',
+   CASE WHEN OLD.title IS DISTINCT FROM NEW.title THEN 'Reason: '||OLD.title||' → '||NEW.title END,
+   CASE WHEN OLD.kind IS DISTINCT FROM NEW.kind THEN 'Type: '||OLD.kind::text||' → '||NEW.kind::text END,
+   CASE WHEN OLD.priority IS DISTINCT FROM NEW.priority THEN 'Priority: '||OLD.priority||' → '||NEW.priority END,
+   CASE WHEN OLD.request_section IS DISTINCT FROM NEW.request_section THEN 'Section: '||coalesce(OLD.request_section,'(none)')||' → '||coalesce(NEW.request_section,'(none)') END,
+   CASE WHEN OLD.description IS DISTINCT FROM NEW.description THEN 'Description: '||coalesce(OLD.description,'(none)')||' → '||coalesce(NEW.description,'(none)') END,
+   CASE WHEN OLD.site_address IS DISTINCT FROM NEW.site_address THEN 'Place override: '||coalesce(OLD.site_address,'(customer address)')||' → '||coalesce(NEW.site_address,'(customer address)') END
+ );
+ IF v_details <> '' THEN
+  INSERT INTO public.job_history(job_id,actor_id,event_type,details)
+  VALUES(NEW.id,v_actor,'job_edited',v_details);
+ END IF;
+ RETURN NEW;
+END $$;

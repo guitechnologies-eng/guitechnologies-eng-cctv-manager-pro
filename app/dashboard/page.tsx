@@ -220,6 +220,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <a className="sidebar-link active" href="#overview"><span aria-hidden="true">◫</span> Overview</a>
     {staff&&<a className="sidebar-link" href="#reminder-list"><span aria-hidden="true">◉</span> Team Reminders {reminderItems.length>0&&<small>{reminderItems.length}</small>}</a>}
     {staff&&<a className="sidebar-link" href="#new-job"><span aria-hidden="true">＋</span> Create Job</a>}
+    {p.role==='technician'&&<Link className="sidebar-link" href="/technician"><span aria-hidden="true">▤</span> Technician Mobile</Link>}
     {p.role==='technician'&&<Link className="sidebar-link" href="/dashboard?tech=mine#service-requests"><span aria-hidden="true">◉</span> My Assigned Jobs ({assignedToMe})</Link>}
     <a className="sidebar-link" href="#service-requests"><span aria-hidden="true">▤</span> Service Requests</a>
     {p.role==='admin'&&<Link className="sidebar-link" href="/staff"><span aria-hidden="true">▦</span> Staff Management</Link>}

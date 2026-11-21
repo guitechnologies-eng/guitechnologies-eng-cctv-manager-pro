@@ -4,7 +4,7 @@ import './style.css'
 export const metadata:Metadata={
  title:'CCTV Manager Pro | GUI Technologies',
  description:'Internal CCTV service management for GUI Technologies',
- applicationName:'CCTV Manager Pro',
+ applicationName:'GUI Technologies CCTV Manager Pro',
  manifest:'/manifest.webmanifest',
  icons:{
   icon:[
@@ -13,7 +13,7 @@ export const metadata:Metadata={
   ],
   apple:[{url:'/icons/180.png',sizes:'180x180',type:'image/png'}]
  },
- appleWebApp:{capable:true,title:'CCTV Manager Pro',statusBarStyle:'black-translucent'},
+ appleWebApp:{capable:true,title:'GUI CCTV Pro',statusBarStyle:'black-translucent'},
  formatDetection:{telephone:false}
 }
 export const viewport:Viewport={

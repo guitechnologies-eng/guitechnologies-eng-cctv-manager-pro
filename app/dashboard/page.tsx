@@ -1,5 +1,4 @@
 import {db} from '../../lib/supabase'
-import InstallApp from '../components/InstallApp'
 import {signOut} from '../actions/auth'
 import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder,assignTechnician} from '../actions/jobs'
 import NewJobForm from './NewJobForm'
@@ -227,7 +226,6 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <a className="sidebar-link" href="#service-requests"><span aria-hidden="true">▤</span> Service Requests</a>
     {p.role==='admin'&&<Link className="sidebar-link" href="/staff"><span aria-hidden="true">▦</span> Staff Management</Link>}
    </nav>
-   <InstallApp compact/>
    <div className="sidebar-footer">
     <span className="workspace-status"><span className="online-indicator" aria-hidden="true"/> Internal workspace</span>
     <p>Staff-only access · Sri Lanka</p>

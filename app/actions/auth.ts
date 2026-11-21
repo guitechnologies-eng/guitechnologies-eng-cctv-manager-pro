@@ -3,6 +3,14 @@ import {db} from '../../lib/supabase'
 import {resolveLoginEmail,staffUsernameEmail,normalizeLoginUsername} from '../../lib/username-login'
 import {redirect} from 'next/navigation'
 
+async function loginDestination(supabase:Awaited<ReturnType<typeof db>>){
+ const {data:{user}}=await supabase.auth.getUser()
+ if(!user)return '/login?error=credentials'
+ const {data:profile}=await supabase.from('profiles')
+  .select('role,active').eq('id',user.id).maybeSingle()
+ return profile?.active&&profile.role==='technician'?'/technician':'/dashboard'
+}
+
 export async function signIn(formData:FormData){
  const username=normalizeLoginUsername(formData.get('username'))
  const credential=String(formData.get('password')||'')
@@ -14,7 +22,7 @@ export async function signIn(formData:FormData){
  if(originalEmail){
   const {error}=await supabase.auth.signInWithPassword({email:originalEmail,password:credential})
   if(error)redirect(error.code==='invalid_credentials'?'/login?error=credentials':'/login?error=service')
-  redirect('/dashboard')
+  redirect(await loginDestination(supabase))
  }
  if(!staffUsernameEmail(username)||!/^[0-9]{4,8}$/.test(credential)){
   redirect('/login?error=credentials')
@@ -39,7 +47,7 @@ export async function signIn(formData:FormData){
       String((error as {digest:unknown}).digest).startsWith('NEXT_REDIRECT'))throw error
   redirect('/login?error=credentials')
  }
- redirect('/dashboard')
+ redirect(await loginDestination(supabase))
 }
 
 export async function signOut(){

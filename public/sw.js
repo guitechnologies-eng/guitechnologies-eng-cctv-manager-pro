@@ -21,6 +21,6 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close()
   const jobId = event.notification.data?.jobId
-  const path = typeof jobId === 'string' && uuid.test(jobId) ? '/jobs/' + jobId : '/dashboard'
+  const path = typeof jobId === 'string' && uuid.test(jobId) ? '/technician/jobs/' + jobId : '/technician'
   event.waitUntil(self.clients.openWindow(new URL(path, self.location.origin).href))
 })

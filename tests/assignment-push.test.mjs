@@ -48,5 +48,5 @@ test('push shows generic text and can open only a same-origin job', async () => 
  assert.doesNotMatch(shown[0].options.body, /Customer name/)
  await listeners.get('notificationclick')({waitUntil, notification: {close() {}, data: {jobId}}})
  await listeners.get('notificationclick')({waitUntil, notification: {close() {}, data: {jobId: '//evil.test'}}})
- assert.deepEqual(opened, ['https://cctv.example/jobs/' + jobId, 'https://cctv.example/dashboard'])
+ assert.deepEqual(opened, ['https://cctv.example/technician/jobs/' + jobId, 'https://cctv.example/technician'])
 })

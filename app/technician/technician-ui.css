@@ -202,3 +202,6 @@
 @media(prefers-reduced-motion:reduce){
  .technician-app *, .technician-app *:before,.technician-app *:after{scroll-behavior:auto!important;transition:none!important}
 }
+
+.technician-app .technician-progress-buttons button{display:flex;align-items:center;justify-content:center;gap:10px}
+.technician-app .technician-progress-panel .technician-detail-title h2{margin:0}

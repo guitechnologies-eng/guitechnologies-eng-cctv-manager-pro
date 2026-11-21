@@ -7,7 +7,6 @@ import type {TechIconName} from './TechIcon'
 
 const entries:{href:string;label:string;icon:TechIconName}[]=[
  {href:'/technician',label:'My Jobs',icon:'jobs'},
- {href:'/technician/lodging',label:'Lodging',icon:'bed'},
  {href:'/dashboard?tech=all',label:'All Jobs',icon:'grid'}
 ]
 

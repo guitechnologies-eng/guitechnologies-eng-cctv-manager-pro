@@ -2,11 +2,10 @@
 
 import {db} from '../../lib/supabase'
 import {revalidatePath} from 'next/cache'
+import {technicianJobIdPattern,validTechnicianAction,validTechnicianStayDate,parseLodgingExpense} from '../../lib/technician-validation'
 
 export type TechnicianActionState={success:boolean;message:string;status?:'in_progress'|'completed'}
 export type LodgingActionState={success:boolean;message:string}
-
-const jobIdPattern=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i
 
 async function technicianActor(){
  const supabase=await db()
@@ -28,7 +27,7 @@ export async function technicianProgress(
  const jobId=String(form.get('job_id')||'').trim()
  const action=String(form.get('action')||'')
  const note=String(form.get('note')||'').trim()
- if(!jobIdPattern.test(jobId)||!['start','complete'].includes(action)){
+ if(!technicianJobIdPattern.test(jobId)||!validTechnicianAction(action)){
   return {success:false,message:'Invalid job or action. Please refresh and try again.'}
  }
  if(note.length>1200)return {success:false,message:'Progress note must be 1200 characters or fewer.'}
@@ -53,12 +52,6 @@ export async function technicianProgress(
   message:status==='completed'?'Job completed and saved automatically. No Admin approval required.':'Job started. Status is now In Progress.'}
 }
 
-function validLocalDate(value:string):boolean{
- if(!/^20[2-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/.test(value))return false
- const date=new Date(value+'T00:00:00Z')
- return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===value
-}
-
 export async function saveTechnicianLodging(
  _previous:LodgingActionState,
  form:FormData
@@ -72,23 +65,16 @@ export async function saveTechnicianLodging(
  const notes=String(form.get('notes')||'').trim()
  const jobId=String(form.get('job_id')||'').trim()
 
- if(!validLocalDate(stayDate))return {success:false,message:'Enter a valid lodging date.'}
+ if(!validTechnicianStayDate(stayDate))return {success:false,message:'Enter a valid lodging date.'}
  if(location.length<3||location.length>160)
   return {success:false,message:'Enter a lodging place between 3 and 160 characters.'}
  if(!Number.isInteger(nights)||nights<1||nights>30)
   return {success:false,message:'Nights must be between 1 and 30.'}
  if(notes.length>800)return {success:false,message:'Notes must not exceed 800 characters.'}
- if(jobId&&!jobIdPattern.test(jobId))
+ if(jobId&&!technicianJobIdPattern.test(jobId))
   return {success:false,message:'Select a valid assigned job.'}
- let expense:number|null=null
- if(costRaw){
-  const n=Number(costRaw)
-  if(!/^(?:\d{1,7})(?:\.\d{1,2})?$/.test(costRaw)||
-     !Number.isFinite(n)||n<0||n>9999999){
-   return {success:false,message:'Enter a valid cost in LKR, or leave it blank.'}
-  }
-  expense=Number(n.toFixed(2))
- }
+ const expense=parseLodgingExpense(costRaw)
+ if(expense===undefined)return {success:false,message:'Enter a valid cost in LKR, or leave it blank.'}
  const {error}=await actor.supabase.from('technician_lodging').insert({
   technician_id:actor.user.id,job_id:jobId||null,
   stay_date:stayDate,location,nights,expense_lkr:expense,notes:notes||null

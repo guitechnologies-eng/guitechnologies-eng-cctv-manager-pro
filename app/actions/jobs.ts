@@ -3,7 +3,9 @@
 import {db} from '../../lib/supabase'
 import {revalidatePath} from 'next/cache'
 import {redirect} from 'next/navigation'
+import {after} from 'next/server'
 import {fromColomboInput} from '../../lib/reminders'
+import {deliverAssignmentPush} from '../../lib/assignment-push'
 
 const read=(form:FormData,key:string,max=500)=>String(form.get(key)||'').trim().slice(0,max)
 const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
@@ -239,6 +241,15 @@ export async function assignTechnician(form:FormData){
    ?'This service job no longer exists.'
    :'Technician assignment could not be saved. Check your permissions.'
   throw new Error(message)
+ }
+ if(technicianId){
+  after(async()=>{
+   try{
+    await deliverAssignmentPush()
+   }catch{
+    console.error('Assignment push worker failed after saving an assignment')
+   }
+  })
  }
  revalidatePath('/dashboard')
  revalidatePath('/jobs/'+jobId)

@@ -146,3 +146,11 @@
 - App icons are neutral CCTV Manager graphics, **not an AI-generated or modified GUI Technologies official company logo**. Replace the icon with the exact original asset only if made available and approved.
 - Online connection is required. No service worker caches customer details, service history, passwords/PINs, sessions or dashboards for offline use. Existing Supabase RLS and session checks remain in place.
 - Test installation in current Android Chrome/Samsung Internet and iOS Safari; actual device installation and user credential login still need a person on their device.
+
+## Technician job alerts
+
+- Apply `database/migrations/20261121_assignment_web_push.sql` to the dedicated CCTV database. It queues alerts for new assignments to opted-in technicians. Existing assignments are left in place and generate no alerts on rollout.
+- Generate a stable Web Push VAPID key pair with `npx web-push generate-vapid-keys`. Set `NEXT_PUBLIC_WEB_PUSH_KEY`, `WEB_PUSH_PRIVATE_KEY`, and a contact URL or email in `WEB_PUSH_SUBJECT` in the target Vercel environment. Rotating the VAPID keys requires devices to resubscribe.
+- Generate two independent random secrets. Set a 64-character hex token in `ASSIGNMENT_PUSH_WORKER_TOKEN` and a separate secret in `CRON_SECRET`. Insert the SHA-256 hash of the worker token into `private.assignment_push_worker_key.secret_hash` as a single row. Keep both secrets in the deployment environment and out of source control.
+- Deploy the app after the database and environment are ready. A worker runs after a successful assignment, and the scheduled Vercel request drains pending retries daily. Assignments also give earlier retries another opportunity to run. Expired subscriptions are removed and pending alerts expire after 48 hours.
+- Sign in as the technician on the intended phone, tap **Enable job alerts**, and allow notifications. On iPhone, open the app from its Home Screen icon first. Signing out revokes the subscription for that session. To verify, assign a designated test job as Admin or Shop Staff, confirm that only the chosen technician receives the alert, and tap it to open the job.

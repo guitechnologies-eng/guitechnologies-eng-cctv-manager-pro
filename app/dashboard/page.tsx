@@ -5,6 +5,7 @@ import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternal
 import NewJobForm from './NewJobForm'
 import PendingSubmit from './PendingSubmit'
 import TeamWhatsAppShare from './TeamWhatsAppShare'
+import TechnicianNotifications from './TechnicianNotifications'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
 import {paginateJobs,dashboardPageHref,reminderJobHref,filterJobByTechnician} from '../../lib/dashboard-pagination'
@@ -237,6 +238,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
      <form action={signOut}><button type="submit" className="signout-button">Sign out</button></form>
     </div>
    </header>
+   {p.role==='technician'&&process.env.NEXT_PUBLIC_WEB_PUSH_KEY&&
+    <TechnicianNotifications publicKey={process.env.NEXT_PUBLIC_WEB_PUSH_KEY}/>}
    <section className="dashboard-hero" aria-labelledby="dashboard-heading">
     <div className="hero-content">
      <span className="hero-overline">SERVICE OPERATIONS CENTER</span>

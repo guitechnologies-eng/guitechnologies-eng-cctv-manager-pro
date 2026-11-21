@@ -1,3 +1,4 @@
+import BrandLogo from '../components/BrandLogo'
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {redirect} from 'next/navigation'
@@ -15,10 +16,13 @@ export default async function TechnicianLayout({children}:{children:React.ReactN
 
  return <div className="technician-app">
   <header className="technician-top">
-   <div>
-    <p className="technician-brand">GUI TECHNOLOGIES</p>
-    <strong>CCTV Manager Pro</strong>
-    <span className="technician-user">Technician: {profile.full_name}</span>
+   <div className="technician-identity">
+    <BrandLogo size={54} className="gui-technician-logo" priority/>
+    <div className="technician-identity-text">
+     <p className="technician-brand">GUI TECHNOLOGIES</p>
+     <strong>CCTV Manager Pro</strong>
+     <span className="technician-user">Technician: {profile.full_name}</span>
+    </div>
    </div>
    <form action={signOut}><button className="technician-signout" type="submit">Sign out</button></form>
   </header>

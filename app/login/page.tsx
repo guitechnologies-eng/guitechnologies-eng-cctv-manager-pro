@@ -1,3 +1,4 @@
+import BrandLogo from '../components/BrandLogo'
 import {signIn} from '../actions/auth'
 
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
@@ -9,7 +10,8 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
   :null
 
  return <main className="login">
-  <section className="panel">
+  <section className="panel gui-login-panel">
+   <div className="gui-login-logo"><BrandLogo size={112} priority/></div>
    <p className="brand">GUI TECHNOLOGIES</p>
    <h1>CCTV Manager Pro</h1>
    <p>Authorized staff access only</p>

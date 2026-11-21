@@ -2,6 +2,7 @@ import {db} from '../../lib/supabase'
 import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import TechnicianNotifications from '../dashboard/TechnicianNotifications'
+import TechIcon from './TechIcon'
 
 export const dynamic='force-dynamic'
 
@@ -30,45 +31,87 @@ export default async function TechnicianMobileDashboard(){
  const finished=ordered.filter(j=>j && j.status==='completed')
  const list=[...work,...ordered.filter(j=>j && ['completed','cancelled'].includes(j.status))]
 
+ const visitLabel=(value:string)=>new Intl.DateTimeFormat('en-GB',{
+  timeZone:'Asia/Colombo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'
+ }).format(new Date(value))
+
  return <>
-  <section className="technician-welcome">
-   <span className="technician-kicker">TECHNICIAN WORKSPACE</span>
-   <h1>My Jobs</h1>
-   <p>Your assigned CCTV service jobs. Open a job to start work or mark it completed.</p>
+  <section className="technician-hero">
+   <div className="technician-hero-inner">
+    <div className="technician-eyebrow"><span className="technician-live-dot"/> TECHNICIAN WORKSPACE</div>
+    <h1>My workday<span className="technician-hero-period">.</span></h1>
+    <p>Your CCTV service jobs, progress and next steps — all in one place.</p>
+   </div>
+   <div className="technician-hero-symbol" aria-hidden="true"><TechIcon name="tool" size={78}/></div>
   </section>
-  <div className="technician-stats" aria-label="Your job overview">
-   <div><span>Assigned</span><strong>{ordered.length}</strong></div>
-   <div><span>To Do</span><strong>{work.length}</strong></div>
-   <div><span>Completed</span><strong>{finished.length}</strong></div>
-  </div>
+
+  <section className="technician-stats" aria-label="Your job overview">
+   <div className="technician-stat-card">
+    <div className="technician-stat-icon"><TechIcon name="jobs" size={19}/></div>
+    <strong>{ordered.length}</strong><span>Assigned</span>
+   </div>
+   <div className="technician-stat-card technician-stat-open">
+    <div className="technician-stat-icon"><TechIcon name="clock" size={19}/></div>
+    <strong>{work.length}</strong><span>To do</span>
+   </div>
+   <div className="technician-stat-card technician-stat-done">
+    <div className="technician-stat-icon"><TechIcon name="check" size={19}/></div>
+    <strong>{finished.length}</strong><span>Completed</span>
+   </div>
+  </section>
+
   {process.env.NEXT_PUBLIC_WEB_PUSH_KEY&&
    <section className="technician-notification-panel">
-    <h2>Job Notifications</h2>
-    <p>Enable alerts on this phone to receive new job assignments.</p>
+    <div className="technician-panel-heading">
+     <span className="technician-panel-icon"><TechIcon name="bell" size={19}/></span>
+     <div><h2>Job notifications</h2><p>Get new job alerts on this phone.</p></div>
+    </div>
     <TechnicianNotifications publicKey={process.env.NEXT_PUBLIC_WEB_PUSH_KEY}/>
    </section>}
-  <section className="technician-list">
-   <div className="technician-section-head"><h2>Assigned Service Jobs</h2><span>{ordered.length}</span></div>
+
+  <section className="technician-list" aria-labelledby="assigned-jobs-heading">
+   <div className="technician-section-head">
+    <div>
+     <span className="technician-section-kicker">YOUR ASSIGNMENTS</span>
+     <h2 id="assigned-jobs-heading">Service jobs</h2>
+    </div>
+    <span className="technician-section-count">{ordered.length} total</span>
+   </div>
    {assignmentError||jobError?
-    <p role="alert">Could not load your jobs. Check the connection and refresh.</p>:
+    <div className="technician-empty" role="alert"><TechIcon name="shield" size={30}/>
+     <strong>Unable to load jobs</strong><p>Check your connection and refresh this page.</p>
+    </div>:
     !list.length?<div className="technician-empty">
+     <span className="technician-empty-symbol"><TechIcon name="jobs" size={30}/></span>
      <strong>No jobs assigned yet</strong>
-     <p>New assigned jobs will appear here automatically when you refresh.</p>
+     <p>New service assignments will appear here when available.</p>
     </div>:list.map(job=>{
      if(!job)return null
      const customer=Array.isArray(job.customer)?job.customer[0]:job.customer
-     return <article className="technician-job-card" key={job.id}>
+     return <article className={'technician-job-card'+(job.priority==='urgent'?' technician-card-urgent':'')} key={job.id}>
       <div className="technician-card-top">
-       <span className="technician-job-number">{job.job_number}</span>
+       <span className="technician-job-number">JOB {job.job_number}</span>
        <span className={'technician-status technician-status-'+job.status}>{statusLabel(job.status)}</span>
       </div>
       <h3>{customer?.name||'Customer'}</h3>
       <p className="technician-job-reason">{job.title}</p>
-      <p className="technician-job-place"><strong>Location:</strong> {job.site_address||customer?.address||'Not provided'}</p>
-      {customer?.phone&&<a className="technician-call" href={'tel:'+customer.phone}>Call customer</a>}
-      <Link className="technician-open-job" href={'/technician/jobs/'+job.id}>
-       {job.status==='completed'?'View Completed Job':'Open Job / Update Progress'}
-      </Link>
+      <div className="technician-card-details">
+       {job.scheduled_at&&<div className="technician-detail-line">
+        <TechIcon name="calendar" size={16}/><time dateTime={job.scheduled_at}>{visitLabel(job.scheduled_at)}</time>
+       </div>}
+       <div className="technician-detail-line">
+        <TechIcon name="pin" size={16}/><span>{job.site_address||customer?.address||'Location not provided'}</span>
+       </div>
+      </div>
+      <div className="technician-card-actions">
+       {customer?.phone&&<a className="technician-call" href={'tel:'+customer.phone}>
+        <TechIcon name="phone" size={17}/><span>Call</span>
+       </a>}
+       <Link className="technician-open-job" href={'/technician/jobs/'+job.id}>
+        <span>{job.status==='completed'?'View completed job':job.status==='in_progress'?'Continue job':'View job details'}</span>
+        <TechIcon name="arrow" size={18}/>
+       </Link>
+      </div>
      </article>
     })}
   </section>

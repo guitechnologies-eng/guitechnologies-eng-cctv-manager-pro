@@ -1,0 +1,207 @@
+/* Technician-only redesign. Intentionally scoped to avoid affecting admin/shop screens.
+   Original GUI logo, job mutations, permissions, and customer records remain untouched. */
+.technician-app{
+ --t-surface:#102739;--t-border:#29475b;--t-muted:#aac3d3;--t-cyan:#56d8ef;
+ min-height:100dvh;padding-bottom:calc(94px + env(safe-area-inset-bottom));
+ color:#f4fbff;background:radial-gradient(ellipse at 50% -130px,#1b4c67 0,#0b2032 42%,#071725 82%);
+ font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+.technician-app .technician-top{
+ display:block;position:sticky;top:0;z-index:30;padding:11px 16px;
+ background:rgba(7,24,38,.94);border:0;border-bottom:1px solid #31556a;
+ backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 10px 35px #00172570;
+}
+.technician-top-inner{display:flex;max-width:760px;margin:auto;align-items:center;justify-content:space-between;gap:14px}
+.technician-app .technician-identity{display:flex;flex-direction:row;align-items:center;gap:11px;min-width:0}
+.technician-app .gui-technician-logo{width:48px;height:48px;border-radius:13px;box-shadow:0 0 0 1px #b7d9e94d,0 6px 18px #0004}
+.technician-app .technician-identity-text{display:flex;flex-direction:column;min-width:0;gap:2px}
+.technician-app .technician-brand{margin:0;color:#83def0;letter-spacing:1.6px;font-size:9px;font-weight:900;line-height:1.4}
+.technician-app .technician-identity-text>strong{color:#f9fdff;font-size:15px;font-weight:850;line-height:1.25;letter-spacing:-.3px}
+.technician-app .technician-user{color:#aec9d7;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.technician-app .technician-top form{flex-shrink:0}
+.technician-app .technician-signout{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto!important;
+ min-height:43px;border:1px solid #36566a;border-radius:12px;padding:9px 12px;
+ background:#153349;color:#d8ecf5;font-size:12px;font-weight:750;
+}
+.technician-app .technician-signout:hover{background:#1b4159;border-color:#55a7c2}
+.technician-app .technician-main{width:100%;max-width:760px;margin:0 auto;padding:22px 16px 34px}
+
+.technician-app .technician-hero{
+ position:relative;isolation:isolate;overflow:hidden;padding:27px 23px;margin:0 0 16px;
+ border-radius:22px;border:1px solid #39788d;
+ background:linear-gradient(118deg,#10455f 0%,#0e354e 60%,#103044 100%);
+ box-shadow:0 16px 28px #03132144;
+}
+.technician-app .technician-hero:before{
+ content:"";position:absolute;inset:0 0 auto;height:4px;
+ background:linear-gradient(90deg,#0dafe4 0 66%,#7cbb32 66% 86%,#e33c36 86%);
+}
+.technician-hero-inner{position:relative;z-index:1;max-width:80%}
+.technician-eyebrow{display:inline-flex;align-items:center;gap:8px;color:#a8e5ee;font-size:10px;font-weight:850;letter-spacing:1.4px}
+.technician-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#83d957;box-shadow:0 0 0 4px #83d95725}
+.technician-app .technician-hero h1{font-size:clamp(29px,6.5vw,42px);letter-spacing:-1.3px;line-height:1.1;margin:13px 0 9px;font-weight:850}
+.technician-hero-period{color:#64daea}
+.technician-app .technician-hero p{font-size:13px;line-height:1.65;color:#c4dee8;margin:0}
+.technician-hero-symbol{position:absolute;right:-13px;bottom:-22px;color:#57d0ea;opacity:.17;transform:rotate(-16deg)}
+.technician-hero-symbol svg{width:140px;height:140px;stroke-width:1.2}
+
+.technician-app .technician-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 22px}
+.technician-app .technician-stats>.technician-stat-card{
+ display:flex;align-items:flex-start;flex-direction:column;gap:6px;min-width:0;
+ padding:15px 14px 14px;border:1px solid #33576a;border-radius:17px;text-align:left;
+ background:linear-gradient(155deg,#15354b,#0e2638);box-shadow:0 6px 16px #00142030;
+}
+.technician-stat-icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;background:#24536d;color:#6bdff3;margin:0 0 6px}
+.technician-app .technician-stats strong{font-size:29px;line-height:1;font-weight:900;color:#fff;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.technician-app .technician-stats span{font-size:11px;color:#bdd1dc;font-weight:650}
+.technician-stat-open .technician-stat-icon{background:#644a283d;color:#ffd08a}
+.technician-stat-done .technician-stat-icon{background:#275c475e;color:#84e7b2}
+.technician-app .technician-notification-panel{background:#113349;border:1px solid #366e85;padding:17px;border-radius:17px;margin:0 0 22px}
+.technician-panel-heading{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.technician-panel-icon{display:grid;place-items:center;flex-shrink:0;width:36px;height:36px;border-radius:11px;background:#204c65;color:#76e0f2}
+.technician-app .technician-notification-panel h2{font-size:15px;margin:0 0 3px;line-height:1.3}
+.technician-app .technician-notification-panel p{font-size:12px;margin:0;color:#b8d3df;line-height:1.45}
+.technician-app .technician-notification-panel button{min-height:48px;border-radius:11px;background:#0d9bc3;font-weight:800}
+
+.technician-app .technician-section-head{display:flex;justify-content:space-between;align-items:center;margin:6px 0 14px;gap:8px}
+.technician-section-kicker{display:block;font-size:10px;letter-spacing:1.5px;font-weight:850;color:#78b8cf;margin-bottom:5px}
+.technician-app .technician-section-head h2{font-size:22px;letter-spacing:-.45px;font-weight:850;margin:0}
+.technician-app .technician-section-count{border:1px solid #31576e;background:#17394f;border-radius:99px;padding:7px 11px;color:#d3f4fc;font-size:11px;font-weight:750;white-space:nowrap}
+.technician-app .technician-list{display:grid;gap:13px}
+.technician-app .technician-job-card{
+ display:flex;flex-direction:column;gap:0;position:relative;overflow:hidden;
+ padding:18px 17px 16px;border-radius:19px;border:1px solid #315266;
+ background:linear-gradient(155deg,#133145,#0d2536);
+ box-shadow:0 8px 21px #00142036;
+}
+.technician-app .technician-job-card:before{content:"";position:absolute;inset:0 0 0 auto;width:3px;background:#2e83a5;opacity:.75}
+.technician-app .technician-card-urgent:before{background:#e66254;width:4px}
+.technician-app .technician-card-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.technician-app .technician-job-number{color:#79d7e7;font-size:10px;letter-spacing:1.1px;font-weight:900}
+.technician-app .technician-status{border:1px solid #557089;border-radius:99px;background:#26465e;padding:6px 10px;color:#d4ecf9;font-size:10px;font-weight:850;letter-spacing:.3px;text-transform:capitalize}
+.technician-app .technician-status-completed{border-color:#387f68;color:#9df1c7;background:#1a493a}
+.technician-app .technician-status-in_progress{border-color:#398cae;color:#9deaff;background:#1a4a66}
+.technician-app .technician-status-cancelled{border-color:#9b5868;color:#ffc4c8;background:#542e3a}
+.technician-app .technician-job-card h3{font-size:20px;font-weight:850;letter-spacing:-.4px;line-height:1.25;margin:14px 0 5px;color:#fff}
+.technician-app .technician-job-reason{font-size:13px;color:#c7dbe5;line-height:1.55;margin:0 0 14px}
+.technician-card-details{display:grid;gap:8px;padding:12px 0;margin:0 0 14px;border-top:1px solid #2e4b5c;border-bottom:1px solid #2e4b5c}
+.technician-detail-line{display:flex;align-items:flex-start;gap:9px;color:#b5cfda;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.technician-detail-line svg{flex-shrink:0;color:#74c9df;margin-top:1px}
+.technician-card-actions{display:flex;align-items:stretch;gap:9px}
+.technician-app .technician-call{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;
+ min-height:48px;border:1px solid #477287;border-radius:11px;background:#1a3c52;
+ padding:10px 14px;color:#d0f5ff;text-decoration:none;font-size:13px;font-weight:850;
+}
+.technician-app .technician-open-job{
+ display:inline-flex;align-items:center;justify-content:center;gap:10px;flex:1;width:auto;
+ min-height:48px;border-radius:11px;border:1px solid #34cae4;
+ background:linear-gradient(105deg,#078bb8,#08a7c6);
+ color:white;text-decoration:none;font-size:13px;font-weight:850;padding:10px 13px;
+}
+.technician-app .technician-open-job svg{flex-shrink:0}
+.technician-app .technician-open-job:hover{background:#10aaca}
+.technician-app .technician-empty{display:flex;align-items:center;flex-direction:column;padding:35px 22px;background:#102d40;border:1px dashed #386e84;border-radius:19px;text-align:center;color:#9ccddc}
+.technician-empty-symbol{display:grid;place-items:center;border-radius:15px;background:#214e65;color:#7ddced;padding:14px;margin:0 0 14px}
+.technician-app .technician-empty strong{color:#eefaff;font-size:17px}
+.technician-app .technician-empty p{color:#afccda;font-size:13px;line-height:1.55;max-width:310px}
+
+.technician-app .technician-bottom-nav{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));position:fixed;z-index:40;
+ bottom:0;left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:760px;
+ gap:6px;padding:9px 13px calc(9px + env(safe-area-inset-bottom));
+ border:1px solid #345569;border-bottom:0;border-radius:19px 19px 0 0;
+ background:rgba(9,28,43,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 -8px 38px #00142280;
+}
+.technician-app .technician-bottom-nav a{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:59px;
+ border:1px solid transparent;border-radius:12px;background:transparent;
+ color:#9fbbcc;text-decoration:none;text-align:center;font-size:10px;font-weight:750;
+}
+.technician-app .technician-bottom-nav a.is-active{background:#164961;border-color:#2d7898;color:#8eefff}
+.technician-app .technician-bottom-nav a:hover{color:#e4faff}
+.technician-app a:focus-visible,.technician-app button:focus-visible,.technician-app input:focus-visible,.technician-app select:focus-visible,.technician-app textarea:focus-visible{
+ outline:3px solid #91eaf5;outline-offset:3px;
+}
+
+/* Job detail page and progress panel */
+.technician-app .technician-back{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#9bdfed;font-weight:800;padding:7px 0 12px;font-size:13px}
+.technician-app .technician-job-header{padding:18px 19px;border-radius:18px;background:linear-gradient(120deg,#15435b,#103147);border:1px solid #39748b;margin:2px 0 15px}
+.technician-app .technician-job-header h1{font-size:clamp(24px,6vw,35px);letter-spacing:-.8px;line-height:1.15;margin:14px 0 6px;font-weight:850}
+.technician-app .technician-job-header>p{font-size:13px;line-height:1.5;color:#c5dde7;margin:0}
+.technician-app .technician-detail-card,.technician-app .technician-progress-panel,.technician-app .technician-history{
+ border-radius:18px;border:1px solid #315467;background:linear-gradient(145deg,#123044,#0d2638);
+ padding:19px;margin:14px 0;box-shadow:0 5px 19px #00131d2e;
+}
+.technician-detail-title{display:flex;align-items:center;gap:10px;margin:0 0 17px}
+.technician-app .technician-detail-title h2{font-size:18px;letter-spacing:-.3px;font-weight:850;margin:0}
+.technician-app .technician-detail-card dl{display:grid;gap:0;margin:0 0 15px}
+.technician-app .technician-detail-card dl>div{display:grid;grid-template-columns:minmax(95px,.8fr) minmax(0,1.4fr);gap:13px;padding:11px 0;border-bottom:1px solid #2a485b}
+.technician-app .technician-detail-card dt{font-size:11px;letter-spacing:0;text-transform:none;color:#a5c5d4;font-weight:750;margin:0}
+.technician-app .technician-detail-card dd{font-size:13px;color:#e9f7ff;line-height:1.5;margin:0;overflow-wrap:anywhere}
+.technician-app .technician-priority{display:inline-flex;border-radius:8px;padding:4px 8px;background:#24485d;font-size:12px;text-transform:capitalize}
+.technician-app .technician-instructions{white-space:pre-wrap}
+.technician-app .technician-call-wide{width:100%;margin-top:15px}
+.technician-app .technician-progress-panel h2{font-size:19px;font-weight:850;letter-spacing:-.3px}
+.technician-app .technician-progress-panel>p{font-size:13px;line-height:1.6;color:#b9d3df}
+.technician-app .technician-progress-panel label,.technician-app .technician-lodging-form label{font-size:12px;color:#d8edf6;font-weight:750;margin:16px 0 0}
+.technician-app .technician-progress-panel textarea,.technician-app .technician-lodging-form textarea,
+.technician-app .technician-lodging-form input,.technician-app .technician-lodging-form select{
+ width:100%;border:1px solid #42647a;border-radius:11px;padding:13px 14px;
+ background:#081e2e;color:#eefaff;font-size:16px;margin:7px 0 0;
+}
+.technician-app .technician-progress-panel textarea,.technician-app .technician-lodging-form textarea{min-height:105px;resize:vertical}
+.technician-app .technician-progress-buttons{display:grid;gap:10px;margin:17px 0 0}
+.technician-app .technician-start-button,.technician-app .technician-complete-button,.technician-app .technician-save-button{width:100%;min-height:52px;border-radius:11px;font-size:14px;font-weight:850}
+.technician-app .technician-start-button{border:1px solid #3599bc;background:#175f7f}
+.technician-app .technician-complete-button{border:1px solid #38ca91;background:#147e60}
+.technician-app .technician-save-button{border:1px solid #34cae4;background:#098eb6}
+.technician-app .technician-closed{border-radius:16px;border:1px solid #388469;background:#174634}
+.technician-app .technician-lodging-link{
+ display:flex;justify-content:space-between;gap:10px;align-items:center;
+ padding:15px 17px;border:1px solid #3a7188;background:#12394e;
+ border-radius:14px;color:#c9f5ff;min-height:56px;font-size:13px;font-weight:850;text-decoration:none;
+}
+.technician-app .technician-lodging-link svg:first-child{flex-shrink:0}
+.technician-app .technician-history ol{list-style:none;padding:0;margin:0;display:grid;gap:9px}
+.technician-app .technician-history li{background:#0b2334;border-radius:0 10px 10px 0;border-left:3px solid #35b9ce;padding:13px 14px}
+.technician-app .technician-history li time,.technician-app .technician-history li>span{display:block;font-size:11px;color:#a7c8d7;margin-bottom:5px}
+.technician-app .technician-history li strong{font-size:13px;font-weight:850;color:#f0faff;text-transform:capitalize}
+.technician-app .technician-history li p{font-size:12px;color:#bdd2df;line-height:1.5;overflow-wrap:anywhere}
+.technician-app .technician-welcome{padding:19px;margin:0 0 17px;border-radius:18px;border:1px solid #36758a;background:linear-gradient(110deg,#13455c,#0f2e44)}
+.technician-app .technician-welcome h1{font-size:31px;letter-spacing:-.7px;font-weight:850}
+.technician-app .technician-welcome p{color:#c6dfeb;font-size:13px;line-height:1.55;margin:0}
+.technician-app .technician-lodging-form .technician-lodging-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.technician-app .technician-loading{padding:28px 18px}
+.technician-app .technician-loading-line{background:linear-gradient(110deg,#102f42,#1b5069,#102f42)}
+
+@media(max-width:480px){
+ .technician-app .technician-main{padding:16px 12px 28px}
+ .technician-app .technician-top{padding:9px 12px}
+ .technician-app .gui-technician-logo{width:43px;height:43px}
+ .technician-app .technician-identity-text>strong{font-size:13px}
+ .technician-app .technician-identity{gap:9px}
+ .technician-app .technician-user{font-size:10px;max-width:182px}
+ .technician-app .technician-signout{padding:10px;min-width:42px}
+ .technician-app .technician-signout span{display:none}
+ .technician-app .technician-hero{padding:24px 19px}
+ .technician-app .technician-stats{gap:7px}
+ .technician-app .technician-stats>.technician-stat-card{padding:12px 10px}
+ .technician-app .technician-stats strong{font-size:26px}
+ .technician-app .technician-job-card{padding:16px 14px}
+ .technician-app .technician-detail-card dl>div{grid-template-columns:1fr;gap:4px}
+}
+@media(max-width:340px){
+ .technician-app .technician-hero-inner{max-width:90%}
+ .technician-app .technician-brand{letter-spacing:.8px}
+ .technician-app .technician-stats strong{font-size:24px}
+ .technician-app .technician-call{padding:9px 10px}
+ .technician-app .technician-open-job{font-size:12px;padding:9px 10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .technician-app *, .technician-app *:before,.technician-app *:after{scroll-behavior:auto!important;transition:none!important}
+}
+
+.technician-app .technician-progress-buttons button{display:flex;align-items:center;justify-content:center;gap:10px}
+.technician-app .technician-progress-panel .technician-detail-title h2{margin:0}

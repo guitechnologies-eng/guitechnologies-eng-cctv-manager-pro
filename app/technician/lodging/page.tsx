@@ -2,6 +2,7 @@ import {db} from '../../../lib/supabase'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
 import LodgingForm from './LodgingForm'
+import TechIcon from '../TechIcon'
 
 export const dynamic='force-dynamic'
 const validUuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i
@@ -34,7 +35,7 @@ export default async function TechnicianLodgingPage({searchParams}:{
  const jobNumbers=new Map((jobs||[]).map(j=>[j.id,j.job_number]))
 
  return <>
-  <Link href="/technician" className="technician-back">Back to My Jobs</Link>
+  <Link href="/technician" className="technician-back"><TechIcon name="back" size={18}/> Back to my jobs</Link>
   <section className="technician-welcome">
    <span className="technician-kicker">TECHNICIAN RECORDS</span>
    <h1>Lodging</h1>
@@ -42,7 +43,7 @@ export default async function TechnicianLodgingPage({searchParams}:{
   </section>
   <LodgingForm jobs={jobs||[]} defaultJobId={selected} today={today}/>
   <section className="technician-history">
-   <h2>My Lodging History</h2>
+   <div className="technician-detail-title"><span className="technician-panel-icon"><TechIcon name="history" size={19}/></span><h2>My lodging history</h2></div>
    {entryError?<p role="alert">Could not load lodging records. Please refresh.</p>:
     !entries?.length?<p>No lodging entries saved yet.</p>:
     <ol>{entries.map(e=><li key={e.id}>

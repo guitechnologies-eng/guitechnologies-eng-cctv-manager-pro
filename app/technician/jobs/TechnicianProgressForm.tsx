@@ -2,6 +2,7 @@
 
 import {useActionState} from 'react'
 import {technicianProgress,type TechnicianActionState} from '../../actions/technician'
+import TechIcon from '../TechIcon'
 
 const initial:TechnicianActionState={success:false,message:''}
 
@@ -15,7 +16,7 @@ export default function TechnicianProgressForm({jobId,status}:{
   <p>{result.success?result.message:'This job is closed. No further progress action is needed.'}</p>
  </div>
  return <section className="technician-progress-panel">
-  <h2>Update Job Progress</h2>
+  <div className="technician-detail-title"><span className="technician-panel-icon"><TechIcon name="tool" size={19}/></span><h2>Update job progress</h2></div>
   <p>When you select Complete, the job becomes <strong>Completed immediately</strong> — no Admin approval.</p>
   <form action={submit}>
    <input type="hidden" name="job_id" value={jobId}/>
@@ -26,9 +27,9 @@ export default function TechnicianProgressForm({jobId,status}:{
    <div className="technician-progress-buttons">
     {current!=='in_progress'&&
      <button name="action" value="start" type="submit" disabled={pending}
-      className="technician-start-button">Start Job</button>}
+      className="technician-start-button"><TechIcon name="play" size={18}/> Start job</button>}
     <button name="action" value="complete" type="submit" disabled={pending}
-     className="technician-complete-button">Mark Completed</button>
+     className="technician-complete-button"><TechIcon name="check" size={19}/> Mark completed</button>
    </div>
   </form>
   {result.message&&<p role="status" className={'technician-form-message '+(result.success?'ok':'error')}>

@@ -29,6 +29,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  if(!user)redirect('/login')
  const {data:p}=await s.from('profiles').select('full_name,role,active').eq('id',user.id).single()
  if(!p?.active)return <main className="wrap"><h1>Account approval pending</h1><form action={signOut}><button>Sign out</button></form></main>
+ // Installed PWA opens /dashboard; send Technicians to the touch-friendly mobile app.
+ if(p.role==='technician'&&params.tech!=='all')redirect('/technician')
  const staff=p.role==='admin'||p.role==='office'
  const [jobsRes,customersRes,assignmentsRes,techniciansRes]=await Promise.all([
   s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,created_at,scheduled_at,follow_up_at,reminder_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),

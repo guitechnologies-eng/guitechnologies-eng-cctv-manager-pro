@@ -483,27 +483,6 @@ main.wrap.dashboard-main{max-width:1500px;width:100%;margin:0;padding:22px clamp
 .job-filters label:has(select[name="tech"]){min-width:140px}
 @media(max-width:670px){.job-assignment-line{display:block}.job-assignment-line span{display:block;margin-top:5px}}
 
-/* Android/iOS PWA installation help; never caches customer or login data. */
-.install-app-card{
- margin:15px 0 10px;padding:15px 16px;background:linear-gradient(135deg,#0b354b,#0b2337);
- border:1px solid #287b91;border-radius:13px;color:#d9f4fa;
- box-shadow:0 8px 26px rgba(0,0,0,.12);
-}
-.install-app-heading{display:flex;align-items:center;gap:9px;font-size:13px;margin-bottom:8px}
-.install-app-heading span{color:#74e1ed;font-size:20px;line-height:1}
-.install-app-instructions,.install-app-ios,.install-app-online{font-size:12px;line-height:1.6;margin:8px 0 0;color:#c2ddea}
-.install-app-online{font-size:11px;color:#96b8cb}
-.install-app-button{width:100%;font-size:13px;font-weight:700;min-height:42px;background:#087eaa;color:#fff;border:1px solid #49cde7}
-.install-app-button:hover{background:#0ca8c4}
-.install-app-compact{margin:15px 10px 0;padding:12px;border-color:#275369}
-.install-app-compact .install-app-heading{font-size:12px}
-.install-app-compact .install-app-instructions{font-size:11px}
-.install-app-compact .install-app-online{font-size:10px}
-.login .install-app-card{margin-top:22px}
-@media(max-width:790px){.install-app-compact{margin:15px 0 10px}}
-@media(display-mode:standalone){.install-app-card{display:none}}
-
-
 /* Technician mobile-first job app. No emoji icons; large phone touch targets. */
 .technician-app{min-height:100dvh;background:#071625;color:#edf8ff;padding:0 0 max(88px,env(safe-area-inset-bottom));}
 .technician-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px max(16px,env(safe-area-inset-left));background:#0b2136;border-bottom:1px solid #24475d;box-shadow:0 5px 20px #0002}

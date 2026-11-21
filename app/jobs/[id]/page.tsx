@@ -1,3 +1,4 @@
+import BrandLogo from '../../components/BrandLogo'
 import {db} from '../../../lib/supabase'
 import {redirect,notFound} from 'next/navigation'
 import Link from 'next/link'
@@ -53,7 +54,7 @@ export default async function JobHistoryPage({params,searchParams}:{
  const maxPage=Math.max(1,Math.ceil(total/perPage))
  return <main className="wrap history-page">
   <header>
-   <div><p className="brand">GUI TECHNOLOGIES</p><h1>Service History</h1><p>{job.job_number}</p></div>
+   <div className="gui-history-brand"><BrandLogo size={62}/><div><p className="brand">GUI TECHNOLOGIES</p><h1>Service History</h1><p>{job.job_number}</p></div></div>
    <Link className="action-link" href="/dashboard">Back to Dashboard</Link>
   </header>
   <section className="panel">

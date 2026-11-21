@@ -4,7 +4,7 @@ export default function manifest():MetadataRoute.Manifest{
  return {
   id:'/',
   name:'CCTV Manager Pro | GUI Technologies',
-  short_name:'CCTV Manager',
+  short_name:'GUI CCTV Pro',
   description:'Secure CCTV service jobs, customers and team management for GUI Technologies.',
   start_url:'/dashboard',
   scope:'/',

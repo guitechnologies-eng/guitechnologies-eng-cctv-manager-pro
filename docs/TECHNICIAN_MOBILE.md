@@ -19,7 +19,7 @@
 - The existing dedicated Web Push implementation continues. `TechnicianNotifications` appears in mobile My Jobs when VAPID configuration is available.
 - Technicians must tap **Enable job alerts** in the installed app and grant phone/browser permission. Assignment saves enqueue and attempt delivery to subscribed assigned technician devices only, never customers.
 - Web Push requires compatible platform support, HTTPS, enabled notification permissions and connectivity. No guaranteed delivery is claimed without device testing.
-- The service worker opens `/jobs/{id}`; assigned technician can view relevant job details. Future customization can route it to mobile job details.
+- The service worker opens `/technician/jobs/{id}` directly, which independently checks the current signed-in technician's assignment before showing job details.
 
 ## Quality and verification
 - Run `npm test` (includes pure mobile validation tests) and Next.js TypeScript/build checks.

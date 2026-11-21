@@ -1,3 +1,4 @@
+import BrandLogo from '../components/BrandLogo'
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder,assignTechnician} from '../actions/jobs'
@@ -213,7 +214,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  return <div className="app-frame">
   <aside className="app-sidebar" aria-label="Workspace navigation">
    <div className="sidebar-brand">
-    <span className="sidebar-symbol" aria-hidden="true">▦</span>
+    <BrandLogo size={48} className="gui-sidebar-logo" priority/>
     <div><span className="sidebar-company">GUI TECHNOLOGIES</span><strong>CCTV Manager Pro</strong></div>
    </div>
    <div className="sidebar-section-label">WORKSPACE</div>

@@ -1,3 +1,4 @@
+import BrandLogo from '../components/BrandLogo'
 import {db} from '../../lib/supabase'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
@@ -26,7 +27,7 @@ export default async function StaffPage(){
  return <div className="app-frame staff-page-shell">
   <aside className="app-sidebar" aria-label="Workspace navigation">
    <div className="sidebar-brand">
-    <span className="sidebar-symbol" aria-hidden="true">▦</span>
+    <BrandLogo size={48} className="gui-sidebar-logo" priority/>
     <div><span className="sidebar-company">GUI TECHNOLOGIES</span><strong>CCTV Manager Pro</strong></div>
    </div>
    <div className="sidebar-section-label">WORKSPACE</div>

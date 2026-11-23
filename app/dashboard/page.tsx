@@ -1,11 +1,13 @@
 import BrandLogo from '../components/BrandLogo'
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
-import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder,assignTechnician} from '../actions/jobs'
+import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder} from '../actions/jobs'
 import NewJobForm from './NewJobForm'
 import PendingSubmit from './PendingSubmit'
 import TeamWhatsAppShare from './TeamWhatsAppShare'
 import TechnicianNotifications from './TechnicianNotifications'
+import TechnicianAssignmentForm from './TechnicianAssignmentForm'
+import {groupJobTechnicians} from '../../lib/technician-assignment'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
 import {paginateJobs,dashboardPageHref,reminderJobHref,filterJobByTechnician} from '../../lib/dashboard-pagination'
@@ -35,21 +37,19 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  const [jobsRes,customersRes,assignmentsRes,techniciansRes]=await Promise.all([
   s.from('jobs').select('id,job_number,title,description,site_address,kind,status,priority,request_section,source_status_note,created_at,scheduled_at,follow_up_at,reminder_note,customer:customers(id,name,phone,address)').order('created_at',{ascending:false}).limit(200),
   staff?s.from('customers').select('id,name,phone,address').order('name',{ascending:true}).limit(1000):Promise.resolve({data:[]}),
-  s.from('job_assignments').select('job_id,technician_id').limit(1000),
+  s.from('job_assignments').select('job_id,technician_id,assigned_at').order('assigned_at',{ascending:true}).limit(1000),
   staff?s.from('profiles').select('id,full_name').eq('role','technician').eq('active',true).order('full_name',{ascending:true}):Promise.resolve({data:[]})
  ])
  const jobs=jobsRes.data||[]
  const customers=customersRes.data||[]
  const technicians=techniciansRes.data||[]
- const assignmentByJob=new Map<string,string>(
-  (assignmentsRes.data||[]).map(a=>[a.job_id,a.technician_id])
- )
+ const assignmentByJob=groupJobTechnicians(assignmentsRes.data||[])
  const technicianNames=new Map<string,string>(technicians.map(t=>[t.id,t.full_name]))
  const techFilter=p.role==='technician'
   ?(params.tech==='all'?'all':'mine')
   :params.tech==='unassigned'?'unassigned'
   :technicians.some(t=>t.id===params.tech)?String(params.tech):'all'
- const assignedToMe=jobs.filter(j=>assignmentByJob.get(j.id)===user.id).length
+ const assignedToMe=jobs.filter(j=>(assignmentByJob.get(j.id)||[]).includes(user.id)).length
  const reminderGroups=getReminderGroups(jobs)
  const reminderItems=[...reminderGroups.overdue,...reminderGroups.today,...reminderGroups.upcoming,...reminderGroups.unscheduled]
  const ordered=[...jobs].sort((a,b)=>{
@@ -84,10 +84,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
  const jobCard=(j:typeof jobs[number])=>{
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
   const lastUpdate=latestNotes.get(j.id)
-  const assignedId=assignmentByJob.get(j.id)
-  const assignedName=assignedId
-   ?(technicianNames.get(assignedId)||(assignedId===user.id?'You':'Technician (inactive or other)'))
-   :null
+  const assignedIds=assignmentByJob.get(j.id)||[]
+  const assignedName=assignedIds.map(id=>technicianNames.get(id)||(id===user.id?'You':'Technician (inactive or other)')).join(', ')
   const shareData={
    customerName:customer?.name||'Not Provided',
    customerPhone:customer?.phone,
@@ -118,7 +116,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <p><b>🔧 Reason:</b> {j.title==='(No reason provided)'?'—':j.title}</p>
     {j.source_status_note&&<p className="source-status">📝 {j.source_status_note}</p>}
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
-    <p className="job-assignment-line"><b>Assigned Technician:</b> <span className={assignedId?'assignment-assigned':'assignment-unassigned'}>{assignedName||'Not assigned'}</span></p>
+    <p className="job-assignment-line"><b>Assigned Technicians:</b> <span className={assignedIds.length?'assignment-assigned':'assignment-unassigned'}>{assignedName||'Not assigned'}</span></p>
     <div className="job-shortcuts">
      <Link prefetch={false} className="action-link" href={'/jobs/'+j.id}>View full service history</Link>
     </div>
@@ -131,19 +129,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     {staff&&<details className="job-management">
      <summary>Manage job · Status, Reminders &amp; Details</summary>
      <div className="job-edit-controls">
-     <form action={assignTechnician} className="assign-technician-form">
-      <input type="hidden" name="job_id" value={j.id}/>
-      <label>Assign Technician
-       <select name="technician_id" defaultValue={assignedId||''} aria-label={'Assigned Technician for '+j.job_number}>
-        <option value="">Unassigned (remove Technician)</option>
-        {technicians.map(t=><option key={t.id} value={t.id}>{t.full_name}</option>)}
-        {assignedId&&!technicians.some(t=>t.id===assignedId)&&
-         <option value={assignedId}>Previously assigned (inactive; choose another)</option>}
-       </select>
-      </label>
-      <p className="muted">Assign or reassign an active Technician. Changes appear in Service History.</p>
-      <PendingSubmit label="Save Technician Assignment" pendingLabel="Saving Assignment..."/>
-     </form>
+     <TechnicianAssignmentForm key={j.id+':'+assignedIds.join(',')}
+      jobId={j.id} jobNumber={j.job_number} technicians={technicians} assignedIds={assignedIds}/>
      <details className="edit-customer reminder-editor">
       <summary>🔔 Set / Edit Internal Reminders</summary>
       <form action={updateInternalReminder}>

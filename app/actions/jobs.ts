@@ -6,6 +6,7 @@ import {redirect} from 'next/navigation'
 import {after} from 'next/server'
 import {fromColomboInput} from '../../lib/reminders'
 import {deliverAssignmentPush} from '../../lib/assignment-push'
+import {normalizeTechnicianSelection} from '../../lib/technician-assignment'
 
 const read=(form:FormData,key:string,max=500)=>String(form.get(key)||'').trim().slice(0,max)
 const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
@@ -220,37 +221,47 @@ export async function addUpdate(form:FormData){
  revalidatePath('/dashboard')
 }
 
-/** Admin/Shop Staff can assign, reassign or unassign an active Technician. */
-export async function assignTechnician(form:FormData){
+export type TechnicianAssignmentState={success:boolean;message:string}
+
+/** Save the exact team of 0–2 active technicians in one atomic, audited RPC. */
+export async function assignTechnicians(_previous:TechnicianAssignmentState,form:FormData):Promise<TechnicianAssignmentState>{
  const {supabase,role}=await actor()
  requireOffice(role)
  const jobId=read(form,'job_id',50)
- const technicianId=read(form,'technician_id',50)
- if(!isUuid(jobId)||(technicianId&&!isUuid(technicianId))){
-  throw new Error('Invalid job or Technician')
+ if(!isUuid(jobId))return {success:false,message:'Invalid service job. Refresh and try again.'}
+ let technicianIds:string[]
+ try{
+  technicianIds=normalizeTechnicianSelection(
+   form.get('technician_id_1'),form.get('technician_id_2')
+  )
+ }catch(error){
+  return {success:false,message:(error as Error).message}
  }
- // An atomic, audited Supabase RPC checks active Technician and staff roles again.
- const {error}=await supabase.rpc('assign_job_technician',{
+ // One database transaction updates both assignments and preserves unchanged rows.
+ const {error}=await supabase.rpc('assign_job_technicians',{
   p_job_id:jobId,
-  p_technician_id:technicianId||null
+  p_technician_ids:technicianIds
  })
  if(error){
   const message=error.message.includes('Choose an active Technician')
-   ?'Choose an active Technician and try again.'
+   ?'Choose active Technicians and try again.'
    :error.message.includes('Job not found')
    ?'This service job no longer exists.'
-   :'Technician assignment could not be saved. Check your permissions.'
-  throw new Error(message)
+   :error.message.includes('at most two')||error.message.includes('different Technicians')
+   ?'Choose up to two different Technicians.'
+   :'Assignments could not be saved. Check the database migration and permissions.'
+  return {success:false,message}
  }
- if(technicianId){
+ if(technicianIds.length){
   after(async()=>{
-   try{
-    await deliverAssignmentPush()
-   }catch{
-    console.error('Assignment push worker failed after saving an assignment')
-   }
+   try{await deliverAssignmentPush()}
+   catch{console.error('Assignment push worker failed after saving team assignments')}
   })
  }
  revalidatePath('/dashboard')
  revalidatePath('/jobs/'+jobId)
+ revalidatePath('/technician')
+ return {success:true,message:technicianIds.length
+  ?technicianIds.length===2?'Both Technicians assigned successfully.':'Technician assigned successfully.'
+  :'Technicians unassigned successfully.'}
 }

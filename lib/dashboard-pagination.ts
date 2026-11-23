@@ -38,14 +38,15 @@ export function reminderJobHref(jobNumber:string):string{
 /** Shared job queue stays visible while staff can filter by technician ownership. */
 export function filterJobByTechnician(
  jobId:string,
- assignedTechnicianId:string|undefined,
+ assignedTechnicianIds:readonly string[]|undefined,
  selected:string,
  currentUserId:string,
  isTechnician:boolean
 ):boolean{
  const filter=selected||(isTechnician?'mine':'all')
+ const ids=assignedTechnicianIds||[]
  if(filter==='all')return true
- if(filter==='mine')return assignedTechnicianId===currentUserId
- if(filter==='unassigned')return !assignedTechnicianId
- return assignedTechnicianId===filter
+ if(filter==='mine')return ids.includes(currentUserId)
+ if(filter==='unassigned')return ids.length===0
+ return ids.includes(filter)
 }

@@ -651,3 +651,167 @@ button[aria-busy="true"]::before{content:"";display:inline-block;flex:none;width
  button[aria-busy="true"]::before{animation:none;transition:none}
  .navigation-progress{transform:scaleX(.7)}
 }
+
+
+/* ===========================================================
+   GUI TECHNOLOGIES | CCTV Manager Pro desktop operations UI
+   Scoped to dashboard / staff. No changes to Technician PWA.
+   =========================================================== */
+.app-frame .app-sidebar{box-shadow:8px 0 36px #00000018}
+.app-frame .sidebar-brand{padding-bottom:29px;border-bottom:1px solid #1d3a4f;margin-bottom:25px}
+.app-frame .sidebar-nav{gap:5px}
+.app-frame .sidebar-link{font-size:13px;letter-spacing:-.1px;min-height:46px;gap:12px}
+.app-frame .sidebar-link>svg{width:19px;height:19px;flex:none;color:#80aeca}
+.app-frame .sidebar-link.active>svg,.app-frame .sidebar-link:hover>svg{color:#62dcf0}
+.app-frame .sidebar-link.active{background:linear-gradient(100deg,#1e4962,#143347);border-color:#35718c;box-shadow:inset 3px 0 #49e3e3,0 5px 16px #020e1b38}
+.app-frame .sidebar-link:hover{border-color:#376480}
+.app-frame .sidebar-footer{box-shadow:0 5px 20px #030d1935}
+.app-frame .dashboard-topbar{min-height:66px;margin-bottom:25px}
+.desktop-command-bar{display:none;gap:7px;align-items:center;justify-content:center;min-width:0}
+.desktop-command-bar a{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 11px;border:1px solid transparent;border-radius:10px;white-space:nowrap;text-decoration:none;font-size:12px;font-weight:750;color:#abcde0}
+.desktop-command-bar a svg{flex:none;color:#6bccdf}
+.desktop-command-bar a:hover,.desktop-command-bar a:focus-visible{color:#fff;background:#1a3a53;border-color:#34637a}
+@media(min-width:1190px){
+ .app-frame .dashboard-topbar{display:grid;grid-template-columns:minmax(115px,1fr) auto minmax(210px,1fr);gap:18px;align-items:center}
+ .desktop-command-bar{display:flex}
+ .app-frame .dashboard-topbar>.topbar-user{justify-self:end}
+}
+@media(min-width:1460px){
+ .app-frame{grid-template-columns:252px minmax(0,1fr)}
+ .app-frame main.wrap.dashboard-main{max-width:1660px;padding-left:clamp(30px,3.5vw,62px);padding-right:clamp(30px,3.5vw,62px)}
+}
+.app-frame .dashboard-hero{min-height:228px;border-color:#3e6e86;background:linear-gradient(115deg,#102940 2%,#18415d 55%,#0e4852 100%)}
+.app-frame .dashboard-hero:before{background:radial-gradient(circle at 84% 55%,#35f5d519 0,transparent 35%),linear-gradient(100deg,#071a2733,transparent 80%)}
+.app-frame .hero-overline{display:inline-flex;align-items:center;gap:7px}
+.app-frame .hero-overline:before{content:"";width:7px;height:7px;border-radius:50%;background:#58e6b3;box-shadow:0 0 12px #4be5af55}
+.app-frame .hero-content>p{max-width:570px;font-size:13px}
+.app-frame .hero-quick-actions a svg{flex:none}
+.app-frame .hero-orbit{opacity:.77}
+.app-frame .orbit-core{color:#78edeb}
+.app-frame .stat-grid{gap:15px}
+.app-frame .stat-grid .stat-card{display:flex;flex-direction:column;align-items:stretch;text-decoration:none;min-width:0;position:relative;overflow:hidden;border:1px solid #315069;background:linear-gradient(153deg,#182d45,#102336);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;cursor:pointer}
+.app-frame .stat-grid .stat-card:before{content:"";height:3px;position:absolute;inset:0 0 auto;background:#48c6dd}
+.app-frame .stat-grid .stat-amber:before{background:#efb664}
+.app-frame .stat-grid .stat-blue:before{background:#6c98fa}
+.app-frame .stat-grid .stat-green:before{background:#53cda3}
+.app-frame .stat-grid .stat-card:hover{transform:translateY(-3px);border-color:#58b1cc;box-shadow:0 16px 35px #020b183f}
+.app-frame .stat-grid .stat-card:focus-visible{outline:3px solid #71e2f5;outline-offset:2px}
+.app-frame .stat-grid .stat-card strong{color:#f1faff}
+.app-frame .stat-grid .stat-icon{border:1px solid #2c8196;box-shadow:0 6px 19px #030e1b30}
+.app-frame .stat-grid .stat-icon svg{display:block}
+.pc-workspace-grid{display:block}
+.pc-workspace-grid>.internal-reminders,.pc-workspace-grid>.forms.single-job-form{min-width:0}
+.pc-workspace-grid>.forms.single-job-form{margin-top:21px}
+.app-frame .internal-reminders h2{display:flex;align-items:center;gap:11px;line-height:1.35}
+.app-frame .internal-reminders h2>svg{color:#77e7f0}
+.app-frame .internal-reminders-heading>.reminder-total{white-space:nowrap}
+.app-frame .reminder-group{overflow:hidden;border:1px solid #305064;background:#0d2134;border-radius:12px;padding:0;max-height:none;margin:11px 0 0}
+.app-frame .reminder-group summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;min-height:44px;font-size:12px;font-weight:800;color:#d7eff8;cursor:pointer;list-style:none;background:#122e44}
+.app-frame .reminder-group summary::-webkit-details-marker{display:none}
+.app-frame .reminder-group summary:hover{background:#1a415a}
+.app-frame .reminder-group summary:focus-visible{outline:2px solid #79dfef;outline-offset:-3px}
+.app-frame .reminder-group[open]>summary{border-bottom:1px solid #34546a;background:#183b52}
+.app-frame .reminder-group>p{padding:12px 14px;margin:0;font-size:12px}
+.app-frame .reminder-group>.reminder-entry{margin:9px 11px}
+.app-frame .reminder-group .reminder-entry:last-child{margin-bottom:11px}
+.app-frame .reminder-group-count{flex:none;color:#bdf3f6;border:1px solid #346d7e;background:#173f51}
+.app-frame .reminder-counts{margin-bottom:14px}
+.app-frame .reminder-counts a{transition:background .18s ease,border-color .18s ease}
+.app-frame .reminder-counts a:hover{border-color:#5aa8c0}
+@media(min-width:1360px){
+ .app-frame .pc-workspace-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(345px,.95fr);gap:18px;align-items:start}
+ .app-frame .pc-workspace-grid>.forms.single-job-form{grid-column:1;grid-row:1;margin:0}
+ .app-frame .pc-workspace-grid>.internal-reminders{grid-column:2;grid-row:1;position:sticky;top:18px;max-height:calc(100dvh - 36px);overflow:auto;scrollbar-width:thin;scrollbar-color:#35627a transparent;margin:0}
+ .app-frame .pc-workspace-grid>.internal-reminders .reminder-counts{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .app-frame .pc-workspace-grid>.internal-reminders .reminder-counts a{padding:12px}
+ .app-frame .pc-workspace-grid>.internal-reminders .reminder-counts strong{font-size:23px}
+ .app-frame .pc-workspace-grid>.internal-reminders .reminder-counts span{font-size:11px}
+ .app-frame .pc-workspace-grid>.internal-reminders .reminder-entry{flex-direction:column;align-items:stretch;gap:8px}
+ .app-frame .pc-workspace-grid>.internal-reminders .reminder-entry .action-link{align-self:flex-start;min-height:34px}
+}
+.pc-form-kicker{display:inline-block;color:#70ddeb;letter-spacing:1.8px;font-size:10px;font-weight:850;margin-bottom:5px}
+.new-job-heading h2{margin:0 0 7px}
+.pc-form-step{display:flex;align-items:center;gap:13px;padding:15px 0 11px;margin-top:6px;border-bottom:1px solid #29485d}
+.pc-form-step>span{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:11px;border:1px solid #3f8bab;background:#153c55;color:#a4ecf8;font-size:12px;font-weight:900}
+.pc-form-step>div{display:flex;flex-direction:column;gap:1px}
+.pc-form-step strong{font-size:14px;color:#f1faff}
+.pc-form-step small{font-size:11px;color:#97b7c9}
+.pc-form-step-second{margin-top:20px}
+.new-job-form .customer-mode{margin:14px 0 8px}
+.new-job-form .customer-preview-line{display:flex;align-items:center;gap:8px;line-height:1.5}
+.new-job-form .customer-preview-line svg{color:#80dce8;flex:none}
+.new-job-form>button[type="submit"]{display:inline-flex;align-items:center;justify-content:center;gap:9px;margin-top:18px;min-height:45px}
+.app-frame .service-requests{border-color:#345369;box-shadow:0 14px 38px #01091644}
+.app-frame .job-filters{grid-template-columns:minmax(190px,1.8fr) repeat(3,minmax(110px,1fr));gap:12px;border-color:#35576c;background:linear-gradient(145deg,#122d40,#0c2132)}
+.app-frame .job-filters label{min-width:0}
+.app-frame .job-filters select,.app-frame .job-filters input{min-height:43px}
+.app-frame .filter-buttons{display:flex;justify-content:flex-end;align-items:center;gap:15px;grid-column:1/-1}
+.app-frame .filter-buttons button{display:inline-flex;align-items:center;gap:9px;justify-content:center;min-width:172px;min-height:43px}
+.app-frame .filter-results{display:flex;align-items:center;gap:6px}
+.app-frame .filter-results svg{flex:none;color:#7bdbe9}
+.app-frame .job-section .job{grid-template-columns:minmax(0,1.35fr) minmax(280px,.72fr);border:1px solid #345068;border-left:4px solid #3489aa;gap:20px;background:linear-gradient(115deg,#142a3f,#102235);transition:box-shadow .15s ease,border-color .15s ease}
+.app-frame .job-section .job:hover{border-color:#41718a;box-shadow:0 14px 35px #020a1740}
+.app-frame .job-section .job.job-status-completed{border-left-color:#46c994}
+.app-frame .job-section .job.job-status-in_progress{border-left-color:#7ca0ff}
+.app-frame .job-section .job.job-status-pending{border-left-color:#e6b96a}
+.app-frame .job-section .job.job-status-cancelled{border-left-color:#db8298}
+.app-frame .job-card .job-details{min-width:0;width:100%}
+.app-frame .job-card .job-progress-form{width:100%;align-self:start}
+.app-frame .job-card .job-heading{gap:13px}
+.app-frame .job-card .job-number{font-size:11px;font-variant-numeric:tabular-nums}
+.app-frame .job-card .job-assignment-line{display:flex;align-items:center;gap:8px}
+.app-frame .job-card .job-assignment-line svg{flex:none;color:#7bd9e7}
+.app-frame .job-card .job-management{border-color:#38718a;background:#122f47}
+.app-frame .job-management>summary{display:flex;align-items:center;gap:9px;min-height:23px}
+.app-frame .job-management>summary svg{flex:none;color:#75e1f2}
+.app-frame .job-management[open]{background:#132e43}
+.app-frame .job-card .job-progress-form{background:#0e2132;border-color:#36546c}
+.app-frame .job-card .job-progress-form button{min-height:42px}
+.app-frame .job-shortcuts .action-link{min-height:38px}
+.app-frame .dashboard-pagination .action-link{border-color:#4d8198}
+.app-frame .dashboard-pagination>span:not(.page-link-disabled){padding:8px 10px;background:#142e41;border-radius:8px}
+.staff-pc-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:17px 0 25px}
+.staff-pc-stats>div{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;padding:17px;border:1px solid #34576b;border-radius:13px;background:linear-gradient(140deg,#153047,#10253a)}
+.staff-pc-stats svg{color:#83dce7}
+.staff-pc-stats span{font-size:12px;color:#b5d1df;font-weight:750}
+.staff-pc-stats strong{font-size:25px;color:#f2fcff;font-variant-numeric:tabular-nums;line-height:1}
+.staff-list-scroll{border:1px solid #314c62;border-radius:11px}
+.staff-list-table thead{background:#163950}
+.staff-list-table tbody tr:nth-child(even){background:#0e2536}
+.staff-list-table tbody tr:hover{background:#17364a}
+.staff-list-table th,.staff-list-table td{padding:13px 14px}
+.staff-list-table th{letter-spacing:.7px;color:#afdaea}
+.staff-edit-details>summary{color:#9aeaf8}
+.history-page{max-width:1350px}
+.history-page .history-panel{box-shadow:0 12px 34px #03101d35}
+.history-page .timeline-entry{border-color:#3b5d73}
+@media(max-width:1170px){
+ .app-frame .job-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .app-frame .job-filters label:first-child{grid-column:1/-1}
+ .app-frame .job-section .job{grid-template-columns:1fr}
+ .staff-pc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:790px){
+ .app-frame .app-sidebar .sidebar-brand{border:0;margin-bottom:0;padding-bottom:13px}
+ .app-frame .dashboard-topbar{min-height:0}
+ .app-frame .job-filters{grid-template-columns:1fr}
+ .app-frame .job-filters label:first-child{grid-column:auto}
+ .app-frame .filter-buttons{justify-content:flex-start}
+ .app-frame .job-section .job{grid-template-columns:1fr}
+ .staff-pc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pc-form-step{padding-top:11px}
+}
+@media(max-width:540px){
+ .staff-pc-stats>div{grid-template-columns:23px 1fr;gap:4px 8px;padding:12px}
+ .staff-pc-stats>div strong{grid-column:2}
+ .staff-pc-stats span{font-size:11px}
+ .staff-pc-stats strong{font-size:23px}
+ .app-frame .stat-grid .stat-card{min-height:120px}
+ .app-frame .filter-buttons{justify-content:stretch}
+ .app-frame .filter-buttons button{flex:1;min-width:0}
+ .app-frame .reminder-group summary{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .app-frame .stat-grid .stat-card{transition:none}
+ .app-frame .stat-grid .stat-card:hover{transform:none}
+}

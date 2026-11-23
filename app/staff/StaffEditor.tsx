@@ -38,7 +38,7 @@ export default function StaffEditor({userId,username,fullName,role,active,isSelf
        </select>}
     </label>
     <p className="muted">Username <strong>{username}</strong> remains unchanged to protect existing PIN login details.</p>
-    <button type="submit" disabled={updating}>{updating?'Saving...':'Save Staff Changes'}</button>
+    <button type="submit" disabled={updating} aria-busy={updating}>{updating?'Saving...':'Save Staff Changes'}</button>
     {updated.message&&<p role="status" className={updated.success?'staff-edit-ok':'staff-edit-err'}>{updated.message}</p>}
    </form>
    {!isSelf&&username!=='guiadmin'&&<form ref={pinForm} action={pinAction} className="staff-pin-reset-form">
@@ -51,7 +51,7 @@ export default function StaffEditor({userId,username,fullName,role,active,isSelf
      <label>Confirm New PIN
       <input type="password" name="confirm_pin" required minLength={4} maxLength={8} pattern="[0-9]{4,8}" inputMode="numeric" autoComplete="new-password"/>
      </label>
-     <button type="submit" disabled={resetting}>{resetting?'Resetting...':'Reset PIN'}</button>
+     <button type="submit" disabled={resetting} aria-busy={resetting}>{resetting?'Resetting...':'Reset PIN'}</button>
      {pinResult.message&&<p role="status" className={pinResult.success?'staff-edit-ok':'staff-edit-err'}>{pinResult.message}</p>}
     </form>}
   </div>

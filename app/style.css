@@ -621,3 +621,33 @@ main.wrap.dashboard-main{max-width:1500px;width:100%;margin:0;padding:22px clamp
  .technician-identity-text>strong{font-size:13px}
  .technician-top .technician-signout{padding:9px 10px;font-size:11px;white-space:nowrap}
 }
+
+/* Friendly app-wide page transitions: no data or navigation logic changes. */
+.navigation-feedback{position:fixed;inset:0 0 auto;z-index:1000;pointer-events:none;visibility:hidden;opacity:0;transition:opacity .12s ease,visibility .12s}
+.navigation-feedback.is-visible{visibility:visible;opacity:1}
+.navigation-progress{height:4px;background:linear-gradient(90deg,#25bde3,#6be5c2,#31a5e8);transform-origin:left center;box-shadow:0 2px 10px #18b8e488;animation:navigation-progress 1.6s ease-in-out infinite alternate}
+.navigation-message{position:absolute;right:16px;top:70px;display:flex;align-items:center;gap:11px;padding:11px 16px;border:1px solid #3d829a;border-radius:13px;background:#0d293ded;color:#edfaff;box-shadow:0 12px 30px #020e1c91;font-size:13px;font-weight:750;backdrop-filter:blur(12px)}
+.navigation-spinner{display:inline-block;flex:none;width:19px;height:19px;border:3px solid #376b82;border-top-color:#73e7fb;border-radius:50%;animation:ui-loading-spin .75s linear infinite}
+/* One clear spinner on submitted buttons. CSS-only, so Server Actions remain safe. */
+button[aria-busy="true"]{display:inline-flex;justify-content:center;align-items:center;gap:9px;opacity:.85}
+button[aria-busy="true"]::before{content:"";display:inline-block;flex:none;width:17px;height:17px;border:2px solid #ffffff70;border-top-color:white;border-radius:50%;animation:ui-loading-spin .75s linear infinite}
+.app-page-loading{min-height:65vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;max-width:580px;margin:auto;padding:48px 18px;text-align:center}
+.app-page-loading .app-loading-brand{display:flex;gap:13px;align-items:center;justify-content:center}
+.app-page-loading .app-loading-brand p{font-size:11px;font-weight:900;color:#65d8f0;letter-spacing:1.5px;margin:0 0 4px}
+.app-page-loading .app-loading-brand strong{font-size:18px;color:#fff}
+.app-page-loading h1{margin:14px 0 0;font-size:23px;letter-spacing:-.45px}
+.app-page-loading>p{font-size:13px;color:#bdd7e6;margin:0}
+.app-page-loading .app-loading-spinner{width:33px;height:33px;border:4px solid #2a5267;border-top-color:#67dced;border-radius:50%;animation:ui-loading-spin .85s linear infinite}
+.app-page-loading .app-loading-skeleton{display:grid;gap:12px;width:min(100%,460px);margin-top:13px}
+.app-page-loading .app-loading-skeleton>div{height:60px;border-radius:12px;background:linear-gradient(100deg,#133449 10%,#22516a 50%,#133449 90%);background-size:200% 100%;animation:ui-loading-shimmer 1.6s ease-in-out infinite}
+.app-page-loading .app-loading-skeleton>div:first-child{height:92px}
+@keyframes ui-loading-spin{to{transform:rotate(360deg)}}
+@keyframes navigation-progress{from{transform:scaleX(.09)}to{transform:scaleX(.9)}}
+@keyframes ui-loading-shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@media(max-width:600px){.navigation-message{top:73px;right:12px;padding:10px 13px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){
+ .navigation-feedback,.navigation-spinner,.navigation-progress,
+ .app-page-loading .app-loading-spinner,.app-page-loading .app-loading-skeleton>div,
+ button[aria-busy="true"]::before{animation:none;transition:none}
+ .navigation-progress{transform:scaleX(.7)}
+}

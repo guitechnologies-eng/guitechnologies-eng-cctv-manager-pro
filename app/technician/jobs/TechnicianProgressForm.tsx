@@ -27,9 +27,9 @@ export default function TechnicianProgressForm({jobId,status}:{
    <div className="technician-progress-buttons">
     {current!=='in_progress'&&
      <button name="action" value="start" type="submit" disabled={pending}
-      className="technician-start-button"><TechIcon name="play" size={18}/> Start job</button>}
+      aria-busy={pending} className="technician-start-button"><TechIcon name="play" size={18}/> {pending?'Saving...':'Start job'}</button>}
     <button name="action" value="complete" type="submit" disabled={pending}
-     className="technician-complete-button"><TechIcon name="check" size={19}/> Mark completed</button>
+     aria-busy={pending} className="technician-complete-button"><TechIcon name="check" size={19}/> {pending?'Saving...':'Mark completed'}</button>
    </div>
   </form>
   {result.message&&<p role="status" className={'technician-form-message '+(result.success?'ok':'error')}>

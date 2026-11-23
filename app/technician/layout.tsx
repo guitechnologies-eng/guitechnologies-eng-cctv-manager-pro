@@ -3,6 +3,7 @@ import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {redirect} from 'next/navigation'
 import TechIcon from './TechIcon'
+import PendingButton from '../components/PendingButton'
 import TechnicianNavigation from './TechnicianNavigation'
 import './technician-ui.css'
 
@@ -28,9 +29,7 @@ export default async function TechnicianLayout({children}:{children:React.ReactN
      </div>
     </div>
     <form action={signOut}>
-     <button className="technician-signout" type="submit" aria-label="Sign out">
-      <TechIcon name="logout" size={19}/><span>Sign out</span>
-     </button>
+     <PendingButton className="technician-signout" label="Sign out" pendingLabel="Signing out..." icon={<TechIcon name="logout" size={19}/>}/>
     </form>
    </div>
   </header>

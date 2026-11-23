@@ -1,5 +1,6 @@
 import BrandLogo from '../components/BrandLogo'
 import {signIn} from '../actions/auth'
+import PendingButton from '../components/PendingButton'
 
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){
  const p=await searchParams
@@ -27,7 +28,7 @@ export default async function Login({searchParams}:{searchParams:Promise<{error?
      <input name="password" type="password" required autoComplete="current-password"
       placeholder="Admin password or staff PIN"/>
     </label>
-    <button type="submit">Sign in</button>
+    <PendingButton label="Sign in" pendingLabel="Signing in..."/>
    </form>
    <p className="muted">Admin uses the existing password. Newly created staff use their 4–8 digit PIN. No Gmail address is required.</p>
   </section>

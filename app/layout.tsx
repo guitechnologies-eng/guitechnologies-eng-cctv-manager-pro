@@ -1,5 +1,7 @@
 import type {Metadata,Viewport} from 'next'
 import './style.css'
+import {Suspense} from 'react'
+import NavigationFeedback from './components/NavigationFeedback'
 
 export const metadata:Metadata={
  title:'CCTV Manager Pro | GUI Technologies',
@@ -24,5 +26,5 @@ export const viewport:Viewport={
 }
 
 export default function RootLayout({children}:{children:React.ReactNode}){
- return <html lang="en"><body>{children}</body></html>
+ return <html lang="en"><body><Suspense fallback={null}><NavigationFeedback/></Suspense>{children}</body></html>
 }

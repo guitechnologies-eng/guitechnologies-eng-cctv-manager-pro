@@ -2,6 +2,7 @@
 
 import {useEffect,useRef,useState} from 'react'
 import {usePathname,useSearchParams} from 'next/navigation'
+import {shouldShowNavigationFeedback} from '../../lib/navigation-feedback'
 
 /**
  * Small, non-blocking navigation indicator for internal links and GET filters.
@@ -37,12 +38,7 @@ export default function NavigationFeedback(){
    if(!(event.target instanceof Element))return
    const a=event.target.closest('a[href]') as HTMLAnchorElement|null
    if(!a||a.hasAttribute('download')||(a.target&&a.target!=='_self'))return
-   let destination:URL
-   try{destination=new URL(a.href,window.location.href)}catch{return}
-   if(destination.origin!==window.location.origin)return
-   // In-page anchors should scroll immediately; no loading message.
-   if(destination.pathname===window.location.pathname&&
-    destination.search===window.location.search)return
+   if(!shouldShowNavigationFeedback(window.location.href,a.href))return
    begin()
   }
 

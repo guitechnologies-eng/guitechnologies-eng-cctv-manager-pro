@@ -8,6 +8,8 @@ test('technician bottom navigation contains My Jobs and All Jobs, not Lodging',(
  const nav=read('app/technician/TechnicianNavigation.tsx')
  assert.match(nav,/label:'My Jobs'/)
  assert.match(nav,/label:'All Jobs'/)
+ assert.match(nav,/href:'\/technician\/all'/)
+ assert.doesNotMatch(nav,/dashboard\?tech=all/)
  assert.doesNotMatch(nav,/label:'Lodging'/)
  assert.doesNotMatch(nav,/href:'\/technician\/lodging'/)
  assert.match(read('app/technician/technician-ui.css'),/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/)

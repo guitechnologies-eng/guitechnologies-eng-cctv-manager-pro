@@ -1,6 +1,7 @@
 'use client'
 
 import {useActionState} from 'react'
+import Link from 'next/link'
 import {technicianProgress,type TechnicianActionState} from '../../actions/technician'
 import TechIcon from '../TechIcon'
 
@@ -14,6 +15,7 @@ export default function TechnicianProgressForm({jobId,status}:{
  if(current==='completed'||current==='cancelled')return <div className="technician-closed">
   <strong>{current==='completed'?'Job Completed':'Job Cancelled'}</strong>
   <p>{result.success?result.message:'This job is closed. No further progress action is needed.'}</p>
+  <Link className="technician-team-back" href="/technician">Back to Active Jobs</Link>
  </div>
  return <section className="technician-progress-panel">
   <div className="technician-detail-title"><span className="technician-panel-icon"><TechIcon name="tool" size={19}/></span><h2>Update job progress</h2></div>

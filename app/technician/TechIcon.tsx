@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react'
 
-export type TechIconName='jobs'|'bed'|'grid'|'arrow'|'back'|'pin'|'phone'|'clock'|'check'|'tool'|'calendar'|'play'|'history'|'note'|'logout'|'user'|'bell'|'chevron'|'shield'
+export type TechIconName='jobs'|'bed'|'grid'|'arrow'|'back'|'pin'|'phone'|'clock'|'check'|'tool'|'calendar'|'play'|'history'|'note'|'logout'|'user'|'bell'|'chevron'|'shield'|'search'|'refresh'
 
 const shapes:Record<TechIconName,ReactNode>={
  jobs:<><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M9 3v4M15 3v4M4 10h16M8 14h3M8 18h7"/></>,
@@ -21,7 +21,9 @@ const shapes:Record<TechIconName,ReactNode>={
  user:<><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
  bell:<><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></>,
  chevron:<><path d="m9 6 6 6-6 6"/></>,
- shield:<><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></>
+ shield:<><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></>,
+ search:<><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></>,
+ refresh:<><path d="M20 11a8 8 0 0 0-14.5-4.5L3 9m0-6v6h6M4 13a8 8 0 0 0 14.5 4.5L21 15m0 6v-6h-6"/></>
 }
 
 export default function TechIcon({name,size=20,className=''}:{

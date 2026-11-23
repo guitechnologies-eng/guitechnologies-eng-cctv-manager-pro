@@ -29,7 +29,7 @@ export default async function TechnicianLayout({children}:{children:React.ReactN
      </div>
     </div>
     <form action={signOut}>
-     <PendingButton className="technician-signout" label="Sign out" pendingLabel="Signing out..." icon={<TechIcon name="logout" size={19}/>}/>
+     <PendingButton className="technician-signout" label="Sign out" ariaLabel="Sign out" pendingLabel="Signing out..." icon={<TechIcon name="logout" size={19}/>}/>
     </form>
    </div>
   </header>

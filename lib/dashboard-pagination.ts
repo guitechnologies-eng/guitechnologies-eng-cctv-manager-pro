@@ -1,5 +1,26 @@
 export const JOBS_PER_PAGE=12
 
+export type DashboardJobStatusFilter='active'|'all'|'pending'|'assigned'|'in_progress'|'completed'|'cancelled'
+
+/** Closed jobs remain in the database and are available through explicit history filters. */
+export function isClosedJob(status:string):boolean{
+ return status==='completed'||status==='cancelled'
+}
+
+export function parseJobStatusFilter(value:unknown):DashboardJobStatusFilter{
+ if(typeof value==='string'&&[
+  'active','all','pending','assigned','in_progress','completed','cancelled'
+ ].includes(value))return value as DashboardJobStatusFilter
+ return 'active'
+}
+
+export function matchesJobStatus(status:string,filter:DashboardJobStatusFilter):boolean{
+ if(filter==='active')return !isClosedJob(status)
+ if(filter==='all')return true
+ return status===filter
+}
+
+
 export function parseDashboardPage(value:unknown):number{
  if(typeof value!=='string'||!/^[1-9][0-9]{0,4}$/.test(value))return 1
  const page=Number(value)

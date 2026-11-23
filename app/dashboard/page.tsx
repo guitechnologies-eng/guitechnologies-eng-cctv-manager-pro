@@ -13,7 +13,7 @@ import TechnicianAssignmentForm from './TechnicianAssignmentForm'
 import {groupJobTechnicians} from '../../lib/technician-assignment'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
-import {paginateJobs,dashboardPageHref,reminderJobHref,filterJobByTechnician} from '../../lib/dashboard-pagination'
+import {paginateJobs,dashboardPageHref,reminderJobHref,filterJobByTechnician,parseJobStatusFilter,matchesJobStatus,isClosedJob} from '../../lib/dashboard-pagination'
 import {serviceShareText} from '../../lib/whatsapp'
 import {getReminderGroups,colomboInputValue,colomboDateLabel} from '../../lib/reminders'
 
@@ -27,7 +27,7 @@ const sections=[
 export default async function Dashboard({searchParams}:{searchParams:Promise<{q?:string;status?:string;section?:string;page?:string;tech?:string}>}){
  const params=await searchParams
  const query=typeof params.q==='string'?params.q.trim().slice(0,120).toLowerCase():''
- const statusFilter=typeof params.status==='string'&&['pending','assigned','in_progress','completed','cancelled'].includes(params.status)?params.status:''
+ const statusFilter=parseJobStatusFilter(params.status)
  const sectionFilter=typeof params.section==='string'&&['CCTV NEW INSTALLATION REQUEST','REPAIR & WARRANTY SERVICE','OTHER'].includes(params.section)?params.section:''
  const s=await db()
  const {data:{user}}=await s.auth.getUser()
@@ -44,6 +44,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   staff?s.from('profiles').select('id,full_name').eq('role','technician').eq('active',true).order('full_name',{ascending:true}):Promise.resolve({data:[]})
  ])
  const jobs=jobsRes.data||[]
+ const activeJobCount=jobs.filter(j=>!isClosedJob(j.status)).length
+ const closedJobCount=jobs.length-activeJobCount
  const customers=customersRes.data||[]
  const technicians=techniciansRes.data||[]
  const assignmentByJob=groupJobTechnicians(assignmentsRes.data||[])
@@ -66,7 +68,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   const customer=Array.isArray(j.customer)?j.customer[0]:j.customer
   const searchable=[customer?.name,customer?.phone,customer?.address,j.site_address,j.title,j.job_number,j.source_status_note].filter(Boolean).join(' ').toLowerCase()
   const matchesSearch=!query||searchable.includes(query)
-  const matchesStatus=!statusFilter||j.status===statusFilter
+  const matchesStatus=matchesJobStatus(j.status,statusFilter)
   const matchesSection=!sectionFilter||(sectionFilter==='OTHER'?!sections.some(s=>s.key===j.request_section):j.request_section===sectionFilter)
   const matchesTech=filterJobByTechnician(j.id,assignmentByJob.get(j.id),techFilter,user.id,p.role==='technician')
   return matchesSearch&&matchesStatus&&matchesSection&&matchesTech
@@ -251,7 +253,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    </section>
    <section className="cards stat-grid" aria-label="Job overview statistics">
     {[
-      {label:'Total Jobs',count:jobs.length,icon:'grid' as const,href:'/dashboard#service-requests',tone:'cyan',hint:'All visible service requests'},
+      {label:'Total Jobs',count:jobs.length,icon:'grid' as const,href:'/dashboard?status=all#service-requests',tone:'cyan',hint:'All visible service requests'},
       {label:'Pending Jobs',count:jobs.filter(j=>j.status==='pending').length,icon:'clock' as const,href:'/dashboard?status=pending#service-requests',tone:'amber',hint:'Awaiting service action'},
       {label:'In Progress',count:jobs.filter(j=>j.status==='in_progress').length,icon:'tool' as const,href:'/dashboard?status=in_progress#service-requests',tone:'blue',hint:'Currently being worked on'},
       {label:'Completed Jobs',count:jobs.filter(j=>j.status==='completed').length,icon:'check' as const,href:'/dashboard?status=completed#service-requests',tone:'green',hint:'Service work finished'}
@@ -291,10 +293,15 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   <div className="forms single-job-form" id="new-job">
    <NewJobForm customers={customers}/>
   </div></div>}
-  <section className="panel service-requests ui-section" id="service-requests"><div className="section-heading"><div><span className="section-eyebrow">SERVICE QUEUE</span><h2>{staff?'All Service Requests':techFilter==='mine'?'My Assigned Jobs':'All Service Jobs'}</h2><p>{p.role==='technician'?('Jobs assigned to you: '+assignedToMe+'. Switch to All Jobs for the shared queue.'):'Search, assign and manage service jobs.'}</p></div><span className="section-count-total">{jobs.length} total jobs</span></div>
+  <section className="panel service-requests ui-section" id="service-requests"><div className="section-heading"><div><span className="section-eyebrow">SERVICE QUEUE</span><h2>{statusFilter==='active'?'Active Service Jobs':statusFilter==='completed'?'Completed Jobs':statusFilter==='cancelled'?'Cancelled Jobs':statusFilter==='all'?'All Service Requests':'Filtered Service Jobs'}</h2><p>{statusFilter==='active'?'Completed and cancelled jobs are hidden from this active queue. Use the status options to view them.':'Historical jobs are kept safely; changing the filter does not delete any job.'}</p></div><span className="section-count-total">{activeJobCount} active · {closedJobCount} closed</span></div>
+   <nav className="job-status-shortcuts" aria-label="Choose service queue status">
+    {([
+     ['active','Active Jobs'],['completed','Completed'],['cancelled','Cancelled'],['all','All Jobs']
+    ] as const).map(([value,label])=><Link key={value} href={'/dashboard?status='+value+'#service-requests'} className={'job-status-shortcut'+(statusFilter===value?' is-active':'')} aria-current={statusFilter===value?'page':undefined}>{label}{value==='active'?<span>{activeJobCount}</span>:value==='all'?<span>{jobs.length}</span>:<span>{jobs.filter(j=>j.status===value).length}</span>}</Link>)}
+   </nav>
    <form method="GET" action="/dashboard" className="job-filters">
     <label>Search customer, phone, place or reason<input name="q" type="search" defaultValue={params.q||''} maxLength={120} placeholder="Name / phone / address / job"/></label>
-    <label>Status<select name="status" defaultValue={statusFilter}><option value="">All statuses</option><option value="pending">Pending</option><option value="assigned">Assigned</option><option value="in_progress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>
+    <label>Status<select name="status" defaultValue={statusFilter}><option value="active">Active Jobs (default)</option><option value="all">All Jobs (including closed)</option><option value="pending">Pending</option><option value="assigned">Assigned</option><option value="in_progress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>
     <label>Section<select name="section" defaultValue={sectionFilter}><option value="">All sections</option>{sections.map(s=><option key={s.key} value={s.key}>{s.key}</option>)}<option value="OTHER">Other</option></select></label>
     <label>Technician<select name="tech" defaultValue={techFilter}>
      {p.role==='technician'
@@ -306,7 +313,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <div className="filter-buttons"><button type="submit"><TechIcon name="jobs" size={16}/> Search / Filter</button><a href="/dashboard">Clear Filters</a></div>
    </form>
    <p className="muted filter-results"><TechIcon name="jobs" size={15}/> Showing <strong>{visiblePage.from}–{visiblePage.to}</strong> of {filtered.length} matching service requests (from {jobs.length} loaded jobs)</p>
-   {jobsRes.error?<p>Unable to load service requests.</p>:!filtered.length?<p>No matching service requests.</p>:<div>
+   {jobsRes.error?<p>Unable to load service requests.</p>:!filtered.length?<p>{statusFilter==='active'?'No active jobs match your filters. Completed and cancelled jobs are available in their own views.':'No matching service requests.'}</p>:<div>
     {sections.map(sec=>{
      const group=visibleJobs.filter(j=>j.request_section===sec.key)
      return <div className="job-section" key={sec.key}><h3>{sec.label} <span className="section-count">{group.length}</span></h3>{group.length?group.map(jobCard):<p className="muted">No requests in this section.</p>}</div>

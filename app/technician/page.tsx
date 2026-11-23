@@ -3,12 +3,15 @@ import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import TechnicianNotifications from '../dashboard/TechnicianNotifications'
 import TechIcon from './TechIcon'
+import {isClosedJob} from '../../lib/dashboard-pagination'
 
 export const dynamic='force-dynamic'
 
 const statusLabel=(status:string)=>status.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase())
 
-export default async function TechnicianMobileDashboard(){
+export default async function TechnicianMobileDashboard({searchParams}:{searchParams:Promise<{view?:string}>}){
+ const {view}=await searchParams
+ const showClosed=view==='closed'
  const supabase=await db()
  const {data:{user}}=await supabase.auth.getUser()
  if(!user)redirect('/login')
@@ -27,9 +30,10 @@ export default async function TechnicianMobileDashboard(){
   :{data:[],error:null}
  const jobsById=new Map((rawJobs||[]).map(job=>[job.id,job]))
  const ordered=(assignments||[]).map(a=>jobsById.get(a.job_id)).filter(j=>Boolean(j))
- const work=ordered.filter(j=>j && !['completed','cancelled'].includes(j.status))
- const finished=ordered.filter(j=>j && j.status==='completed')
- const list=[...work,...ordered.filter(j=>j && ['completed','cancelled'].includes(j.status))]
+ const work=ordered.filter(j=>j && !isClosedJob(j.status))
+ const closed=ordered.filter(j=>j && isClosedJob(j.status))
+ const finished=closed.filter(j=>j && j.status==='completed')
+ const list=showClosed?closed:work
 
  const visitLabel=(value:string)=>new Intl.DateTimeFormat('en-GB',{
   timeZone:'Asia/Colombo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'
@@ -73,18 +77,22 @@ export default async function TechnicianMobileDashboard(){
    <div className="technician-section-head">
     <div>
      <span className="technician-section-kicker">YOUR ASSIGNMENTS</span>
-     <h2 id="assigned-jobs-heading">Service jobs</h2>
+     <h2 id="assigned-jobs-heading">{showClosed?'Completed & Cancelled Jobs':'Active Service Jobs'}</h2>
     </div>
-    <span className="technician-section-count">{ordered.length} total</span>
+    <span className="technician-section-count">{list.length} jobs</span>
    </div>
+   <nav className="technician-job-views" aria-label="Technician job list view">
+    <Link href="/technician" className={!showClosed?'is-active':''} aria-current={!showClosed?'page':undefined}>Active Jobs <span>{work.length}</span></Link>
+    <Link href="/technician?view=closed" className={showClosed?'is-active':''} aria-current={showClosed?'page':undefined}>Completed / Cancelled <span>{closed.length}</span></Link>
+   </nav>
    {assignmentError||jobError?
     <div className="technician-empty" role="alert"><TechIcon name="shield" size={30}/>
      <strong>Unable to load jobs</strong><p>Check your connection and refresh this page.</p>
     </div>:
     !list.length?<div className="technician-empty">
      <span className="technician-empty-symbol"><TechIcon name="jobs" size={30}/></span>
-     <strong>No jobs assigned yet</strong>
-     <p>New service assignments will appear here when available.</p>
+     <strong>{showClosed?'No completed or cancelled jobs':'No active jobs right now'}</strong>
+     <p>{showClosed?'Closed jobs will remain available here for reference.':'Completed and cancelled jobs are in the separate history view.'}</p>
     </div>:list.map(job=>{
      if(!job)return null
      const customer=Array.isArray(job.customer)?job.customer[0]:job.customer
@@ -108,7 +116,7 @@ export default async function TechnicianMobileDashboard(){
         <TechIcon name="phone" size={17}/><span>Call</span>
        </a>}
        <Link className="technician-open-job" href={'/technician/jobs/'+job.id}>
-        <span>{job.status==='completed'?'View completed job':job.status==='in_progress'?'Continue job':'View job details'}</span>
+        <span>{isClosedJob(job.status)?'View closed job':job.status==='in_progress'?'Continue job':'View job details'}</span>
         <TechIcon name="arrow" size={18}/>
        </Link>
       </div>

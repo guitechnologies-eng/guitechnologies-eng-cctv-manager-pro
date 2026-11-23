@@ -55,15 +55,14 @@ test('short summary has bounded length even with long customer input',()=>{
  assert.match(short,/Status: Assigned/)
 })
 
-test('the action is a visible shortcut, the editor remains optional, and customer WhatsApp is not automatic',()=>{
+test('WhatsApp Team remains one click and the optional editor is not rendered',()=>{
  const dash=readFileSync(new URL('../app/dashboard/page.tsx',import.meta.url),'utf8')
- const editor=readFileSync(new URL('../app/dashboard/TeamWhatsAppShare.tsx',import.meta.url),'utf8')
  assert.match(dash,/className="action-link whatsapp-quick-action"/)
  assert.match(dash,/whatsappShareLink\(shortMessage\)/)
  assert.match(dash,/target="_blank" rel="noopener noreferrer"/)
- assert.match(dash,/initialMessage=\{shortMessage\} detailMessage=\{message\}/)
- assert.match(editor,/Edit WhatsApp Message \(optional\)/)
- assert.match(editor,/Full Details/)
- assert.match(editor,/Short Version/)
- assert.match(editor,/Nothing is sent automatically/)
+ assert.match(dash,/WhatsApp Team/)
+ assert.match(dash,/View full service history/)
+ assert.doesNotMatch(dash,/TeamWhatsAppShare/)
+ assert.doesNotMatch(dash,/Edit WhatsApp Message \(optional\)/)
+ assert.doesNotMatch(dash,/serviceShareText\(shareData\)/)
 })

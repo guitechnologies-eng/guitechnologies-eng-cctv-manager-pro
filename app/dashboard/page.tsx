@@ -4,6 +4,7 @@ import {signOut} from '../actions/auth'
 import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder} from '../actions/jobs'
 import NewJobForm from './NewJobForm'
 import PendingSubmit from './PendingSubmit'
+import PendingButton from '../components/PendingButton'
 import TeamWhatsAppShare from './TeamWhatsAppShare'
 import TechnicianNotifications from './TechnicianNotifications'
 import TechnicianAssignmentForm from './TechnicianAssignmentForm'
@@ -224,7 +225,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <p className="topbar-breadcrumb"><span className="online-indicator" aria-hidden="true"/> Workspace <span className="breadcrumb-separator">/</span> Dashboard</p>
     <div className="topbar-user"><div className="user-avatar" aria-hidden="true">{p.full_name?.charAt(0)?.toUpperCase()||'G'}</div>
      <div><strong>{p.full_name}</strong><span>{p.role==='office'?'Shop Staff':p.role==='technician'?'Technician':p.role}</span></div>
-     <form action={signOut}><button type="submit" className="signout-button">Sign out</button></form>
+     <form action={signOut}><PendingButton label="Sign out" pendingLabel="Signing out..." className="signout-button"/></form>
     </div>
    </header>
    {p.role==='technician'&&process.env.NEXT_PUBLIC_WEB_PUSH_KEY&&

@@ -19,7 +19,7 @@ test('middleware keeps updated refresh cookies when redirecting stale sessions',
  assert.match(source,/auth\.getClaims\(\)/)
  assert.match(source,/cookiesToSet\.forEach/)
  assert.match(source,/response\.cookies\.getAll\(\)\.forEach\(cookie=>login\.cookies\.set\(cookie\)\)/)
- assert.match(source,/headersToSet/)
+ assert.match(source,/response.headers.set\('Cache-Control','private, no-store'\)/)
  assert.match(source,/private, no-store/)
  assert.match(source,/if\(protectedPage&&!authorized\)/)
  assert.doesNotMatch(source,/getSession\(\)/)

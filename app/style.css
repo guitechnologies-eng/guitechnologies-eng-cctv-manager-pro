@@ -815,3 +815,13 @@ button[aria-busy="true"]::before{content:"";display:inline-block;flex:none;width
  .app-frame .stat-grid .stat-card{transition:none}
  .app-frame .stat-grid .stat-card:hover{transform:none}
 }
+
+
+/* Service queues: closed work stays accessible without cluttering daily operations. */
+.app-frame .job-status-shortcuts{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 17px;padding-bottom:14px;border-bottom:1px solid #2b4a60}
+.app-frame .job-status-shortcut{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:41px;padding:8px 14px;border:1px solid #34576e;border-radius:11px;background:#102c3e;color:#bad5e4;text-decoration:none;font-size:12px;font-weight:780;transition:border-color .15s ease,background .15s ease}
+.app-frame .job-status-shortcut span{display:inline-grid;place-items:center;min-width:23px;height:23px;padding:0 6px;border-radius:8px;background:#204257;color:#d9f6ff;font-size:11px;font-weight:900;font-variant-numeric:tabular-nums}
+.app-frame .job-status-shortcut:hover{border-color:#66a8be;color:#fff;background:#183a50}
+.app-frame .job-status-shortcut.is-active{background:#174b64;border-color:#55bdd2;color:#e9fdff;box-shadow:inset 0 -2px #5be7e7}
+.app-frame .job-status-shortcut.is-active span{background:#1c6680}
+@media(max-width:600px){.app-frame .job-status-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.app-frame .job-status-shortcut{padding:9px 10px;font-size:11px}}

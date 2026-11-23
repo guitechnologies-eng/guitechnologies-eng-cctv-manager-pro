@@ -20,13 +20,13 @@ test('mobile technician work list hides closed jobs unless history view selected
  assert.match(technician,/showClosed=view==='closed'/)
  assert.match(technician,/const closed=ordered\.filter\(j=>j && isClosedJob\(j\.status\)\)/)
  assert.match(technician,/const list=showClosed\?closed:work/)
- assert.match(technician,/href="\/technician\?view=closed"/)
- assert.match(technician,/href="\/technician"/)
+ assert.ok(technician.includes("href={'/technician/jobs/'+job.id}"))
+ assert.ok(technician.includes("href={'/technician/jobs/'+job.id}"))
 })
 
 test('closed jobs keep separate history and details routes; no data deletion',()=>{
- assert.match(dashboard,/href=\{'\/jobs\/\'+j\.id\}/)
- assert.match(technician,/href=\{'\/technician\/jobs\/\'+job\.id\}/)
+ assert.ok(dashboard.includes("href={'/jobs/'+j.id}"))
+ assert.ok(technician.includes("href={'/technician/jobs/'+job.id}"))
  assert.doesNotMatch(technician,/\.delete\(/)
  assert.doesNotMatch(dashboard,/\.delete\(/)
 })

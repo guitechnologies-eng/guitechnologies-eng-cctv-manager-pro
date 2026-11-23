@@ -483,6 +483,16 @@ main.wrap.dashboard-main{max-width:1500px;width:100%;margin:0;padding:22px clamp
 .job-filters label:has(select[name="tech"]){min-width:140px}
 @media(max-width:670px){.job-assignment-line{display:block}.job-assignment-line span{display:block;margin-top:5px}}
 
+/* Two technicians per job: responsive desktop assignment editor. */
+.assign-technician-form .assign-technician-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.assign-technician-form .assign-technician-row label{font-weight:750;font-size:13px}
+.assign-technician-form .assign-technician-row select{width:100%;max-width:100%;min-height:46px}
+.assign-technician-form button[disabled]{cursor:not-allowed;opacity:.65}
+.technician-assignment-feedback{font-size:12px;font-weight:700;border-radius:9px;padding:10px 12px;margin:2px 0 0}
+.technician-assignment-feedback.ok{background:#173f35;border:1px solid #347e61;color:#aaf7d2}
+.technician-assignment-feedback.error{background:#4a2932;border:1px solid #965365;color:#ffccdb}
+@media(max-width:650px){.assign-technician-form .assign-technician-row{grid-template-columns:1fr}}
+
 /* Technician mobile-first job app. No emoji icons; large phone touch targets. */
 .technician-app{min-height:100dvh;background:#071625;color:#edf8ff;padding:0 0 max(88px,env(safe-area-inset-bottom));}
 .technician-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px max(16px,env(safe-area-inset-left));background:#0b2136;border-bottom:1px solid #24475d;box-shadow:0 5px 20px #0002}

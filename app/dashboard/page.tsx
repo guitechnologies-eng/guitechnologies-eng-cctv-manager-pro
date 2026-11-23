@@ -8,6 +8,7 @@ import PendingSubmit from './PendingSubmit'
 import PendingButton from '../components/PendingButton'
 import TeamWhatsAppShare from './TeamWhatsAppShare'
 import TechnicianNotifications from './TechnicianNotifications'
+import ReminderJump from './ReminderJump'
 import TechnicianAssignmentForm from './TechnicianAssignmentForm'
 import {groupJobTechnicians} from '../../lib/technician-assignment'
 import {redirect} from 'next/navigation'
@@ -260,6 +261,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     </Link>)}
    </section>
   {staff&&<div className="pc-workspace-grid"><section className="panel internal-reminders ui-section" id="reminder-list">
+   <ReminderJump/>
    <div className="internal-reminders-heading"><div><h2><TechIcon name="bell" size={20}/> Internal Team Reminders</h2><p className="muted">Dashboard alerts only · Sri Lanka time · Updates when you load or refresh the dashboard.</p></div><span className="reminder-total">{reminderItems.length} active alerts</span></div>
    <div className="reminder-counts">
     <a href="#reminder-overdue"><strong>{reminderGroups.overdue.length}</strong><span>Overdue</span></a>

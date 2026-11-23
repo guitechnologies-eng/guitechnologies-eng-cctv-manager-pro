@@ -13,7 +13,8 @@ test('desktop dashboard keeps original service and admin work areas',()=>{
  assert.match(dash,/className="pc-workspace-grid"/)
  assert.match(dash,/className="desktop-command-bar"/)
  assert.match(dash,/TechnicianAssignmentForm/)
- assert.match(dash,/TeamWhatsAppShare/)
+ assert.match(dash,/className="action-link whatsapp-quick-action"/)
+ assert.doesNotMatch(dash,/TeamWhatsAppShare/)
  assert.match(dash,/className="job-progress-form"/)
 })
 

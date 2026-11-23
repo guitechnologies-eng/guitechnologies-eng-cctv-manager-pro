@@ -23,14 +23,10 @@ export async function middleware(request:NextRequest){
  const supabase=createServerClient(url,key,{
   cookies:{
    getAll(){return request.cookies.getAll()},
-   setAll(cookiesToSet,headersToSet){
+   setAll(cookiesToSet){
     cookiesToSet.forEach(({name,value})=>request.cookies.set(name,value))
     response=NextResponse.next({request})
     cookiesToSet.forEach(({name,value,options})=>response.cookies.set(name,value,options))
-    // Supabase SSR supplies cache-prevention headers during token refresh.
-    if(headersToSet){
-     Object.entries(headersToSet).forEach(([name,value])=>response.headers.set(name,value))
-    }
    }
   }
  })

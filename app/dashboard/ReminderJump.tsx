@@ -16,10 +16,14 @@ export default function ReminderJump(){
    const link=event.target.closest('#reminder-list .reminder-counts a[href^="#reminder-"]') as HTMLAnchorElement|null
    if(link)reveal(link.hash)
   }
-  reveal(window.location.hash)
+  const onHashChange=()=>reveal(window.location.hash)
+  onHashChange()
   document.addEventListener('click',onClick)
-  window.addEventListener('hashchange',()=>reveal(window.location.hash))
-  return ()=>document.removeEventListener('click',onClick)
+  window.addEventListener('hashchange',onHashChange)
+  return ()=>{
+   document.removeEventListener('click',onClick)
+   window.removeEventListener('hashchange',onHashChange)
+  }
  },[])
  return null
 }

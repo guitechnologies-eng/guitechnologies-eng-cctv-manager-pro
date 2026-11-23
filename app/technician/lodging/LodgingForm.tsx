@@ -41,7 +41,7 @@ export default function LodgingForm({jobs,defaultJobId,today}:{
     <textarea name="notes" maxLength={800}
      placeholder="Accommodation details or reimbursement note"/>
    </label>
-   <button type="submit" disabled={pending} className="technician-save-button">
+   <button type="submit" disabled={pending} aria-busy={pending} className="technician-save-button">
     {pending?'Saving Lodging...':'Save Lodging Details'}
    </button>
    {result.message&&<p role="status" className={'technician-form-message '+(result.success?'ok':'error')}>

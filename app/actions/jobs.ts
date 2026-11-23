@@ -221,32 +221,36 @@ export async function addUpdate(form:FormData){
  revalidatePath('/dashboard')
 }
 
+export type TechnicianAssignmentState={success:boolean;message:string}
+
 /** Save the exact team of 0–2 active technicians in one atomic, audited RPC. */
-export async function assignTechnicians(form:FormData){
+export async function assignTechnicians(_previous:TechnicianAssignmentState,form:FormData):Promise<TechnicianAssignmentState>{
  const {supabase,role}=await actor()
  requireOffice(role)
  const jobId=read(form,'job_id',50)
- if(!isUuid(jobId))throw new Error('Invalid job')
- const technicianIds=normalizeTechnicianSelection(
-  form.get('technician_id_1'),form.get('technician_id_2')
- )
- // The RPC validates staff/tech roles and updates both slots under one job lock.
- // It preserves unchanged assignments and queues notifications for new assignees only.
+ if(!isUuid(jobId))return {success:false,message:'Invalid service job. Refresh and try again.'}
+ let technicianIds:string[]
+ try{
+  technicianIds=normalizeTechnicianSelection(
+   form.get('technician_id_1'),form.get('technician_id_2')
+  )
+ }catch(error){
+  return {success:false,message:(error as Error).message}
+ }
+ // One database transaction updates both assignments and preserves unchanged rows.
  const {error}=await supabase.rpc('assign_job_technicians',{
   p_job_id:jobId,
   p_technician_ids:technicianIds
  })
  if(error){
-  if(error.message.includes('Choose an active Technician')){
-   throw new Error('Choose active Technicians and try again.')
-  }
-  if(error.message.includes('Job not found')){
-   throw new Error('This service job no longer exists.')
-  }
-  if(error.message.includes('at most two')||error.message.includes('different Technicians')){
-   throw new Error('Choose up to two different Technicians.')
-  }
-  throw new Error('Technician assignments could not be saved. Check your permissions and database update.')
+  const message=error.message.includes('Choose an active Technician')
+   ?'Choose active Technicians and try again.'
+   :error.message.includes('Job not found')
+   ?'This service job no longer exists.'
+   :error.message.includes('at most two')||error.message.includes('different Technicians')
+   ?'Choose up to two different Technicians.'
+   :'Assignments could not be saved. Check the database migration and permissions.'
+  return {success:false,message}
  }
  if(technicianIds.length){
   after(async()=>{
@@ -257,4 +261,7 @@ export async function assignTechnicians(form:FormData){
  revalidatePath('/dashboard')
  revalidatePath('/jobs/'+jobId)
  revalidatePath('/technician')
+ return {success:true,message:technicianIds.length
+  ?technicianIds.length===2?'Both Technicians assigned successfully.':'Technician assigned successfully.'
+  :'Technicians unassigned successfully.'}
 }

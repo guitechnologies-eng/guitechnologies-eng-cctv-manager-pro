@@ -1,4 +1,5 @@
 import BrandLogo from '../components/BrandLogo'
+import TechIcon from '../technician/TechIcon'
 import {db} from '../../lib/supabase'
 import {signOut} from '../actions/auth'
 import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternalReminder} from '../actions/jobs'
@@ -117,7 +118,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <p><b>🔧 Reason:</b> {j.title==='(No reason provided)'?'—':j.title}</p>
     {j.source_status_note&&<p className="source-status">📝 {j.source_status_note}</p>}
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
-    <p className="job-assignment-line"><b>Assigned Technicians:</b> <span className={assignedIds.length?'assignment-assigned':'assignment-unassigned'}>{assignedName||'Not assigned'}</span></p>
+    <p className="job-assignment-line"><TechIcon name="user" size={16}/><b>Assigned Technicians:</b> <span className={assignedIds.length?'assignment-assigned':'assignment-unassigned'}>{assignedName||'Not assigned'}</span></p>
     <div className="job-shortcuts">
      <Link prefetch={false} className="action-link" href={'/jobs/'+j.id}>View full service history</Link>
     </div>
@@ -128,7 +129,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
      {j.follow_up_at&&<span>🔔 Follow-up: {colomboDateLabel(j.follow_up_at)}</span>}
     </p>}
     {staff&&<details className="job-management">
-     <summary>Manage job · Status, Reminders &amp; Details</summary>
+     <summary><TechIcon name="tool" size={16}/> Manage Job · Assign, Edit &amp; Status</summary>
      <div className="job-edit-controls">
      <TechnicianAssignmentForm key={j.id+':'+assignedIds.join(',')}
       jobId={j.id} jobNumber={j.job_number} technicians={technicians} assignedIds={assignedIds}/>
@@ -207,13 +208,13 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    </div>
    <div className="sidebar-section-label">WORKSPACE</div>
    <nav className="sidebar-nav">
-    <a className="sidebar-link active" href="#overview"><span aria-hidden="true">◫</span> Overview</a>
-    {staff&&<a className="sidebar-link" href="#reminder-list"><span aria-hidden="true">◉</span> Team Reminders {reminderItems.length>0&&<small>{reminderItems.length}</small>}</a>}
-    {staff&&<a className="sidebar-link" href="#new-job"><span aria-hidden="true">＋</span> Create Job</a>}
-    {p.role==='technician'&&<Link className="sidebar-link" href="/technician"><span aria-hidden="true">▤</span> Technician Mobile</Link>}
-    {p.role==='technician'&&<Link className="sidebar-link" href="/dashboard?tech=mine#service-requests"><span aria-hidden="true">◉</span> My Assigned Jobs ({assignedToMe})</Link>}
-    <a className="sidebar-link" href="#service-requests"><span aria-hidden="true">▤</span> Service Requests</a>
-    {p.role==='admin'&&<Link className="sidebar-link" href="/staff"><span aria-hidden="true">▦</span> Staff Management</Link>}
+    <a className="sidebar-link active" href="#overview"><TechIcon name="grid" size={19}/> Overview</a>
+    {staff&&<a className="sidebar-link" href="#reminder-list"><TechIcon name="bell" size={19}/> Team Reminders {reminderItems.length>0&&<small>{reminderItems.length}</small>}</a>}
+    {staff&&<a className="sidebar-link" href="#new-job"><TechIcon name="note" size={19}/> Create Job</a>}
+    {p.role==='technician'&&<Link className="sidebar-link" href="/technician"><TechIcon name="tool" size={19}/> Technician Mobile</Link>}
+    {p.role==='technician'&&<Link className="sidebar-link" href="/dashboard?tech=mine#service-requests"><TechIcon name="jobs" size={19}/> My Assigned Jobs ({assignedToMe})</Link>}
+    <a className="sidebar-link" href="#service-requests"><TechIcon name="jobs" size={19}/> Service Requests</a>
+    {p.role==='admin'&&<Link className="sidebar-link" href="/staff"><TechIcon name="user" size={19}/> Staff Management</Link>}
    </nav>
    <div className="sidebar-footer">
     <span className="workspace-status"><span className="online-indicator" aria-hidden="true"/> Internal workspace</span>
@@ -223,6 +224,11 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
   <main className="wrap dashboard-main" id="overview">
    <header className="dashboard-topbar">
     <p className="topbar-breadcrumb"><span className="online-indicator" aria-hidden="true"/> Workspace <span className="breadcrumb-separator">/</span> Dashboard</p>
+     {staff&&<nav className="desktop-command-bar" aria-label="Quick access">
+      <a href="#new-job"><TechIcon name="note" size={16}/> New Job</a>
+      <a href="#service-requests"><TechIcon name="jobs" size={16}/> Service Queue</a>
+      <a href="#reminder-list"><TechIcon name="bell" size={16}/> Reminders</a>
+     </nav>}
     <div className="topbar-user"><div className="user-avatar" aria-hidden="true">{p.full_name?.charAt(0)?.toUpperCase()||'G'}</div>
      <div><strong>{p.full_name}</strong><span>{p.role==='office'?'Shop Staff':p.role==='technician'?'Technician':p.role}</span></div>
      <form action={signOut}><PendingButton label="Sign out" pendingLabel="Signing out..." className="signout-button"/></form>
@@ -232,29 +238,29 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <TechnicianNotifications publicKey={process.env.NEXT_PUBLIC_WEB_PUSH_KEY}/>}
    <section className="dashboard-hero" aria-labelledby="dashboard-heading">
     <div className="hero-content">
-     <span className="hero-overline">SERVICE OPERATIONS CENTER</span>
+     <span className="hero-overline">GUI TECHNOLOGIES · DESKTOP WORKSPACE</span>
      <h1 id="dashboard-heading">CCTV Service Dashboard<span className="hero-dot">.</span></h1>
-     <p>Manage customer requests, track service progress and stay on top of every follow-up in one place.</p>
+     <p>Customers, technicians, service jobs and follow-ups — one clear desktop workspace.</p>
      <div className="hero-quick-actions">
-      {staff&&<a className="hero-primary-action" href="#new-job"><span aria-hidden="true">＋</span> Create New Job</a>}
-      <a className="hero-secondary-action" href={p.role==='technician'?'/dashboard?tech=mine#service-requests':'#service-requests'}>{p.role==='technician'?'My Assigned Jobs':'View Service Jobs'} <span aria-hidden="true">↗</span></a>
+      {staff&&<a className="hero-primary-action" href="#new-job"><TechIcon name="note" size={17}/> Create New Job</a>}
+      <a className="hero-secondary-action" href={p.role==='technician'?'/dashboard?tech=mine#service-requests':'#service-requests'}>{p.role==='technician'?'My Assigned Jobs':'View Service Jobs'} <TechIcon name="arrow" size={17}/></a>
      </div>
     </div>
-    <div className="hero-orbit" aria-hidden="true"><div className="orbit-ring orbit-ring-one"/><div className="orbit-ring orbit-ring-two"/><div className="orbit-core">◉</div><span className="orbit-spark orbit-spark-one"/><span className="orbit-spark orbit-spark-two"/></div>
+    <div className="hero-orbit" aria-hidden="true"><div className="orbit-ring orbit-ring-one"/><div className="orbit-ring orbit-ring-two"/><div className="orbit-core"><TechIcon name="shield" size={51}/></div><span className="orbit-spark orbit-spark-one"/><span className="orbit-spark orbit-spark-two"/></div>
    </section>
    <section className="cards stat-grid" aria-label="Job overview statistics">
     {[
-      {label:'Total Jobs',count:jobs.length,icon:'▤',tone:'cyan',hint:'All visible service requests'},
-      {label:'Pending Jobs',count:jobs.filter(j=>j.status==='pending').length,icon:'◷',tone:'amber',hint:'Awaiting service action'},
-      {label:'In Progress',count:jobs.filter(j=>j.status==='in_progress').length,icon:'◉',tone:'blue',hint:'Currently being worked on'},
-      {label:'Completed Jobs',count:jobs.filter(j=>j.status==='completed').length,icon:'✓',tone:'green',hint:'Service work finished'}
-    ].map(stat=><article key={stat.label} className={'stat-card stat-'+stat.tone}>
-      <div className="stat-card-header"><span>{stat.label}</span><span className="stat-icon" aria-hidden="true">{stat.icon}</span></div>
+      {label:'Total Jobs',count:jobs.length,icon:'grid' as const,href:'/dashboard#service-requests',tone:'cyan',hint:'All visible service requests'},
+      {label:'Pending Jobs',count:jobs.filter(j=>j.status==='pending').length,icon:'clock' as const,href:'/dashboard?status=pending#service-requests',tone:'amber',hint:'Awaiting service action'},
+      {label:'In Progress',count:jobs.filter(j=>j.status==='in_progress').length,icon:'tool' as const,href:'/dashboard?status=in_progress#service-requests',tone:'blue',hint:'Currently being worked on'},
+      {label:'Completed Jobs',count:jobs.filter(j=>j.status==='completed').length,icon:'check' as const,href:'/dashboard?status=completed#service-requests',tone:'green',hint:'Service work finished'}
+    ].map(stat=><Link key={stat.label} href={stat.href} className={'stat-card stat-'+stat.tone} aria-label={'View '+stat.label.toLowerCase()+' in service queue'}>
+      <div className="stat-card-header"><span>{stat.label}</span><span className="stat-icon" aria-hidden="true"><TechIcon name={stat.icon} size={22}/></span></div>
       <strong>{stat.count}</strong><small>{stat.hint}</small>
-    </article>)}
+    </Link>)}
    </section>
-  {staff&&<section className="panel internal-reminders ui-section" id="reminder-list">
-   <div className="internal-reminders-heading"><div><h2>🔔 Internal Team Reminders</h2><p className="muted">Dashboard alerts only · Sri Lanka time · Updates when you load or refresh the dashboard.</p></div><span className="reminder-total">{reminderItems.length} active alerts</span></div>
+  {staff&&<div className="pc-workspace-grid"><section className="panel internal-reminders ui-section" id="reminder-list">
+   <div className="internal-reminders-heading"><div><h2><TechIcon name="bell" size={20}/> Internal Team Reminders</h2><p className="muted">Dashboard alerts only · Sri Lanka time · Updates when you load or refresh the dashboard.</p></div><span className="reminder-total">{reminderItems.length} active alerts</span></div>
    <div className="reminder-counts">
     <a href="#reminder-overdue"><strong>{reminderGroups.overdue.length}</strong><span>Overdue</span></a>
     <a href="#reminder-today"><strong>{reminderGroups.today.length}</strong><span>Due Today</span></a>
@@ -266,8 +272,8 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     ['today','Due Today'],
     ['upcoming','Next 7 Days'],
     ['unscheduled','Pending – Schedule Needed']
-   ] as const).map(([key,label])=><div key={key} className="reminder-group" id={'reminder-'+key}>
-    <h3>{label} <span className="reminder-group-count">{reminderGroups[key].length}</span></h3>
+   ] as const).map(([key,label])=><details key={key} className="reminder-group" id={'reminder-'+key} open={key==='overdue'||key==='today'}>
+    <summary>{label} <span className="reminder-group-count">{reminderGroups[key].length}</span></summary>
     {reminderGroups[key].length?reminderGroups[key].map(item=>{
      const cust=Array.isArray(item.job.customer)?item.job.customer[0]:item.job.customer
      return <div className={'reminder-entry reminder-'+key} key={item.job.id}>
@@ -278,11 +284,11 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
       </div><a className="action-link" href={reminderJobHref(item.job.job_number)}>Open Job</a>
      </div>
     }):<p className="muted">No jobs in this category.</p>}
-   </div>)}
-  </section>}
-  {staff&&<div className="forms single-job-form" id="new-job">
+   </details>)}
+  </section>
+  <div className="forms single-job-form" id="new-job">
    <NewJobForm customers={customers}/>
-  </div>}
+  </div></div>}
   <section className="panel service-requests ui-section" id="service-requests"><div className="section-heading"><div><span className="section-eyebrow">SERVICE QUEUE</span><h2>{staff?'All Service Requests':techFilter==='mine'?'My Assigned Jobs':'All Service Jobs'}</h2><p>{p.role==='technician'?('Jobs assigned to you: '+assignedToMe+'. Switch to All Jobs for the shared queue.'):'Search, assign and manage service jobs.'}</p></div><span className="section-count-total">{jobs.length} total jobs</span></div>
    <form method="GET" action="/dashboard" className="job-filters">
     <label>Search customer, phone, place or reason<input name="q" type="search" defaultValue={params.q||''} maxLength={120} placeholder="Name / phone / address / job"/></label>
@@ -295,9 +301,9 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
         {technicians.map(t=><option key={t.id} value={t.id}>{t.full_name}</option>)}
        </>}
     </select></label>
-    <div className="filter-buttons"><button type="submit">Search / Filter</button><a href="/dashboard">Clear</a></div>
+    <div className="filter-buttons"><button type="submit"><TechIcon name="jobs" size={16}/> Search / Filter</button><a href="/dashboard">Clear Filters</a></div>
    </form>
-   <p className="muted filter-results">Showing <strong>{visiblePage.from}–{visiblePage.to}</strong> of {filtered.length} matching service requests (from {jobs.length} loaded jobs)</p>
+   <p className="muted filter-results"><TechIcon name="jobs" size={15}/> Showing <strong>{visiblePage.from}–{visiblePage.to}</strong> of {filtered.length} matching service requests (from {jobs.length} loaded jobs)</p>
    {jobsRes.error?<p>Unable to load service requests.</p>:!filtered.length?<p>No matching service requests.</p>:<div>
     {sections.map(sec=>{
      const group=visibleJobs.filter(j=>j.request_section===sec.key)

@@ -3,11 +3,11 @@ import Link from 'next/link'
 import {redirect} from 'next/navigation'
 import TechnicianNotifications from '../dashboard/TechnicianNotifications'
 import TechIcon from './TechIcon'
+import TechnicianJobList from './TechnicianJobList'
+import type {TechnicianJobSummary} from './TechnicianJobList'
 import {isClosedJob} from '../../lib/dashboard-pagination'
 
 export const dynamic='force-dynamic'
-
-const statusLabel=(status:string)=>status.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase())
 
 export default async function TechnicianMobileDashboard({searchParams}:{searchParams:Promise<{view?:string}>}){
  const {view}=await searchParams
@@ -21,34 +21,38 @@ export default async function TechnicianMobileDashboard({searchParams}:{searchPa
 
  const {data:assignments,error:assignmentError}=await supabase.from('job_assignments')
   .select('job_id,assigned_at')
-  .eq('technician_id',user.id).order('assigned_at',{ascending:false}).limit(200)
- const ids=(assignments||[]).map(a=>a.job_id)
+  .eq('technician_id',user.id).order('assigned_at',{ascending:false}).limit(500)
+ const ids=(assignments||[]).map(assignment=>assignment.job_id)
  const {data:rawJobs,error:jobError}=ids.length
   ?await supabase.from('jobs')
     .select('id,job_number,title,status,priority,scheduled_at,site_address,customer:customers(name,phone,address)')
     .in('id',ids)
   :{data:[],error:null}
  const jobsById=new Map((rawJobs||[]).map(job=>[job.id,job]))
- const ordered=(assignments||[]).map(a=>jobsById.get(a.job_id)).filter(j=>Boolean(j))
- const work=ordered.filter(j=>j && !isClosedJob(j.status))
- const closed=ordered.filter(j=>j && isClosedJob(j.status))
- const finished=closed.filter(j=>j && j.status==='completed')
+ const ordered=ids.map(id=>jobsById.get(id)).filter((job):job is NonNullable<typeof job>=>Boolean(job))
+ const work=ordered.filter(job=>!isClosedJob(job.status))
+ const closed=ordered.filter(job=>isClosedJob(job.status))
+ const finished=closed.filter(job=>job.status==='completed')
  const list=showClosed?closed:work
-
- const visitLabel=(value:string)=>new Intl.DateTimeFormat('en-GB',{
-  timeZone:'Asia/Colombo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'
- }).format(new Date(value))
+ const items:TechnicianJobSummary[]=list.map(job=>{
+  const customer=Array.isArray(job.customer)?job.customer[0]:job.customer
+  return {
+   id:job.id,jobNumber:job.job_number,customerName:customer?.name||'Customer',
+   phone:customer?.phone||null,title:job.title,status:job.status,priority:job.priority,
+   scheduledAt:job.scheduled_at,address:job.site_address||customer?.address||'',
+   assignedToMe:true
+  }
+ })
 
  return <>
   <section className="technician-hero">
    <div className="technician-hero-inner">
     <div className="technician-eyebrow"><span className="technician-live-dot"/> TECHNICIAN WORKSPACE</div>
     <h1>My workday<span className="technician-hero-period">.</span></h1>
-    <p>Your CCTV service jobs, progress and next steps — all in one place.</p>
+    <p>Find assigned CCTV service jobs and update progress in a few taps.</p>
    </div>
    <div className="technician-hero-symbol" aria-hidden="true"><TechIcon name="tool" size={78}/></div>
   </section>
-
   <section className="technician-stats" aria-label="Your job overview">
    <div className="technician-stat-card">
     <div className="technician-stat-icon"><TechIcon name="jobs" size={19}/></div>
@@ -64,64 +68,30 @@ export default async function TechnicianMobileDashboard({searchParams}:{searchPa
    </div>
   </section>
 
+  <div className="technician-section-head">
+   <div><span className="technician-section-kicker">YOUR ASSIGNMENTS</span>
+    <h2>{showClosed?'Completed & Cancelled Jobs':'Active Service Jobs'}</h2>
+   </div>
+   <span className="technician-section-count">{list.length} jobs</span>
+  </div>
+  <nav className="technician-job-views" aria-label="Technician job list view">
+   <Link href="/technician" className={!showClosed?'is-active':''} aria-current={!showClosed?'page':undefined}>Active Jobs <span>{work.length}</span></Link>
+   <Link href="/technician?view=closed" className={showClosed?'is-active':''} aria-current={showClosed?'page':undefined}>Completed / Cancelled <span>{closed.length}</span></Link>
+  </nav>
+  {assignmentError||jobError?
+   <div className="technician-empty" role="alert"><TechIcon name="shield" size={30}/>
+    <strong>Unable to load jobs</strong><p>Check your connection and refresh this page.</p>
+   </div>:
+   <TechnicianJobList jobs={items} heading="My service jobs"
+    emptyMessage={showClosed?'Completed and cancelled jobs will appear here.':'No active jobs right now. Closed jobs are in the Completed / Cancelled tab.'}/>
+  }
   {process.env.NEXT_PUBLIC_WEB_PUSH_KEY&&
-   <section className="technician-notification-panel">
+   <section className="technician-notification-panel technician-notification-secondary">
     <div className="technician-panel-heading">
      <span className="technician-panel-icon"><TechIcon name="bell" size={19}/></span>
-     <div><h2>Job notifications</h2><p>Get new job alerts on this phone.</p></div>
+     <div><h2>Job notifications</h2><p>Get new assignment alerts on this phone.</p></div>
     </div>
     <TechnicianNotifications publicKey={process.env.NEXT_PUBLIC_WEB_PUSH_KEY}/>
    </section>}
-
-  <section className="technician-list" aria-labelledby="assigned-jobs-heading">
-   <div className="technician-section-head">
-    <div>
-     <span className="technician-section-kicker">YOUR ASSIGNMENTS</span>
-     <h2 id="assigned-jobs-heading">{showClosed?'Completed & Cancelled Jobs':'Active Service Jobs'}</h2>
-    </div>
-    <span className="technician-section-count">{list.length} jobs</span>
-   </div>
-   <nav className="technician-job-views" aria-label="Technician job list view">
-    <Link href="/technician" className={!showClosed?'is-active':''} aria-current={!showClosed?'page':undefined}>Active Jobs <span>{work.length}</span></Link>
-    <Link href="/technician?view=closed" className={showClosed?'is-active':''} aria-current={showClosed?'page':undefined}>Completed / Cancelled <span>{closed.length}</span></Link>
-   </nav>
-   {assignmentError||jobError?
-    <div className="technician-empty" role="alert"><TechIcon name="shield" size={30}/>
-     <strong>Unable to load jobs</strong><p>Check your connection and refresh this page.</p>
-    </div>:
-    !list.length?<div className="technician-empty">
-     <span className="technician-empty-symbol"><TechIcon name="jobs" size={30}/></span>
-     <strong>{showClosed?'No completed or cancelled jobs':'No active jobs right now'}</strong>
-     <p>{showClosed?'Closed jobs will remain available here for reference.':'Completed and cancelled jobs are in the separate history view.'}</p>
-    </div>:list.map(job=>{
-     if(!job)return null
-     const customer=Array.isArray(job.customer)?job.customer[0]:job.customer
-     return <article className={'technician-job-card'+(job.priority==='urgent'?' technician-card-urgent':'')} key={job.id}>
-      <div className="technician-card-top">
-       <span className="technician-job-number">JOB {job.job_number}</span>
-       <span className={'technician-status technician-status-'+job.status}>{statusLabel(job.status)}</span>
-      </div>
-      <h3>{customer?.name||'Customer'}</h3>
-      <p className="technician-job-reason">{job.title}</p>
-      <div className="technician-card-details">
-       {job.scheduled_at&&<div className="technician-detail-line">
-        <TechIcon name="calendar" size={16}/><time dateTime={job.scheduled_at}>{visitLabel(job.scheduled_at)}</time>
-       </div>}
-       <div className="technician-detail-line">
-        <TechIcon name="pin" size={16}/><span>{job.site_address||customer?.address||'Location not provided'}</span>
-       </div>
-      </div>
-      <div className="technician-card-actions">
-       {customer?.phone&&<a className="technician-call" href={'tel:'+customer.phone}>
-        <TechIcon name="phone" size={17}/><span>Call</span>
-       </a>}
-       <Link className="technician-open-job" href={'/technician/jobs/'+job.id}>
-        <span>{isClosedJob(job.status)?'View closed job':job.status==='in_progress'?'Continue job':'View job details'}</span>
-        <TechIcon name="arrow" size={18}/>
-       </Link>
-      </div>
-     </article>
-    })}
-  </section>
  </>
 }

@@ -7,7 +7,7 @@ import type {TechIconName} from './TechIcon'
 
 const entries:{href:string;label:string;icon:TechIconName}[]=[
  {href:'/technician',label:'My Jobs',icon:'jobs'},
- {href:'/dashboard?tech=all',label:'All Jobs',icon:'grid'}
+ {href:'/technician/all',label:'All Jobs',icon:'grid'}
 ]
 
 export default function TechnicianNavigation(){
@@ -17,7 +17,7 @@ export default function TechnicianNavigation(){
    const root=item.href==='/technician'
    const active=root
     ?pathname==='/technician'||pathname.startsWith('/technician/jobs/')
-    :item.href.startsWith('/dashboard')?pathname==='/dashboard':pathname===item.href
+    :pathname==='/technician/all'||pathname.startsWith('/technician/all/')
    return <Link key={item.href} href={item.href}
     className={active?'is-active':''} aria-current={active?'page':undefined}>
     <TechIcon name={item.icon} size={21}/>

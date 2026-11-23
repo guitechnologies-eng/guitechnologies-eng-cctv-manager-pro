@@ -835,3 +835,12 @@ button[aria-busy="true"]::before{content:"";display:inline-block;flex:none;width
  .app-frame .job-shortcuts .whatsapp-quick-action{flex:1 1 170px}
  .app-frame .job-shortcuts .whatsapp-quick-action+ .action-link{flex:1 1 170px}
 }
+
+
+/* Avoid automatic input zoom on mobile login (iOS uses a 16px input threshold). */
+@media(max-width:600px){
+ .login{min-height:100dvh;padding:16px}
+ .login .gui-login-panel{max-width:100%;min-width:0;padding:20px}
+ .login input{font-size:16px;min-height:50px}
+ .login form button{min-height:50px}
+}

@@ -89,7 +89,7 @@ export default function TechnicianNotifications({publicKey}:{publicKey:string}) 
  if (supported === null) return null
  if (!supported) return <p>To receive job alerts on iPhone, add the app to your Home Screen and open it there.</p>
  return <div>
-  <button type="button" onClick={toggle} disabled={busy}>
+  <button type="button" onClick={toggle} disabled={busy} aria-busy={busy} aria-pressed={enabled}>
    {enabled ? 'Turn off job alerts' : 'Enable job alerts'}
   </button>
   {message && <p role="status">{message}</p>}

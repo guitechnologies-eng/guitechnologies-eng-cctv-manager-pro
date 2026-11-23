@@ -33,7 +33,7 @@ export default async function TechnicianJobPage({params}:{
   .order('created_at',{ascending:false}).limit(12)
 
  return <>
-  <Link className="technician-back" href="/technician"><TechIcon name="back" size={18}/> Back to my jobs</Link>
+  <Link className="technician-back" href={job.status==='completed'||job.status==='cancelled'?'/technician?view=closed':'/technician'}><TechIcon name="back" size={18}/> Back to my jobs</Link>
   <section className="technician-job-header">
    <div className="technician-card-top">
     <span className="technician-job-number">JOB {job.job_number}</span>

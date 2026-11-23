@@ -214,3 +214,55 @@
 .technician-app .technician-job-views a.is-active{color:#ecfeff;background:#18516b;border-color:#50bfd5;box-shadow:inset 0 -2px #6adce9}
 .technician-app .technician-job-views a:focus-visible{outline:2px solid #77e0ee;outline-offset:2px}
 @media(max-width:430px){.technician-app .technician-job-views a{font-size:11px;padding:9px 6px;gap:5px}}
+
+
+/* Technician Mobile UX refresh: scoped to technician pages only. */
+.technician-app{overflow-x:clip;scroll-padding-top:90px}
+.technician-app .technician-main,.technician-app .technician-list{min-width:0}
+.technician-app .technician-notification-secondary{margin:20px 0 3px}
+.technician-app .technician-search-panel{min-width:0;padding:15px;border:1px solid #32607a;border-radius:17px;background:#102d42;margin:0 0 3px}
+.technician-app .technician-search-panel>label{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:800;color:#cfeff9;margin:0 0 10px}
+.technician-app .technician-search-panel>label svg{color:#74d6e9}
+.technician-app .technician-search-controls{display:flex;gap:9px;min-width:0}
+.technician-app .technician-search-controls input{flex:1;min-width:0;width:auto;min-height:48px;margin:0;padding:11px 12px;font:inherit;font-size:16px;border:1px solid #476e82;background:#071e30;color:#f4fcff;border-radius:12px}
+.technician-app .technician-search-controls input::placeholder{color:#91abbc}
+.technician-app .technician-search-controls button{display:inline-flex;align-items:center;justify-content:center;flex:none;gap:7px;min-height:48px;width:auto;min-width:106px;padding:10px 13px;border:1px solid #3488a6;border-radius:12px;background:#1b4b65;font-size:12px;font-weight:850;color:#e9faff}
+.technician-app .technician-search-controls button:disabled{opacity:.7}
+.technician-app .technician-search-count{color:#a4ccdc;font-size:11px;margin:10px 0 0;line-height:1.4}
+.technician-app .technician-card-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;min-width:0}
+.technician-app .technician-card-heading h3{margin:13px 0 5px;min-width:0;overflow-wrap:anywhere}
+.technician-app .technician-ownership{display:inline-flex;align-items:center;min-height:27px;padding:5px 9px;font-size:10px;line-height:1.1;font-weight:800;border-radius:99px;border:1px solid #52667d;background:#293d50;color:#c9d9e4;white-space:nowrap}
+.technician-app .technician-ownership.is-mine{background:#154d4d;border-color:#308b85;color:#9cf1dc}
+.technician-app .technician-readonly{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:8px 10px;font-size:12px;line-height:1.5;border:1px solid #3b576a;background:#0d2b3d;color:#c1d8e4;border-radius:11px}
+.technician-app .technician-readonly svg{flex:none;color:#90c3d6}
+.technician-app .technician-clear-search{width:auto;min-height:44px;margin-top:15px;border:1px solid #4589a1;background:#19465c;color:#e8faff;font-size:13px}
+.technician-app .technician-team-hero h1{margin:9px 0 7px}
+.technician-app .technician-team-back{display:inline-flex;align-items:center;gap:7px;min-height:43px;border:1px solid #5495aa;border-radius:10px;padding:9px 13px;margin:17px 0 0;text-decoration:none;background:#194d60;color:#eaffff;font-size:12px;font-weight:850}
+.technician-app .technician-progress-panel .technician-form-message,.technician-app .technician-lodging-form .technician-form-message{line-height:1.5;overflow-wrap:anywhere}
+.technician-app .technician-closed{padding:17px 18px;margin:14px 0;line-height:1.6}
+.technician-app .technician-closed strong{display:block;color:#b8f7d7}
+.technician-app .technician-closed p{margin:7px 0 0;font-size:13px}
+.technician-app .technician-closed .technician-team-back{margin-top:13px}
+.technician-app .technician-bottom-nav{padding-bottom:max(9px,env(safe-area-inset-bottom))}
+.technician-app .technician-detail-card,.technician-app .technician-progress-panel,.technician-app .technician-history{min-width:0}
+.technician-app .technician-progress-panel textarea{font-size:16px}
+.technician-app .technician-hero p{max-width:330px}
+@media(max-width:480px){
+ .technician-app .technician-top-inner{gap:8px}
+ .technician-app .technician-identity{flex:1;min-width:0}
+ .technician-app .technician-identity-text{max-width:100%;min-width:0}
+ .technician-app .technician-identity-text>strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .technician-app .technician-job-views a{min-height:48px}
+ .technician-app .technician-card-actions{min-width:0}
+ .technician-app .technician-open-job{min-width:0}
+}
+@media(max-width:360px){
+ .technician-app .technician-search-controls{flex-wrap:wrap}
+ .technician-app .technician-search-controls input{flex-basis:100%}
+ .technician-app .technician-search-controls button{width:100%}
+ .technician-app .technician-stats strong{font-size:23px}
+ .technician-app .technician-card-actions{flex-wrap:wrap}
+ .technician-app .technician-card-actions>a{flex:1 1 100%}
+ .technician-app .technician-user{max-width:135px}
+}
+@media(prefers-reduced-motion:reduce){.technician-app .technician-search-controls button{transition:none}}

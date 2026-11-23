@@ -6,7 +6,6 @@ import {addUpdate,updateCustomer,updateJobStatus,updateJobDetails,updateInternal
 import NewJobForm from './NewJobForm'
 import PendingSubmit from './PendingSubmit'
 import PendingButton from '../components/PendingButton'
-import TeamWhatsAppShare from './TeamWhatsAppShare'
 import TechnicianNotifications from './TechnicianNotifications'
 import ReminderJump from './ReminderJump'
 import TechnicianAssignmentForm from './TechnicianAssignmentForm'
@@ -14,7 +13,7 @@ import {groupJobTechnicians} from '../../lib/technician-assignment'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
 import {paginateJobs,dashboardPageHref,reminderJobHref,filterJobByTechnician,parseJobStatusFilter,matchesJobStatus,isClosedJob} from '../../lib/dashboard-pagination'
-import {serviceShareText,shortServiceShareText,whatsappShareLink} from '../../lib/whatsapp'
+import {shortServiceShareText,whatsappShareLink} from '../../lib/whatsapp'
 import {getReminderGroups,colomboInputValue,colomboDateLabel} from '../../lib/reminders'
 
 export const dynamic='force-dynamic'
@@ -109,7 +108,6 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    latestNoteAt:lastUpdate?.created_at,
    assignedTechnician:assignedName||'Unassigned'
   }
-  const message=serviceShareText(shareData)
   const shortMessage=shortServiceShareText(shareData)
   return <div key={j.id} id={"job-"+j.id} className={"job job-card job-status-"+j.status}>
    <div className="job-details">
@@ -130,7 +128,6 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
      </a>
      <Link prefetch={false} className="action-link" href={'/jobs/'+j.id}>View full service history</Link>
     </div>
-    <TeamWhatsAppShare initialMessage={shortMessage} detailMessage={message}/>
     {j.reminder_note&&<p className="job-reminder-note"><strong>📌 Internal Note:</strong> {j.reminder_note}</p>}
     {(j.scheduled_at||j.follow_up_at)&&<p className="job-reminder-dates">
      {j.scheduled_at&&<span>📅 Visit: {colomboDateLabel(j.scheduled_at)}</span>}

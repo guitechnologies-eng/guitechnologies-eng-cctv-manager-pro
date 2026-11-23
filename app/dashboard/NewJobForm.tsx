@@ -2,6 +2,7 @@
 
 import {useActionState,useEffect,useRef,useState} from 'react'
 import {createJobWithCustomer,type JobCreateState} from '../actions/jobs'
+import TechIcon from '../technician/TechIcon'
 
 export type CustomerOption={
  id:string
@@ -57,10 +58,11 @@ export default function NewJobForm({customers}:{customers:CustomerOption[]}){
  }
 
  return <section className="panel new-job-panel">
-  <h2>New Job + Customer Details</h2>
-  <p className="muted">Choose a saved customer or enter new details. New customer details are saved automatically when the job is created.</p>
+  <div className="new-job-heading"><span className="pc-form-kicker">QUICK CREATE</span><h2>New Service Job</h2></div>
+  <p className="muted">Add a job in one place. Choose a saved customer or enter a new customer before adding service details.</p>
   <form ref={formRef} action={submitJob} className="new-job-form">
    <input type="hidden" name="customer_mode" value={mode}/>
+   <div className="pc-form-step"><span>01</span><div><strong>Customer</strong><small>Find an existing customer or add a new one</small></div></div>
    <div className="customer-mode" role="group" aria-label="Customer entry method">
     <button type="button" disabled={pending} aria-pressed={mode==='existing'} className={mode==='existing'?'selected':''} onClick={()=>setMode('existing')}>Existing Customer</button>
     <button type="button" disabled={pending} aria-pressed={mode==='new'} className={mode==='new'?'selected':''} onClick={()=>setMode('new')}>New Customer</button>
@@ -78,8 +80,8 @@ export default function NewJobForm({customers}:{customers:CustomerOption[]}){
      </label>
      {selected?<div className="customer-preview">
       <strong>{selected.name}</strong>
-      <p>📞 {selected.phone||'Phone not provided'}</p>
-      <p>📍 {selected.address||'Place not provided'}</p>
+      <p className="customer-preview-line"><TechIcon name="phone" size={15}/> {selected.phone||'Phone not provided'}</p>
+      <p className="customer-preview-line"><TechIcon name="pin" size={15}/> {selected.address||'Place not provided'}</p>
       <span className="muted">This job will be linked to the saved customer; no duplicate customer will be created.</span>
      </div>:!matching.length?<div className="customer-preview">
       <p>No saved customer matches this search.</p>
@@ -96,6 +98,7 @@ export default function NewJobForm({customers}:{customers:CustomerOption[]}){
      </div>}
      <p className="muted">A customer record will be added automatically together with the job. You don't need to register the customer separately.</p>
     </div>}
+   <div className="pc-form-step pc-form-step-second"><span>02</span><div><strong>Service details</strong><small>Tell the team what needs to be done</small></div></div>
    <div className="job-inputs">
     <label>Request section
      <select name="request_section" required defaultValue="REPAIR & WARRANTY SERVICE">
@@ -118,7 +121,7 @@ export default function NewJobForm({customers}:{customers:CustomerOption[]}){
     <label>Job Place (only if different from customer address) <input name="site_address" maxLength={500} placeholder="Optional different location"/></label>
     <label>Description <textarea name="description" maxLength={2000} placeholder="Notes / instructions"/></label>
    </div>
-   <button type="submit" disabled={pending} aria-busy={pending}>{pending?'Saving customer & job...':'Save Job'}</button>
+   <button type="submit" disabled={pending} aria-busy={pending}>{!pending&&<TechIcon name="check" size={18}/>} {pending?'Saving customer & job...':'Save Service Job'}</button>
    {result.message&&<p role="status" className={'job-form-result '+(result.success?'success':'error')}>
     {result.message} {result.jobNumber&&<strong> Reference: {result.jobNumber}</strong>}
    </p>}

@@ -1,4 +1,5 @@
 import BrandLogo from '../components/BrandLogo'
+import TechIcon from '../technician/TechIcon'
 import {db} from '../../lib/supabase'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
@@ -23,6 +24,9 @@ export default async function StaffPage(){
   ?await supabase.from('profiles').select('id,full_name,role,active').in('id',ids)
   :{data:[] as {id:string;full_name:string;role:string;active:boolean}[]}
  const byId=new Map((profiles||[]).map(p=>[p.id,p]))
+ const activeStaff=(accounts||[]).filter(a=>byId.get(a.user_id)?.active).length
+ const technicianCount=(accounts||[]).filter(a=>byId.get(a.user_id)?.role==='technician').length
+ const officeCount=(accounts||[]).filter(a=>byId.get(a.user_id)?.role==='office').length
 
  return <div className="app-frame staff-page-shell">
   <aside className="app-sidebar" aria-label="Workspace navigation">
@@ -32,8 +36,8 @@ export default async function StaffPage(){
    </div>
    <div className="sidebar-section-label">WORKSPACE</div>
    <nav className="sidebar-nav">
-    <Link className="sidebar-link" href="/dashboard"><span aria-hidden="true">◫</span> Dashboard</Link>
-    <Link className="sidebar-link active" href="/staff"><span aria-hidden="true">▤</span> Staff Management</Link>
+    <Link className="sidebar-link" href="/dashboard"><TechIcon name="grid" size={19}/> Dashboard</Link>
+    <Link className="sidebar-link active" href="/staff"><TechIcon name="user" size={19}/> Staff Management</Link>
    </nav>
    <div className="sidebar-footer">
     <span className="workspace-status"><span className="online-indicator" aria-hidden="true"/> Restricted Admin Area</span>
@@ -43,7 +47,7 @@ export default async function StaffPage(){
   <main className="wrap dashboard-main staff-admin-main">
    <header className="dashboard-topbar">
     <p className="topbar-breadcrumb">Workspace / Administration</p>
-    <Link href="/dashboard" className="action-link">Back to Dashboard</Link>
+    <Link href="/dashboard" className="action-link"><TechIcon name="back" size={16}/> Back to Dashboard</Link>
    </header>
    <section className="dashboard-hero staff-hero">
     <div className="hero-content">
@@ -52,10 +56,16 @@ export default async function StaffPage(){
      <p>Add secure username-based accounts for your internal team. Only active Administrators can create users, edit existing staff and reset staff PINs.</p>
     </div>
    </section>
+   <section className="staff-pc-stats" aria-label="Staff overview">
+    <div><TechIcon name="user" size={21}/><span>Registered users</span><strong>{(accounts||[]).length}</strong></div>
+    <div><TechIcon name="check" size={21}/><span>Active users</span><strong>{activeStaff}</strong></div>
+    <div><TechIcon name="tool" size={21}/><span>Technicians</span><strong>{technicianCount}</strong></div>
+    <div><TechIcon name="grid" size={21}/><span>Shop staff</span><strong>{officeCount}</strong></div>
+   </section>
    <StaffManager/>
    <section className="panel staff-list-panel">
     <div className="staff-list-head">
-     <div><span className="section-eyebrow">STAFF DIRECTORY</span><h2>Registered Staff Users</h2></div>
+     <div><span className="section-eyebrow">TEAM DIRECTORY</span><h2>Registered Staff Users</h2></div>
      <span className="section-count-total">{(accounts||[]).length} users</span>
     </div>
     {listError

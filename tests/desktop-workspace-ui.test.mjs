@@ -18,7 +18,7 @@ test('desktop dashboard keeps original service and admin work areas',()=>{
 })
 
 test('job stats open the matching filtered service queue without data changes',()=>{
- for(const href of ['/dashboard#service-requests','/dashboard?status=pending#service-requests',
+ for(const href of ['/dashboard?status=all#service-requests','/dashboard?status=pending#service-requests',
    '/dashboard?status=in_progress#service-requests','/dashboard?status=completed#service-requests']){
   assert.ok(dash.includes("href:'"+href+"'"),href)
  }

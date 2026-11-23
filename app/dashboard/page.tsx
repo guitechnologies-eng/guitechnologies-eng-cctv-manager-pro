@@ -14,7 +14,7 @@ import {groupJobTechnicians} from '../../lib/technician-assignment'
 import {redirect} from 'next/navigation'
 import Link from 'next/link'
 import {paginateJobs,dashboardPageHref,reminderJobHref,filterJobByTechnician,parseJobStatusFilter,matchesJobStatus,isClosedJob} from '../../lib/dashboard-pagination'
-import {serviceShareText} from '../../lib/whatsapp'
+import {serviceShareText,shortServiceShareText,whatsappShareLink} from '../../lib/whatsapp'
 import {getReminderGroups,colomboInputValue,colomboDateLabel} from '../../lib/reminders'
 
 export const dynamic='force-dynamic'
@@ -110,6 +110,7 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
    assignedTechnician:assignedName||'Unassigned'
   }
   const message=serviceShareText(shareData)
+  const shortMessage=shortServiceShareText(shareData)
   return <div key={j.id} id={"job-"+j.id} className={"job job-card job-status-"+j.status}>
    <div className="job-details">
     <div className="job-heading">
@@ -123,9 +124,13 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{q?
     <p className="job-status">Current workflow: {j.status.replaceAll('_',' ')} · Priority: {j.priority}</p>
     <p className="job-assignment-line"><TechIcon name="user" size={16}/><b>Assigned Technicians:</b> <span className={assignedIds.length?'assignment-assigned':'assignment-unassigned'}>{assignedName||'Not assigned'}</span></p>
     <div className="job-shortcuts">
+     <a className="action-link whatsapp-quick-action" href={whatsappShareLink(shortMessage)}
+      target="_blank" rel="noopener noreferrer" aria-label={'Open WhatsApp with short internal team message for '+j.job_number}>
+      <TechIcon name="phone" size={18}/> WhatsApp Team
+     </a>
      <Link prefetch={false} className="action-link" href={'/jobs/'+j.id}>View full service history</Link>
     </div>
-    <TeamWhatsAppShare initialMessage={message}/>
+    <TeamWhatsAppShare initialMessage={shortMessage} detailMessage={message}/>
     {j.reminder_note&&<p className="job-reminder-note"><strong>📌 Internal Note:</strong> {j.reminder_note}</p>}
     {(j.scheduled_at||j.follow_up_at)&&<p className="job-reminder-dates">
      {j.scheduled_at&&<span>📅 Visit: {colomboDateLabel(j.scheduled_at)}</span>}

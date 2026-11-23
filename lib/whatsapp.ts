@@ -83,6 +83,32 @@ export function serviceShareText(data:ServiceShareData):string{
  return lines.join('\n')
 }
 
+/** Concise one-tap internal team summary; recipient chooses the chat and presses Send.
+ *  Keep user-controlled fields short so the wa.me URL stays readable on phones. */
+const compact=(value:string|null|undefined,max=100):string=>{
+ const normalized=value?.replace(/\s+/g,' ').trim()||'Not Provided'
+ return normalized.length>max?normalized.slice(0,max-3)+'...':normalized
+}
+
+export function shortServiceShareText(data:ServiceShareData):string{
+ const lines=[
+  '*GUI TECHNOLOGIES | CCTV JOB*',
+  'Job: '+compact(data.jobNumber,50),
+  'Customer: '+compact(data.customerName,70),
+  'Phone: '+compact(data.customerPhone,35),
+  'Place: '+compact(data.place,95),
+  'Work: '+compact(data.reason,110),
+  'Tech: '+compact(data.assignedTechnician||'Unassigned',85),
+  'Status: '+(statusLabels[data.status]||compact(data.status,30))
+ ]
+ if(data.priority==='urgent')lines.push('Priority: URGENT')
+ if(data.jobId&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.jobId)){
+  lines.push('Job details: https://cctv-manager-pro.vercel.app/jobs/'+data.jobId)
+ }
+ lines.push('*Internal team only*')
+ return lines.join('\n')
+}
+
 export function whatsappShareLink(text:string):string{
  // Sinhala and other Unicode user data round-trip safely via URL encoding.
  // The team recipient must be selected by the human in WhatsApp.

@@ -3,7 +3,7 @@
 import {useEffect,useState} from 'react'
 import {whatsappShareLink} from '../../lib/whatsapp'
 
-export default function TeamWhatsAppShare({initialMessage}:{initialMessage:string}){
+export default function TeamWhatsAppShare({initialMessage,detailMessage}:{initialMessage:string;detailMessage?:string}){
  const [message,setMessage]=useState(initialMessage)
  const [copyStatus,setCopyStatus]=useState('')
 
@@ -21,9 +21,9 @@ export default function TeamWhatsAppShare({initialMessage}:{initialMessage:strin
   }
  }
  return <details className="team-whatsapp-panel">
-  <summary>Advanced Team WhatsApp Message</summary>
+  <summary>Edit WhatsApp Message (optional)</summary>
   <div className="team-whatsapp-content">
-   <p className="muted">Preview and edit the plain-text message before sharing it with your internal GUI Technologies team chat.</p>
+   <p className="muted">The short job summary is ready to share. You can edit it here or switch to the detailed version.</p>
    <label>Message preview / edit
     <textarea
      className="team-whatsapp-text"
@@ -31,7 +31,7 @@ export default function TeamWhatsAppShare({initialMessage}:{initialMessage:strin
      value={message}
      onChange={e=>{setMessage(e.target.value);setCopyStatus('')}}
      spellCheck={false}
-     rows={18}
+     rows={9}
      maxLength={8000}
     />
    </label>
@@ -43,11 +43,13 @@ export default function TeamWhatsAppShare({initialMessage}:{initialMessage:strin
      Open WhatsApp
     </a>
     <button type="button" className="secondary-button" onClick={copyMessage}>Copy Message</button>
+    {detailMessage&&<button type="button" className="secondary-button"
+       onClick={()=>{setMessage(detailMessage);setCopyStatus('')}}>Full Details</button>}
     <button type="button" className="secondary-button"
-       onClick={()=>{setMessage(initialMessage);setCopyStatus('')}}>Reset Preview</button>
+       onClick={()=>{setMessage(initialMessage);setCopyStatus('')}}>Short Version</button>
    </div>
    {copyStatus&&<p role="status" className="team-copy-status">{copyStatus}</p>}
-   <p className="muted team-share-note">No message is sent automatically. Do not select a customer chat.</p>
+   <p className="muted team-share-note">WhatsApp opens with the message ready. Choose the correct internal team chat and press Send. Nothing is sent automatically; do not select a customer chat.</p>
   </div>
  </details>
 }

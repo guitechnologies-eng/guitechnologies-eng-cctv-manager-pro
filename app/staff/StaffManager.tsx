@@ -52,7 +52,7 @@ export default function StaffManager(){
     </label>
    </div>
    <p id="staff-pin-help" className="muted staff-password-note">Numeric PIN only (4–8 digits). Avoid easy PINs such as 1234, 0000 or birthdays. A 6–8 digit random PIN is safer. Never share PINs in job notes or WhatsApp groups.</p>
-   <button type="submit" disabled={pending}>{pending?'Creating Staff Account...':'Create Staff Account'}</button>
+   <button type="submit" disabled={pending} aria-busy={pending}>{pending?'Creating Staff Account...':'Create Staff Account'}</button>
    {result.message&&<div className={'staff-result '+(result.success?'staff-result-success':'staff-result-error')} role="status">
     <strong>{result.success?'Account created':'Could not create account'}</strong>
     <p>{result.message}</p>

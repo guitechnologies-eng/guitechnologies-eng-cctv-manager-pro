@@ -30,6 +30,10 @@ test('reminder groups can be expanded and maintain their section anchors',()=>{
  assert.match(dash,/id=\{'reminder-'\+key\}/)
  assert.match(dash,/<summary>\{label\}/)
  assert.match(dash,/No jobs in this category/)
+ assert.match(dash,/<ReminderJump\s*\/>/)
+ const jump=read('app/dashboard/ReminderJump.tsx')
+ assert.match(jump,/HTMLDetailsElement/)
+ assert.match(jump,/hashchange/)
 })
 
 test('desktop job creation and staff management retain their existing actions',()=>{

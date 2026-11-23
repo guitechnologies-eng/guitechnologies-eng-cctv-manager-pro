@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {paginateJobs,parseDashboardPage,dashboardPageHref,reminderJobHref,JOBS_PER_PAGE} from '../lib/dashboard-pagination.ts'
+import {paginateJobs,parseDashboardPage,dashboardPageHref,reminderJobHref,JOBS_PER_PAGE,parseJobStatusFilter,matchesJobStatus,isClosedJob} from '../lib/dashboard-pagination.ts'
 
 const jobs=Array.from({length:17},(_,i)=>({job_number:'CCTV-'+String(i+1),id:i+1}))
 
@@ -48,4 +48,35 @@ test('pagination links preserve search/status/section filter values',()=>{
 test('reminder links target the correct job through unique job reference search',()=>{
  const href=reminderJobHref('CCTV-IMPORT-20261118-01')
  assert.equal(new URL(href,'https://example.test').searchParams.get('q'),'CCTV-IMPORT-20261118-01')
+})
+
+test('active queue hides completed and cancelled jobs but retains historical views',()=>{
+ const records=[
+  {id:1,status:'pending'},
+  {id:2,status:'assigned'},
+  {id:3,status:'in_progress'},
+  {id:4,status:'completed'},
+  {id:5,status:'cancelled'}
+ ]
+ assert.equal(parseJobStatusFilter(undefined),'active')
+ assert.equal(parseJobStatusFilter(''),'active')
+ assert.equal(parseJobStatusFilter('invalid'),'active')
+ assert.equal(parseJobStatusFilter('completed'),'completed')
+ assert.equal(parseJobStatusFilter('cancelled'),'cancelled')
+ assert.equal(parseJobStatusFilter('all'),'all')
+ assert.deepEqual(records.filter(j=>matchesJobStatus(j.status,'active')).map(j=>j.id),[1,2,3])
+ assert.deepEqual(records.filter(j=>matchesJobStatus(j.status,'completed')).map(j=>j.id),[4])
+ assert.deepEqual(records.filter(j=>matchesJobStatus(j.status,'cancelled')).map(j=>j.id),[5])
+ assert.deepEqual(records.filter(j=>matchesJobStatus(j.status,'all')).map(j=>j.id),[1,2,3,4,5])
+ assert.equal(isClosedJob('completed'),true)
+ assert.equal(isClosedJob('cancelled'),true)
+ assert.equal(isClosedJob('pending'),false)
+})
+
+test('active and history filters are preserved across pagination',()=>{
+ for(const status of ['active','completed','cancelled','all']){
+  const u=new URL(dashboardPageHref(2,{status}),'https://example.test')
+  assert.equal(u.searchParams.get('status'),status)
+  assert.equal(u.hash,'#service-requests')
+ }
 })

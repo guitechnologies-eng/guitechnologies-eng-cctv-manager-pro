@@ -51,7 +51,7 @@ DECLARE
  v_before text;
  v_after text;
 BEGIN
- IF v_actor IS NULL OR (SELECT private.current_role()) NOT IN ('admin','office') THEN
+ IF v_actor IS NULL OR NOT coalesce((SELECT private.current_role()) IN ('admin','office'),false) THEN
   RAISE EXCEPTION 'Only Admin and Shop Staff may assign technicians' USING ERRCODE='42501';
  END IF;
  IF p_job_id IS NULL THEN
@@ -129,7 +129,7 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $function$
 DECLARE v_job_id uuid;
 BEGIN
- IF (SELECT auth.uid()) IS NULL OR (SELECT private.current_role()) NOT IN ('admin','office') THEN
+ IF (SELECT auth.uid()) IS NULL OR NOT coalesce((SELECT private.current_role()) IN ('admin','office'),false) THEN
   RAISE EXCEPTION 'Only Admin and Shop Staff may assign technicians' USING ERRCODE='42501';
  END IF;
  SELECT j.id INTO v_job_id FROM public.jobs j WHERE j.id=p_job_id FOR UPDATE;

@@ -118,7 +118,7 @@ export default function NewJobForm({customers}:{customers:CustomerOption[]}){
     <label>Job Place (only if different from customer address) <input name="site_address" maxLength={500} placeholder="Optional different location"/></label>
     <label>Description <textarea name="description" maxLength={2000} placeholder="Notes / instructions"/></label>
    </div>
-   <button type="submit" disabled={pending}>{pending?'Saving customer & job...':'Save Job'}</button>
+   <button type="submit" disabled={pending} aria-busy={pending}>{pending?'Saving customer & job...':'Save Job'}</button>
    {result.message&&<p role="status" className={'job-form-result '+(result.success?'success':'error')}>
     {result.message} {result.jobNumber&&<strong> Reference: {result.jobNumber}</strong>}
    </p>}
